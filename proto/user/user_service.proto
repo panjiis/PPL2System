@@ -132,7 +132,9 @@ message UpdateUserRequest {
 }
 
 message UpdateUserResponse {
-  User user = 1;
+  bool success = 1;
+  string message = 2;
+  User user = 3;
 }
 
 message ListUsersRequest {
@@ -142,8 +144,10 @@ message ListUsersRequest {
 }
 
 message ListUsersResponse {
-  repeated User users = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  string message = 2;
+  repeated User users = 3;
+  PaginationResponse pagination = 4;
 }
 
 // Employee Management
@@ -161,7 +165,9 @@ message CreateEmployeeRequest {
 }
 
 message CreateEmployeeResponse {
-  Employee employee = 1;
+  bool success = 1;
+  string message = 2;
+  Employee employee = 3;
 }
 
 message GetEmployeeRequest {
@@ -169,7 +175,9 @@ message GetEmployeeRequest {
 }
 
 message GetEmployeeResponse {
-  Employee employee = 1;
+  bool success = 1;
+  string message = 2;
+  Employee employee = 3;
 }
 
 message UpdateEmployeeRequest {
@@ -186,7 +194,9 @@ message UpdateEmployeeRequest {
 }
 
 message UpdateEmployeeResponse {
-  Employee employee = 1;
+  bool success = 1;
+  string message = 2;
+  Employee employee = 3;
 }
 
 message ListEmployeesRequest {
@@ -196,8 +206,10 @@ message ListEmployeesRequest {
 }
 
 message ListEmployeesResponse {
-  repeated Employee employees = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  string message = 2;
+  repeated Employee employees = 3;
+  PaginationResponse pagination = 4;
 }
 
 // Role Management
@@ -209,7 +221,9 @@ message CreateRoleRequest {
 }
 
 message CreateRoleResponse {
-  Role role = 1;
+  bool success = 1;
+  string message = 2;
+  Role role = 3;
 }
 
 message ListRolesRequest {
@@ -217,8 +231,10 @@ message ListRolesRequest {
 }
 
 message ListRolesResponse {
-  repeated Role roles = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  string message = 2;
+  repeated Role roles = 3;
+  PaginationResponse pagination = 4;
 }
 
 service UserService {

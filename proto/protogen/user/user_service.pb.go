@@ -1148,7 +1148,9 @@ func (x *UpdateUserRequest) GetIsActive() bool {
 
 type UpdateUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	User          *User                  `protobuf:"bytes,3,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1181,6 +1183,20 @@ func (x *UpdateUserResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use UpdateUserResponse.ProtoReflect.Descriptor instead.
 func (*UpdateUserResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *UpdateUserResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UpdateUserResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 func (x *UpdateUserResponse) GetUser() *User {
@@ -1252,8 +1268,10 @@ func (x *ListUsersRequest) GetRoleId() int32 {
 
 type ListUsersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Users         []*User                `protobuf:"bytes,3,rep,name=users,proto3" json:"users,omitempty"`
+	Pagination    *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1286,6 +1304,20 @@ func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListUsersResponse.ProtoReflect.Descriptor instead.
 func (*ListUsersResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ListUsersResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListUsersResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 func (x *ListUsersResponse) GetUsers() []*User {
@@ -1412,7 +1444,9 @@ func (x *CreateEmployeeRequest) GetCommissionType() CommissionType {
 
 type CreateEmployeeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Employee      *Employee              `protobuf:"bytes,1,opt,name=employee,proto3" json:"employee,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Employee      *Employee              `protobuf:"bytes,3,opt,name=employee,proto3" json:"employee,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1445,6 +1479,20 @@ func (x *CreateEmployeeResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateEmployeeResponse.ProtoReflect.Descriptor instead.
 func (*CreateEmployeeResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *CreateEmployeeResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateEmployeeResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 func (x *CreateEmployeeResponse) GetEmployee() *Employee {
@@ -1500,7 +1548,9 @@ func (x *GetEmployeeRequest) GetId() int64 {
 
 type GetEmployeeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Employee      *Employee              `protobuf:"bytes,1,opt,name=employee,proto3" json:"employee,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Employee      *Employee              `protobuf:"bytes,3,opt,name=employee,proto3" json:"employee,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1533,6 +1583,20 @@ func (x *GetEmployeeResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetEmployeeResponse.ProtoReflect.Descriptor instead.
 func (*GetEmployeeResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetEmployeeResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetEmployeeResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 func (x *GetEmployeeResponse) GetEmployee() *Employee {
@@ -1660,7 +1724,9 @@ func (x *UpdateEmployeeRequest) GetIsActive() bool {
 
 type UpdateEmployeeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Employee      *Employee              `protobuf:"bytes,1,opt,name=employee,proto3" json:"employee,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Employee      *Employee              `protobuf:"bytes,3,opt,name=employee,proto3" json:"employee,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1693,6 +1759,20 @@ func (x *UpdateEmployeeResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use UpdateEmployeeResponse.ProtoReflect.Descriptor instead.
 func (*UpdateEmployeeResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *UpdateEmployeeResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UpdateEmployeeResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 func (x *UpdateEmployeeResponse) GetEmployee() *Employee {
@@ -1764,8 +1844,10 @@ func (x *ListEmployeesRequest) GetPosition() string {
 
 type ListEmployeesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Employees     []*Employee            `protobuf:"bytes,1,rep,name=employees,proto3" json:"employees,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Employees     []*Employee            `protobuf:"bytes,3,rep,name=employees,proto3" json:"employees,omitempty"`
+	Pagination    *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1798,6 +1880,20 @@ func (x *ListEmployeesResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListEmployeesResponse.ProtoReflect.Descriptor instead.
 func (*ListEmployeesResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ListEmployeesResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListEmployeesResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 func (x *ListEmployeesResponse) GetEmployees() []*Employee {
@@ -1876,7 +1972,9 @@ func (x *CreateRoleRequest) GetPermissions() string {
 
 type CreateRoleResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Role          *Role                  `protobuf:"bytes,1,opt,name=role,proto3" json:"role,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Role          *Role                  `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1909,6 +2007,20 @@ func (x *CreateRoleResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateRoleResponse.ProtoReflect.Descriptor instead.
 func (*CreateRoleResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *CreateRoleResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateRoleResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 func (x *CreateRoleResponse) GetRole() *Role {
@@ -1964,8 +2076,10 @@ func (x *ListRolesRequest) GetPagination() *PaginationRequest {
 
 type ListRolesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Roles         []*Role                `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Roles         []*Role                `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
+	Pagination    *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1998,6 +2112,20 @@ func (x *ListRolesResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListRolesResponse.ProtoReflect.Descriptor instead.
 func (*ListRolesResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ListRolesResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListRolesResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 func (x *ListRolesResponse) GetRoles() []*Role {
@@ -2144,9 +2272,11 @@ const file_user_user_service_proto_rawDesc = "" +
 	"\n" +
 	"\b_role_idB\f\n" +
 	"\n" +
-	"_is_active\"4\n" +
-	"\x12UpdateUserResponse\x12\x1e\n" +
-	"\x04user\x18\x01 \x01(\v2\n" +
+	"_is_active\"h\n" +
+	"\x12UpdateUserResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1e\n" +
+	"\x04user\x18\x03 \x01(\v2\n" +
 	".user.UserR\x04user\"\xa5\x01\n" +
 	"\x10ListUsersRequest\x127\n" +
 	"\n" +
@@ -2157,12 +2287,14 @@ const file_user_user_service_proto_rawDesc = "" +
 	"\n" +
 	"_is_activeB\n" +
 	"\n" +
-	"\b_role_id\"o\n" +
-	"\x11ListUsersResponse\x12 \n" +
-	"\x05users\x18\x01 \x03(\v2\n" +
+	"\b_role_id\"\xa3\x01\n" +
+	"\x11ListUsersResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12 \n" +
+	"\x05users\x18\x03 \x03(\v2\n" +
 	".user.UserR\x05users\x128\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x18.user.PaginationResponseR\n" +
+	"pagination\x18\x04 \x01(\v2\x18.user.PaginationResponseR\n" +
 	"pagination\"\x98\x03\n" +
 	"\x15CreateEmployeeRequest\x12#\n" +
 	"\remployee_name\x18\x01 \x01(\tR\femployeeName\x12\x1f\n" +
@@ -2181,13 +2313,17 @@ const file_user_user_service_proto_rawDesc = "" +
 	"\n" +
 	"\b_addressB\f\n" +
 	"\n" +
-	"_hire_date\"D\n" +
-	"\x16CreateEmployeeResponse\x12*\n" +
-	"\bemployee\x18\x01 \x01(\v2\x0e.user.EmployeeR\bemployee\"$\n" +
+	"_hire_date\"x\n" +
+	"\x16CreateEmployeeResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12*\n" +
+	"\bemployee\x18\x03 \x01(\v2\x0e.user.EmployeeR\bemployee\"$\n" +
 	"\x12GetEmployeeRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"A\n" +
-	"\x13GetEmployeeResponse\x12*\n" +
-	"\bemployee\x18\x01 \x01(\v2\x0e.user.EmployeeR\bemployee\"\x86\x04\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"u\n" +
+	"\x13GetEmployeeResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12*\n" +
+	"\bemployee\x18\x03 \x01(\v2\x0e.user.EmployeeR\bemployee\"\x86\x04\n" +
 	"\x15UpdateEmployeeRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12(\n" +
 	"\remployee_name\x18\x02 \x01(\tH\x00R\femployeeName\x88\x01\x01\x12\x1f\n" +
@@ -2211,9 +2347,11 @@ const file_user_user_service_proto_rawDesc = "" +
 	"\x10_commission_rateB\x12\n" +
 	"\x10_commission_typeB\f\n" +
 	"\n" +
-	"_is_active\"D\n" +
-	"\x16UpdateEmployeeResponse\x12*\n" +
-	"\bemployee\x18\x01 \x01(\v2\x0e.user.EmployeeR\bemployee\"\xad\x01\n" +
+	"_is_active\"x\n" +
+	"\x16UpdateEmployeeResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12*\n" +
+	"\bemployee\x18\x03 \x01(\v2\x0e.user.EmployeeR\bemployee\"\xad\x01\n" +
 	"\x14ListEmployeesRequest\x127\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x17.user.PaginationRequestR\n" +
@@ -2222,29 +2360,35 @@ const file_user_user_service_proto_rawDesc = "" +
 	"\bposition\x18\x03 \x01(\tH\x01R\bposition\x88\x01\x01B\f\n" +
 	"\n" +
 	"_is_activeB\v\n" +
-	"\t_position\"\x7f\n" +
-	"\x15ListEmployeesResponse\x12,\n" +
-	"\temployees\x18\x01 \x03(\v2\x0e.user.EmployeeR\temployees\x128\n" +
+	"\t_position\"\xb3\x01\n" +
+	"\x15ListEmployeesResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12,\n" +
+	"\temployees\x18\x03 \x03(\v2\x0e.user.EmployeeR\temployees\x128\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x18.user.PaginationResponseR\n" +
+	"pagination\x18\x04 \x01(\v2\x18.user.PaginationResponseR\n" +
 	"pagination\"\x8a\x01\n" +
 	"\x11CreateRoleRequest\x12\x1b\n" +
 	"\trole_name\x18\x01 \x01(\tR\broleName\x12!\n" +
 	"\faccess_level\x18\x02 \x01(\x05R\vaccessLevel\x12%\n" +
 	"\vpermissions\x18\x03 \x01(\tH\x00R\vpermissions\x88\x01\x01B\x0e\n" +
-	"\f_permissions\"4\n" +
-	"\x12CreateRoleResponse\x12\x1e\n" +
-	"\x04role\x18\x01 \x01(\v2\n" +
+	"\f_permissions\"h\n" +
+	"\x12CreateRoleResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1e\n" +
+	"\x04role\x18\x03 \x01(\v2\n" +
 	".user.RoleR\x04role\"K\n" +
 	"\x10ListRolesRequest\x127\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x17.user.PaginationRequestR\n" +
-	"pagination\"o\n" +
-	"\x11ListRolesResponse\x12 \n" +
-	"\x05roles\x18\x01 \x03(\v2\n" +
+	"pagination\"\xa3\x01\n" +
+	"\x11ListRolesResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12 \n" +
+	"\x05roles\x18\x03 \x03(\v2\n" +
 	".user.RoleR\x05roles\x128\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x18.user.PaginationResponseR\n" +
+	"pagination\x18\x04 \x01(\v2\x18.user.PaginationResponseR\n" +
 	"pagination*\x8f\x01\n" +
 	"\x0eCommissionType\x12\x1f\n" +
 	"\x1bCOMMISSION_TYPE_UNSPECIFIED\x10\x00\x12\x1e\n" +
