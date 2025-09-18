@@ -740,9 +740,11 @@ func (x *AuthenticateRequest) GetPassword() string {
 
 type AuthenticateResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
-	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	User          *User                  `protobuf:"bytes,5,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -777,11 +779,18 @@ func (*AuthenticateResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *AuthenticateResponse) GetUser() *User {
+func (x *AuthenticateResponse) GetSuccess() bool {
 	if x != nil {
-		return x.User
+		return x.Success
 	}
-	return nil
+	return false
+}
+
+func (x *AuthenticateResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 func (x *AuthenticateResponse) GetToken() string {
@@ -794,6 +803,13 @@ func (x *AuthenticateResponse) GetToken() string {
 func (x *AuthenticateResponse) GetExpiresAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.ExpiresAt
+	}
+	return nil
+}
+
+func (x *AuthenticateResponse) GetUser() *User {
+	if x != nil {
+		return x.User
 	}
 	return nil
 }
@@ -884,7 +900,11 @@ func (x *CreateUserRequest) GetRoleId() int32 {
 
 type CreateUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	ExpiredAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
+	User          *User                  `protobuf:"bytes,5,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -917,6 +937,34 @@ func (x *CreateUserResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateUserResponse.ProtoReflect.Descriptor instead.
 func (*CreateUserResponse) Descriptor() ([]byte, []int) {
 	return file_user_user_service_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CreateUserResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateUserResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *CreateUserResponse) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *CreateUserResponse) GetExpiredAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiredAt
+	}
+	return nil
 }
 
 func (x *CreateUserResponse) GetUser() *User {
@@ -2053,22 +2101,29 @@ const file_user_user_service_proto_rawDesc = "" +
 	"\x11_max_sales_amount\"M\n" +
 	"\x13AuthenticateRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x87\x01\n" +
-	"\x14AuthenticateResponse\x12\x1e\n" +
-	"\x04user\x18\x01 \x01(\v2\n" +
-	".user.UserR\x04user\x12\x14\n" +
-	"\x05token\x18\x02 \x01(\tR\x05token\x129\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xbb\x01\n" +
+	"\x14AuthenticateResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x14\n" +
+	"\x05token\x18\x03 \x01(\tR\x05token\x129\n" +
 	"\n" +
-	"expires_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"\xb4\x01\n" +
+	"expires_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x12\x1e\n" +
+	"\x04user\x18\x05 \x01(\v2\n" +
+	".user.UserR\x04user\"\xb4\x01\n" +
 	"\x11CreateUserRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x1c\n" +
 	"\tfirstname\x18\x04 \x01(\tR\tfirstname\x12\x1a\n" +
 	"\blastname\x18\x05 \x01(\tR\blastname\x12\x17\n" +
-	"\arole_id\x18\x06 \x01(\x05R\x06roleId\"4\n" +
-	"\x12CreateUserResponse\x12\x1e\n" +
-	"\x04user\x18\x01 \x01(\v2\n" +
+	"\arole_id\x18\x06 \x01(\x05R\x06roleId\"\xb9\x01\n" +
+	"\x12CreateUserResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x14\n" +
+	"\x05token\x18\x03 \x01(\tR\x05token\x129\n" +
+	"\n" +
+	"expired_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\texpiredAt\x12\x1e\n" +
+	"\x04user\x18\x05 \x01(\v2\n" +
 	".user.UserR\x04user\" \n" +
 	"\x0eGetUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"1\n" +
@@ -2195,7 +2250,22 @@ const file_user_user_service_proto_rawDesc = "" +
 	"\x1bCOMMISSION_TYPE_UNSPECIFIED\x10\x00\x12\x1e\n" +
 	"\x1aCOMMISSION_TYPE_PERCENTAGE\x10\x01\x12 \n" +
 	"\x1cCOMMISSION_TYPE_FIXED_AMOUNT\x10\x02\x12\x1a\n" +
-	"\x16COMMISSION_TYPE_TIERED\x10\x03B'Z%syntra-system/proto/protogen;protogenb\x06proto3"
+	"\x16COMMISSION_TYPE_TIERED\x10\x032\xf3\x05\n" +
+	"\vUserService\x12E\n" +
+	"\fAuthenticate\x12\x19.user.AuthenticateRequest\x1a\x1a.user.AuthenticateResponse\x12?\n" +
+	"\n" +
+	"CreateUser\x12\x17.user.CreateUserRequest\x1a\x18.user.CreateUserResponse\x126\n" +
+	"\aGetUser\x12\x14.user.GetUserRequest\x1a\x15.user.GetUserResponse\x12?\n" +
+	"\n" +
+	"UpdateUser\x12\x17.user.UpdateUserRequest\x1a\x18.user.UpdateUserResponse\x12<\n" +
+	"\tListUsers\x12\x16.user.ListUsersRequest\x1a\x17.user.ListUsersResponse\x12K\n" +
+	"\x0eCreateEmployee\x12\x1b.user.CreateEmployeeRequest\x1a\x1c.user.CreateEmployeeResponse\x12B\n" +
+	"\vGetEmployee\x12\x18.user.GetEmployeeRequest\x1a\x19.user.GetEmployeeResponse\x12K\n" +
+	"\x0eUpdateEmployee\x12\x1b.user.UpdateEmployeeRequest\x1a\x1c.user.UpdateEmployeeResponse\x12H\n" +
+	"\rListEmployees\x12\x1a.user.ListEmployeesRequest\x1a\x1b.user.ListEmployeesResponse\x12?\n" +
+	"\n" +
+	"CreateRole\x12\x17.user.CreateRoleRequest\x1a\x18.user.CreateRoleResponse\x12<\n" +
+	"\tListRoles\x12\x16.user.ListRolesRequest\x1a\x17.user.ListRolesResponseB'Z%syntra-system/proto/protogen;protogenb\x06proto3"
 
 var (
 	file_user_user_service_proto_rawDescOnce sync.Once
@@ -2257,31 +2327,54 @@ var file_user_user_service_proto_depIdxs = []int32{
 	7,  // 9: user.Employee.commission_tiers:type_name -> user.CommissionTier
 	30, // 10: user.CommissionTier.created_at:type_name -> google.protobuf.Timestamp
 	30, // 11: user.CommissionTier.updated_at:type_name -> google.protobuf.Timestamp
-	5,  // 12: user.AuthenticateResponse.user:type_name -> user.User
-	30, // 13: user.AuthenticateResponse.expires_at:type_name -> google.protobuf.Timestamp
-	5,  // 14: user.CreateUserResponse.user:type_name -> user.User
-	5,  // 15: user.GetUserResponse.user:type_name -> user.User
-	5,  // 16: user.UpdateUserResponse.user:type_name -> user.User
-	1,  // 17: user.ListUsersRequest.pagination:type_name -> user.PaginationRequest
-	5,  // 18: user.ListUsersResponse.users:type_name -> user.User
-	2,  // 19: user.ListUsersResponse.pagination:type_name -> user.PaginationResponse
-	0,  // 20: user.CreateEmployeeRequest.commission_type:type_name -> user.CommissionType
-	6,  // 21: user.CreateEmployeeResponse.employee:type_name -> user.Employee
-	6,  // 22: user.GetEmployeeResponse.employee:type_name -> user.Employee
-	0,  // 23: user.UpdateEmployeeRequest.commission_type:type_name -> user.CommissionType
-	6,  // 24: user.UpdateEmployeeResponse.employee:type_name -> user.Employee
-	1,  // 25: user.ListEmployeesRequest.pagination:type_name -> user.PaginationRequest
-	6,  // 26: user.ListEmployeesResponse.employees:type_name -> user.Employee
-	2,  // 27: user.ListEmployeesResponse.pagination:type_name -> user.PaginationResponse
-	4,  // 28: user.CreateRoleResponse.role:type_name -> user.Role
-	1,  // 29: user.ListRolesRequest.pagination:type_name -> user.PaginationRequest
-	4,  // 30: user.ListRolesResponse.roles:type_name -> user.Role
-	2,  // 31: user.ListRolesResponse.pagination:type_name -> user.PaginationResponse
-	32, // [32:32] is the sub-list for method output_type
-	32, // [32:32] is the sub-list for method input_type
-	32, // [32:32] is the sub-list for extension type_name
-	32, // [32:32] is the sub-list for extension extendee
-	0,  // [0:32] is the sub-list for field type_name
+	30, // 12: user.AuthenticateResponse.expires_at:type_name -> google.protobuf.Timestamp
+	5,  // 13: user.AuthenticateResponse.user:type_name -> user.User
+	30, // 14: user.CreateUserResponse.expired_at:type_name -> google.protobuf.Timestamp
+	5,  // 15: user.CreateUserResponse.user:type_name -> user.User
+	5,  // 16: user.GetUserResponse.user:type_name -> user.User
+	5,  // 17: user.UpdateUserResponse.user:type_name -> user.User
+	1,  // 18: user.ListUsersRequest.pagination:type_name -> user.PaginationRequest
+	5,  // 19: user.ListUsersResponse.users:type_name -> user.User
+	2,  // 20: user.ListUsersResponse.pagination:type_name -> user.PaginationResponse
+	0,  // 21: user.CreateEmployeeRequest.commission_type:type_name -> user.CommissionType
+	6,  // 22: user.CreateEmployeeResponse.employee:type_name -> user.Employee
+	6,  // 23: user.GetEmployeeResponse.employee:type_name -> user.Employee
+	0,  // 24: user.UpdateEmployeeRequest.commission_type:type_name -> user.CommissionType
+	6,  // 25: user.UpdateEmployeeResponse.employee:type_name -> user.Employee
+	1,  // 26: user.ListEmployeesRequest.pagination:type_name -> user.PaginationRequest
+	6,  // 27: user.ListEmployeesResponse.employees:type_name -> user.Employee
+	2,  // 28: user.ListEmployeesResponse.pagination:type_name -> user.PaginationResponse
+	4,  // 29: user.CreateRoleResponse.role:type_name -> user.Role
+	1,  // 30: user.ListRolesRequest.pagination:type_name -> user.PaginationRequest
+	4,  // 31: user.ListRolesResponse.roles:type_name -> user.Role
+	2,  // 32: user.ListRolesResponse.pagination:type_name -> user.PaginationResponse
+	8,  // 33: user.UserService.Authenticate:input_type -> user.AuthenticateRequest
+	10, // 34: user.UserService.CreateUser:input_type -> user.CreateUserRequest
+	12, // 35: user.UserService.GetUser:input_type -> user.GetUserRequest
+	14, // 36: user.UserService.UpdateUser:input_type -> user.UpdateUserRequest
+	16, // 37: user.UserService.ListUsers:input_type -> user.ListUsersRequest
+	18, // 38: user.UserService.CreateEmployee:input_type -> user.CreateEmployeeRequest
+	20, // 39: user.UserService.GetEmployee:input_type -> user.GetEmployeeRequest
+	22, // 40: user.UserService.UpdateEmployee:input_type -> user.UpdateEmployeeRequest
+	24, // 41: user.UserService.ListEmployees:input_type -> user.ListEmployeesRequest
+	26, // 42: user.UserService.CreateRole:input_type -> user.CreateRoleRequest
+	28, // 43: user.UserService.ListRoles:input_type -> user.ListRolesRequest
+	9,  // 44: user.UserService.Authenticate:output_type -> user.AuthenticateResponse
+	11, // 45: user.UserService.CreateUser:output_type -> user.CreateUserResponse
+	13, // 46: user.UserService.GetUser:output_type -> user.GetUserResponse
+	15, // 47: user.UserService.UpdateUser:output_type -> user.UpdateUserResponse
+	17, // 48: user.UserService.ListUsers:output_type -> user.ListUsersResponse
+	19, // 49: user.UserService.CreateEmployee:output_type -> user.CreateEmployeeResponse
+	21, // 50: user.UserService.GetEmployee:output_type -> user.GetEmployeeResponse
+	23, // 51: user.UserService.UpdateEmployee:output_type -> user.UpdateEmployeeResponse
+	25, // 52: user.UserService.ListEmployees:output_type -> user.ListEmployeesResponse
+	27, // 53: user.UserService.CreateRole:output_type -> user.CreateRoleResponse
+	29, // 54: user.UserService.ListRoles:output_type -> user.ListRolesResponse
+	44, // [44:55] is the sub-list for method output_type
+	33, // [33:44] is the sub-list for method input_type
+	33, // [33:33] is the sub-list for extension type_name
+	33, // [33:33] is the sub-list for extension extendee
+	0,  // [0:33] is the sub-list for field type_name
 }
 
 func init() { file_user_user_service_proto_init() }
@@ -2307,7 +2400,7 @@ func file_user_user_service_proto_init() {
 			NumEnums:      1,
 			NumMessages:   29,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_user_user_service_proto_goTypes,
 		DependencyIndexes: file_user_user_service_proto_depIdxs,

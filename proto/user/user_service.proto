@@ -88,9 +88,11 @@ message AuthenticateRequest {
 }
 
 message AuthenticateResponse {
-  User user = 1;
-  string token = 2;
-  google.protobuf.Timestamp expires_at = 3;
+  bool success = 1;
+  string message = 2;
+  string token = 3;
+  google.protobuf.Timestamp expires_at = 4;
+  User user = 5;
 }
 
 // User Management
@@ -105,7 +107,11 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-  User user = 1;
+  bool success = 1;
+  string message = 2;
+  string token = 3;
+  google.protobuf.Timestamp expired_at =4;
+  User user = 5;
 }
 
 message GetUserRequest {
@@ -213,4 +219,25 @@ message ListRolesRequest {
 message ListRolesResponse {
   repeated Role roles = 1;
   PaginationResponse pagination = 2;
+}
+
+service UserService {
+  // Authentication
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  
+  // User Management
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  
+  // Employee Management
+  rpc CreateEmployee(CreateEmployeeRequest) returns (CreateEmployeeResponse);
+  rpc GetEmployee(GetEmployeeRequest) returns (GetEmployeeResponse);
+  rpc UpdateEmployee(UpdateEmployeeRequest) returns (UpdateEmployeeResponse);
+  rpc ListEmployees(ListEmployeesRequest) returns (ListEmployeesResponse);
+  
+  // Role Management
+  rpc CreateRole(CreateRoleRequest) returns (CreateRoleResponse);
+  rpc ListRoles(ListRolesRequest) returns (ListRolesResponse);
 }
