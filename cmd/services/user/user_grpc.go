@@ -39,8 +39,8 @@ func main() {
 
 	s := grpc.NewServer()
 
-	psnHandler := handler.NewUserHandler(db, redisClient)
-	proto.RegisterUserServiceServer(s, psnHandler)
+	userHandler := handler.NewUserHandler(db, redisClient)
+	proto.RegisterUserServiceServer(s, userHandler)
 
 	reflection.Register(s)
 

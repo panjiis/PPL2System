@@ -12,6 +12,7 @@ enum CommissionType {
   COMMISSION_TYPE_TIERED = 3;
 }
 
+
 message PaginationRequest {
   int32 page_size = 1;
   string page_token = 2;
