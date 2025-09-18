@@ -1,0 +1,216 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "syntra-system/proto/protogen;protogen";
+import "google/protobuf/timestamp.proto";
+
+enum CommissionType {
+  COMMISSION_TYPE_UNSPECIFIED = 0;
+  COMMISSION_TYPE_PERCENTAGE = 1;
+  COMMISSION_TYPE_FIXED_AMOUNT = 2;
+  COMMISSION_TYPE_TIERED = 3;
+}
+
+message PaginationRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message PaginationResponse {
+  string next_page_token = 1;
+  int32 total_count = 2;
+}
+
+message DateRange {
+  string start_date = 1;
+  string end_date = 2;
+}
+
+message Role {
+  int32 id = 1;
+  string role_name = 2;
+  int32 access_level = 3;
+  optional string permissions = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message User {
+  int64 id = 1;
+  string username = 2;
+  string email = 3;
+  string password = 4;
+  string firstname = 5;
+  string lastname = 6;
+  int32 role_id = 7;
+  bool is_active = 8;
+  optional google.protobuf.Timestamp last_login = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  
+  optional Role role = 12;
+}
+
+message Employee {
+  int64 id = 1;
+  string employee_name = 2;
+  optional string position = 3;
+  optional string phone = 4;
+  optional string email = 5;
+  optional string address = 6;
+  optional string hire_date = 7;
+  string base_salary = 8;
+  string commission_rate = 9;
+  CommissionType commission_type = 10;
+  bool is_active = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+  
+  repeated CommissionTier commission_tiers = 14;
+}
+
+message CommissionTier {
+  int32 id = 1;
+  int64 employee_id = 2;
+  string min_sales_amount = 3;
+  optional string max_sales_amount = 4;
+  string commission_rate = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+// Authentication
+
+message AuthenticateRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  User user = 1;
+  string token = 2;
+  google.protobuf.Timestamp expires_at = 3;
+}
+
+// User Management
+
+message CreateUserRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+  string firstname = 4;
+  string lastname = 5;
+  int32 role_id = 6;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message GetUserRequest {
+  int64 id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message UpdateUserRequest {
+  int64 id = 1;
+  optional string email = 2;
+  optional string firstname = 3;
+  optional string lastname = 4;
+  optional int32 role_id = 5;
+  optional bool is_active = 6;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+}
+
+message ListUsersRequest {
+  PaginationRequest pagination = 1;
+  optional bool is_active = 2;
+  optional int32 role_id = 3;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Employee Management
+
+message CreateEmployeeRequest {
+  string employee_name = 1;
+  optional string position = 2;
+  optional string phone = 3;
+  optional string email = 4;
+  optional string address = 5;
+  optional string hire_date = 6;
+  string base_salary = 7;
+  string commission_rate = 8;
+  CommissionType commission_type = 9;
+}
+
+message CreateEmployeeResponse {
+  Employee employee = 1;
+}
+
+message GetEmployeeRequest {
+  int64 id = 1;
+}
+
+message GetEmployeeResponse {
+  Employee employee = 1;
+}
+
+message UpdateEmployeeRequest {
+  int64 id = 1;
+  optional string employee_name = 2;
+  optional string position = 3;
+  optional string phone = 4;
+  optional string email = 5;
+  optional string address = 6;
+  optional string base_salary = 7;
+  optional string commission_rate = 8;
+  optional CommissionType commission_type = 9;
+  optional bool is_active = 10;
+}
+
+message UpdateEmployeeResponse {
+  Employee employee = 1;
+}
+
+message ListEmployeesRequest {
+  PaginationRequest pagination = 1;
+  optional bool is_active = 2;
+  optional string position = 3;
+}
+
+message ListEmployeesResponse {
+  repeated Employee employees = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Role Management
+
+message CreateRoleRequest {
+  string role_name = 1;
+  int32 access_level = 2;
+  optional string permissions = 3;
+}
+
+message CreateRoleResponse {
+  Role role = 1;
+}
+
+message ListRolesRequest {
+  PaginationRequest pagination = 1;
+}
+
+message ListRolesResponse {
+  repeated Role roles = 1;
+  PaginationResponse pagination = 2;
+}

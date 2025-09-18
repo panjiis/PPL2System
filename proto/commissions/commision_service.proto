@@ -1,0 +1,318 @@
+syntax = "proto3";
+
+package commission;
+
+option go_package = "syntra-system/proto/protogen;protogen";
+import "google/protobuf/timestamp.proto";
+
+enum CommissionType {
+  COMMISSION_TYPE_UNSPECIFIED = 0;
+  COMMISSION_TYPE_PERCENTAGE = 1;
+  COMMISSION_TYPE_FIXED_AMOUNT = 2;
+  COMMISSION_TYPE_TIERED = 3;
+}
+
+enum CommissionStatus {
+  COMMISSION_STATUS_UNSPECIFIED = 0;
+  COMMISSION_STATUS_DRAFT = 1;
+  COMMISSION_STATUS_CALCULATED = 2;
+  COMMISSION_STATUS_APPROVED = 3;
+  COMMISSION_STATUS_PAID = 4;
+}
+
+message PaginationRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message PaginationResponse {
+  string next_page_token = 1;
+  int32 total_count = 2;
+}
+
+message DateRange {
+  string start_date = 1;
+  string end_date = 2;
+}
+
+message CommissionCalculation {
+  int64 id = 1;
+  int64 employee_id = 2;
+  string calculation_period_start = 3;
+  string calculation_period_end = 4;
+  string total_sales = 5;
+  string base_commission = 6;
+  string bonus_commission = 7;
+  string total_commission = 8;
+  CommissionStatus status = 9;
+  int64 calculated_by = 10;
+  optional int64 approved_by = 11;
+  optional string notes = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+  
+  repeated CommissionDetail commission_details = 15;
+  optional CommissionPayment commission_payment = 16;
+  optional EmployeeSummary employee = 17;
+}
+
+message CommissionDetail {
+  int64 id = 1;
+  int64 commission_calculation_id = 2;
+  int64 order_item_id = 3;
+  int32 product_id = 4;
+  string sales_amount = 5;
+  string commission_rate = 6;
+  string commission_amount = 7;
+  google.protobuf.Timestamp created_at = 8;
+  
+  optional string product_name = 9;
+  optional string order_document_number = 10;
+}
+
+message CommissionPayment {
+  int64 id = 1;
+  int64 commission_calculation_id = 2;
+  int64 employee_id = 3;
+  string payment_amount = 4;
+  string payment_date = 5;
+  int32 payment_type_id = 6;
+  optional string reference_number = 7;
+  int64 paid_by = 8;
+  optional string notes = 9;
+  google.protobuf.Timestamp created_at = 10;
+  
+  optional PaymentTypeSummary payment_type = 11;
+}
+
+// Summary models for cross-service references
+message EmployeeSummary {
+  int64 id = 1;
+  string employee_name = 2;
+  optional string position = 3;
+  string commission_rate = 4;
+  CommissionType commission_type = 5;
+}
+
+message PaymentTypeSummary {
+  int32 id = 1;
+  string payment_name = 2;
+  string processing_fee_rate = 3;
+}
+
+// Commission calculation models
+message CommissionBreakdown {
+  string total_sales = 1;
+  string base_commission_rate = 2;
+  string base_commission_amount = 3;
+  repeated TierCommission tier_commissions = 4;
+  string bonus_commission = 5;
+  string total_commission = 6;
+  string effective_commission_rate = 7;
+}
+
+message TierCommission {
+  string tier_min_amount = 1;
+  string tier_max_amount = 2;
+  string tier_rate = 3;
+  string tier_sales_amount = 4;
+  string tier_commission = 5;
+}
+
+// Commission Calculation
+message CalculateCommissionRequest {
+  int64 employee_id = 1;
+  string period_start = 2;
+  string period_end = 3;
+  int64 calculated_by = 4;
+  optional bool save_calculation = 5;
+}
+
+message CalculateCommissionResponse {
+  CommissionCalculation commission_calculation = 1;
+  CommissionBreakdown breakdown = 2;
+  bool is_preview = 3;
+}
+
+message RecalculateCommissionRequest {
+  int64 commission_calculation_id = 1;
+  int64 recalculated_by = 2;
+  optional string notes = 3;
+}
+
+message RecalculateCommissionResponse {
+  CommissionCalculation commission_calculation = 1;
+  CommissionBreakdown breakdown = 2;
+}
+
+// Commission Management
+message GetCommissionCalculationRequest {
+  int64 id = 1;
+}
+
+message GetCommissionCalculationResponse {
+  CommissionCalculation commission_calculation = 1;
+}
+
+message ListCommissionCalculationsRequest {
+  PaginationRequest pagination = 1;
+  optional int64 employee_id = 2;
+  optional CommissionStatus status = 3;
+  optional DateRange calculation_period = 4;
+}
+
+message ListCommissionCalculationsResponse {
+  repeated CommissionCalculation commission_calculations = 1;
+  PaginationResponse pagination = 2;
+}
+
+message ApproveCommissionRequest {
+  int64 commission_calculation_id = 1;
+  int64 approved_by = 2;
+  optional string approval_notes = 3;
+}
+
+message ApproveCommissionResponse {
+  CommissionCalculation commission_calculation = 1;
+}
+
+message RejectCommissionRequest {
+  int64 commission_calculation_id = 1;
+  int64 rejected_by = 2;
+  string rejection_reason = 3;
+}
+
+message RejectCommissionResponse {
+  CommissionCalculation commission_calculation = 1;
+}
+
+// Commission Payment
+message PayCommissionRequest {
+  int64 commission_calculation_id = 1;
+  int32 payment_type_id = 2;
+  optional string reference_number = 3;
+  int64 paid_by = 4;
+  optional string notes = 5;
+  optional string payment_date = 6;
+}
+
+message PayCommissionResponse {
+  CommissionPayment commission_payment = 1;
+  CommissionCalculation updated_calculation = 2;
+}
+
+message GetCommissionPaymentRequest {
+  int64 commission_calculation_id = 1;
+}
+
+message GetCommissionPaymentResponse {
+  CommissionPayment commission_payment = 1;
+}
+
+// Commission Reports
+message GetCommissionSummaryRequest {
+  int64 employee_id = 1;
+  DateRange date_range = 2;
+}
+
+message GetCommissionSummaryResponse {
+  CommissionSummary summary = 1;
+}
+
+message CommissionSummary {
+  int64 employee_id = 1;
+  string employee_name = 2;
+  DateRange period = 3;
+  string total_sales = 4;
+  string total_commission_earned = 5;
+  string total_commission_paid = 6;
+  string commission_pending = 7;
+  string average_commission_rate = 8;
+  int32 calculation_count = 9;
+  repeated CommissionCalculation recent_calculations = 10;
+}
+
+message GetCommissionReportRequest {
+  DateRange date_range = 1;
+  optional int64 employee_id = 2;
+  optional CommissionStatus status = 3;
+  PaginationRequest pagination = 4;
+}
+
+message GetCommissionReportResponse {
+  repeated CommissionSummary employee_summaries = 1;
+  string total_commissions_calculated = 2;
+  string total_commissions_paid = 3;
+  string total_commissions_pending = 4;
+  PaginationResponse pagination = 5;
+}
+
+// Bulk Operations
+message BulkCalculateCommissionsRequest {
+  repeated int64 employee_ids = 1;
+  string period_start = 2;
+  string period_end = 3;
+  int64 calculated_by = 4;
+}
+
+message BulkCalculateCommissionsResponse {
+  repeated CommissionCalculation calculations = 1;
+  repeated string errors = 2;
+  int32 success_count = 3;
+  int32 error_count = 4;
+}
+
+message BulkApproveCommissionsRequest {
+  repeated int64 commission_calculation_ids = 1;
+  int64 approved_by = 2;
+  optional string approval_notes = 3;
+}
+
+message BulkApproveCommissionsResponse {
+  repeated CommissionCalculation approved_calculations = 1;
+  repeated string errors = 2;
+  int32 success_count = 3;
+  int32 error_count = 4;
+}
+
+// Commission Settings/Configuration
+message GetCommissionSettingsRequest {
+  int64 employee_id = 1;
+}
+
+message GetCommissionSettingsResponse {
+  EmployeeSummary employee = 1;
+  repeated CommissionTierSetting tier_settings = 2;
+}
+
+message CommissionTierSetting {
+  int32 id = 1;
+  string min_sales_amount = 2;
+  optional string max_sales_amount = 3;
+  string commission_rate = 4;
+}
+
+service CommissionService {
+  // Commission Calculation
+  rpc CalculateCommission(CalculateCommissionRequest) returns (CalculateCommissionResponse);
+  rpc RecalculateCommission(RecalculateCommissionRequest) returns (RecalculateCommissionResponse);
+  rpc BulkCalculateCommissions(BulkCalculateCommissionsRequest) returns (BulkCalculateCommissionsResponse);
+  
+  // Commission Management
+  rpc GetCommissionCalculation(GetCommissionCalculationRequest) returns (GetCommissionCalculationResponse);
+  rpc ListCommissionCalculations(ListCommissionCalculationsRequest) returns (ListCommissionCalculationsResponse);
+  rpc ApproveCommission(ApproveCommissionRequest) returns (ApproveCommissionResponse);
+  rpc RejectCommission(RejectCommissionRequest) returns (RejectCommissionResponse);
+  rpc BulkApproveCommissions(BulkApproveCommissionsRequest) returns (BulkApproveCommissionsResponse);
+  
+  // Commission Payment
+  rpc PayCommission(PayCommissionRequest) returns (PayCommissionResponse);
+  rpc GetCommissionPayment(GetCommissionPaymentRequest) returns (GetCommissionPaymentResponse);
+  
+  // Commission Reporting
+  rpc GetCommissionSummary(GetCommissionSummaryRequest) returns (GetCommissionSummaryResponse);
+  rpc GetCommissionReport(GetCommissionReportRequest) returns (GetCommissionReportResponse);
+  
+  // Commission Settings
+  rpc GetCommissionSettings(GetCommissionSettingsRequest) returns (GetCommissionSettingsResponse);
+}

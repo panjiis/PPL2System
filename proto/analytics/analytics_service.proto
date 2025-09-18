@@ -1,0 +1,265 @@
+syntax = "proto3";
+
+package analytics;
+
+option go_package = "syntra-system/proto/protogen;protogen";
+import "google/protobuf/timestamp.proto";
+
+message PaginationRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message PaginationResponse {
+  string next_page_token = 1;
+  int32 total_count = 2;
+}
+
+message DateRange {
+  string start_date = 1;
+  string end_date = 2;
+}
+
+message SalesSummaryDaily {
+  int64 id = 1;
+  string date = 2;
+  int64 cashier_id = 3;
+  int32 total_transactions = 4;
+  int32 total_items_sold = 5;
+  string gross_sales = 6;
+  string total_discounts = 7;
+  string net_sales = 8;
+  string total_tax = 9;
+  string total_cost = 10;
+  string gross_profit = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+}
+
+message ProductSalesSummary {
+  int64 id = 1;
+  string date = 2;
+  int32 product_id = 3;
+  optional int32 product_group_id = 4;
+  int32 quantity_sold = 5;
+  string gross_sales = 6;
+  string total_discounts = 7;
+  string net_sales = 8;
+  string total_cost = 9;
+  string gross_profit = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+message EmployeePerformance {
+  int64 id = 1;
+  string date = 2;
+  int64 employee_id = 3;
+  string total_sales = 4;
+  int32 total_transactions = 5;
+  int32 total_items_sold = 6;
+  string commission_earned = 7;
+  string performance_score = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message CustomerAnalytics {
+  int64 id = 1;
+  string date = 2;
+  optional int32 product_group_id = 3;
+  int32 total_transactions = 4;
+  string total_revenue = 5;
+  string average_transaction_value = 6;
+  optional string peak_hour = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+// Aggregated reporting models
+message SalesReport {
+  DateRange period = 1;
+  string total_revenue = 2;
+  string total_cost = 3;
+  string gross_profit = 4;
+  string profit_margin_percentage = 5;
+  int32 total_transactions = 6;
+  int32 total_items_sold = 7;
+  string average_transaction_value = 8;
+  repeated SalesSummaryDaily daily_breakdowns = 9;
+  repeated ProductSalesSummary top_products = 10;
+}
+
+message PerformanceReport {
+  DateRange period = 1;
+  repeated EmployeePerformance employee_performances = 2;
+  string total_commissions = 3;
+  int64 top_performer_employee_id = 4;
+  string top_performer_sales = 5;
+}
+
+// Sales Reporting
+message GetSalesReportRequest {
+  DateRange date_range = 1;
+  optional int64 cashier_id = 2;
+  optional int32 product_group_id = 3;
+  optional bool include_daily_breakdown = 4;
+  optional bool include_product_breakdown = 5;
+}
+
+message GetSalesReportResponse {
+  SalesReport sales_report = 1;
+}
+
+message GetDailySummaryRequest {
+  string date = 1;
+  optional int64 cashier_id = 2;
+}
+
+message GetDailySummaryResponse {
+  repeated SalesSummaryDaily daily_summaries = 1;
+}
+
+message GenerateDailySummaryRequest {
+  string date = 1;
+  optional int64 cashier_id = 2;
+}
+
+message GenerateDailySummaryResponse {
+  repeated SalesSummaryDaily generated_summaries = 1;
+  bool success = 2;
+  optional string message = 3;
+}
+
+// Product Analytics
+message GetProductSalesRequest {
+  DateRange date_range = 1;
+  optional int32 product_id = 2;
+  optional int32 product_group_id = 3;
+  PaginationRequest pagination = 4;
+}
+
+message GetProductSalesResponse {
+  repeated ProductSalesSummary product_sales = 1;
+  PaginationResponse pagination = 2;
+}
+
+message GetTopSellingProductsRequest {
+DateRange date_range = 1;
+  int32 limit = 2;
+  optional int32 product_group_id = 3;
+}
+
+message GetTopSellingProductsResponse {
+  repeated ProductSalesSummary top_products = 1;
+}
+
+// Employee Performance
+message GetEmployeePerformanceRequest {
+DateRange date_range = 1;
+  optional int64 employee_id = 2;
+PaginationRequest pagination = 3;
+}
+
+message GetEmployeePerformanceResponse {
+  repeated EmployeePerformance performances = 1;
+PaginationResponse pagination = 2;
+}
+
+message GetPerformanceReportRequest {
+DateRange date_range = 1;
+  optional int64 employee_id = 2;
+}
+
+message GetPerformanceReportResponse {
+  PerformanceReport performance_report = 1;
+}
+
+// Customer Analytics
+message GetCustomerAnalyticsRequest {
+DateRange date_range = 1;
+  optional int32 product_group_id = 2;
+PaginationRequest pagination = 3;
+}
+
+message GetCustomerAnalyticsResponse {
+  repeated CustomerAnalytics analytics = 1;
+PaginationResponse pagination = 2;
+}
+
+message GetPeakHoursRequest {
+DateRange date_range = 1;
+}
+
+message GetPeakHoursResponse {
+  repeated PeakHourData peak_hours = 1;
+}
+
+message PeakHourData {
+  string hour = 1;
+  int32 transaction_count = 2;
+  string total_revenue = 3;
+}
+
+message GetDashboardDataRequest {
+  string date = 1;
+}
+
+message GetDashboardDataResponse {
+  DashboardData dashboard = 1;
+}
+
+message DashboardData {
+  string today_revenue = 1;
+  int32 today_transactions = 2;
+  int32 today_items_sold = 3;
+  string today_profit = 4;
+  
+  string revenue_change_percentage = 5;
+  string transaction_change_percentage = 6;
+  
+  repeated ProductSalesSummary top_products_today = 7;
+  repeated EmployeePerformance top_performers_today = 8;
+  
+  repeated string low_stock_alerts = 9;
+  int32 pending_commissions_count = 10;
+}
+
+message GetRealTimeMetricsRequest {
+}
+
+message GetRealTimeMetricsResponse {
+  RealTimeMetrics metrics = 1;
+}
+
+message RealTimeMetrics {
+  google.protobuf.Timestamp last_updated = 1;
+  int32 active_transactions = 2;
+  string hourly_revenue = 3;
+  int32 hourly_transaction_count = 4;
+  string average_transaction_value = 5;
+  repeated string recent_large_transactions = 6;
+}
+
+service AnalyticsService {
+  // Sales Analytics
+  rpc GetSalesReport(GetSalesReportRequest) returns (GetSalesReportResponse);
+  rpc GetDailySummary(GetDailySummaryRequest) returns (GetDailySummaryResponse);
+  rpc GenerateDailySummary(GenerateDailySummaryRequest) returns (GenerateDailySummaryResponse);
+  
+  // Product Analytics
+  rpc GetProductSales(GetProductSalesRequest) returns (GetProductSalesResponse);
+  rpc GetTopSellingProducts(GetTopSellingProductsRequest) returns (GetTopSellingProductsResponse);
+  
+  // Employee Performance Analytics
+  rpc GetEmployeePerformance(GetEmployeePerformanceRequest) returns (GetEmployeePerformanceResponse);
+  rpc GetPerformanceReport(GetPerformanceReportRequest) returns (GetPerformanceReportResponse);
+  
+  // Customer Analytics
+  rpc GetCustomerAnalytics(GetCustomerAnalyticsRequest) returns (GetCustomerAnalyticsResponse);
+  rpc GetPeakHours(GetPeakHoursRequest) returns (GetPeakHoursResponse);
+  
+  // Dashboard and Real-time
+  rpc GetDashboardData(GetDashboardDataRequest) returns (GetDashboardDataResponse);
+  rpc GetRealTimeMetrics(GetRealTimeMetricsRequest) returns (GetRealTimeMetricsResponse);
+}

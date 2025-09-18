@@ -1,0 +1,413 @@
+syntax = "proto3";
+
+package pos;
+
+option go_package = "syntra-system/proto/protogen;protogen";
+import "google/protobuf/timestamp.proto";
+
+enum DocumentType {
+  DOCUMENT_TYPE_UNSPECIFIED = 0;
+  DOCUMENT_TYPE_SALE = 1;
+  DOCUMENT_TYPE_RETURN = 2;
+  DOCUMENT_TYPE_VOID = 3;
+}
+
+enum PaidStatus {
+  PAID_STATUS_UNSPECIFIED = 0;
+  PAID_STATUS_PENDING = 1;
+  PAID_STATUS_PAID = 2;
+  PAID_STATUS_PARTIAL = 3;
+  PAID_STATUS_REFUNDED = 4;
+}
+
+enum DiscountType {
+  DISCOUNT_TYPE_UNSPECIFIED = 0;
+  DISCOUNT_TYPE_PERCENTAGE = 1;
+  DISCOUNT_TYPE_FIXED_AMOUNT = 2;
+  DISCOUNT_TYPE_BUY_X_GET_Y = 3;
+}
+
+message PaginationRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message PaginationResponse {
+  string next_page_token = 1;
+  int32 total_count = 2;
+}
+
+message DateRange {
+  string start_date = 1;
+  string end_date = 2;
+}
+
+message OrderDocument {
+  int64 id = 1;
+  string document_number = 2;
+  int64 cashier_id = 3;
+  google.protobuf.Timestamp orders_date = 4;
+  DocumentType document_type = 5;
+  optional int32 payment_type_id = 6;
+  string subtotal = 7;
+  string tax_amount = 8;
+  string discount_amount = 9;
+  string total_amount = 10;
+  string paid_amount = 11;
+  string change_amount = 12;
+  PaidStatus paid_status = 13;
+  optional string additional_info = 14;
+  optional string notes = 15;
+  google.protobuf.Timestamp created_at = 16;
+  google.protobuf.Timestamp updated_at = 17;
+  
+  repeated OrderItem order_items = 18;
+  optional PaymentType payment_type = 19;
+}
+
+message OrderItem {
+  int64 id = 1;
+  int64 document_id = 2;
+  int32 product_id = 3;
+  optional int64 serving_employee_id = 4;
+  int32 quantity = 5;
+  string unit_price = 6;
+  string price_before_discount = 7;
+  optional int32 discount_id = 8;
+  string discount_amount = 9;
+  string line_total = 10;
+  string commission_amount = 11;
+  google.protobuf.Timestamp created_at = 12;
+  
+  optional Product product = 13;
+  optional Discount discount = 14;
+}
+
+message PaymentType {
+  int32 id = 1;
+  string payment_name = 2;
+  bool is_active = 3;
+  string processing_fee_rate = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message Discount {
+  int32 id = 1;
+  string discount_name = 2;
+  DiscountType discount_type = 3;
+  string discount_value = 4;
+  optional int32 product_id = 5;
+  optional int32 product_group_id = 6;
+  int32 min_quantity = 7;
+  optional int32 max_usage_per_transaction = 8;
+  optional google.protobuf.Timestamp valid_from = 9;
+  optional google.protobuf.Timestamp valid_until = 10;
+  bool is_active = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+  
+  optional Product product = 14;
+  optional ProductGroup product_group = 15;
+}
+
+message Product {
+  int32 id = 1;
+  string product_code = 2;
+  string product_name = 3;
+  string product_price = 4;
+  string cost_price = 5;
+  optional int32 product_group_id = 6;
+  bool commission_eligible = 7;
+  bool requires_service_employee = 8;
+  bool is_active = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  
+  optional ProductGroup product_group = 12;
+}
+
+message ProductGroup {
+  int32 id = 1;
+  string product_group_name = 2;
+  optional int32 parent_group_id = 3;
+  optional string color = 4;
+  optional string image_url = 5;
+  string commission_rate = 6;
+  bool is_active = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  
+  optional ProductGroup parent_group = 10;
+  repeated ProductGroup child_groups = 11;
+  repeated Product products = 12;
+}
+
+// Cart management for active transactions
+message Cart {
+  string cart_id = 1;
+  int64 cashier_id = 2;
+  repeated CartItem items = 3;
+  string subtotal = 4;
+  string tax_amount = 5;
+  string discount_amount = 6;
+  string total_amount = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message CartItem {
+  string item_id = 1;
+  int32 product_id = 2;
+  optional int64 serving_employee_id = 3;
+  int32 quantity = 4;
+  string unit_price = 5;
+  optional int32 discount_id = 6;
+  string discount_amount = 7;
+  string line_total = 8;
+  
+  optional Product product = 9;
+  optional Discount discount = 10;
+}
+
+// Cart Operations
+message CreateCartRequest {
+  int64 cashier_id = 1;
+}
+
+message CreateCartResponse {
+  Cart cart = 1;
+}
+
+message AddItemToCartRequest {
+  string cart_id = 1;
+  int32 product_id = 2;
+  int32 quantity = 3;
+  optional int64 serving_employee_id = 4;
+}
+
+message AddItemToCartResponse {
+  Cart cart = 1;
+}
+
+message RemoveItemFromCartRequest {
+  string cart_id = 1;
+  string item_id = 2;
+}
+
+message RemoveItemFromCartResponse {
+  Cart cart = 1;
+}
+
+message ApplyDiscountRequest {
+  string cart_id = 1;
+  int32 discount_id = 2;
+  repeated string item_ids = 3;
+}
+
+message ApplyDiscountResponse {
+  Cart cart = 1;
+}
+
+message GetCartRequest {
+  string cart_id = 1;
+}
+
+message GetCartResponse {
+  Cart cart = 1;
+}
+
+// Order Operations
+message CreateOrderFromCartRequest {
+  string cart_id = 1;
+  string document_number = 2;
+  optional string additional_info = 3;
+  optional string notes = 4;
+}
+
+message CreateOrderFromCartResponse {
+  OrderDocument order_document = 1;
+}
+
+message CreateOrderRequest {
+  string document_number = 1;
+  int64 cashier_id = 2;
+  DocumentType document_type = 3;
+  repeated CreateOrderItemRequest order_items = 4;
+  optional string additional_info = 5;
+  optional string notes = 6;
+}
+
+message CreateOrderItemRequest {
+  int32 product_id = 1;
+  optional int64 serving_employee_id = 2;
+  int32 quantity = 3;
+  optional int32 discount_id = 4;
+}
+
+message CreateOrderResponse {
+  OrderDocument order_document = 1;
+}
+
+message GetOrderRequest {
+  int64 id = 1;
+}
+
+message GetOrderResponse {
+  OrderDocument order_document = 1;
+}
+
+message ListOrdersRequest {
+  PaginationRequest pagination = 1;
+  optional int64 cashier_id = 2;
+  optional DocumentType document_type = 3;
+  optional PaidStatus paid_status = 4;
+  optional DateRange date_range = 5;
+}
+
+message ListOrdersResponse {
+  repeated OrderDocument order_documents = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Payment Operations
+message ProcessPaymentRequest {
+  int64 order_id = 1;
+  string paid_amount = 2;
+  int32 payment_type_id = 3;
+  optional string reference_number = 4;
+}
+
+message ProcessPaymentResponse {
+  OrderDocument order_document = 1;
+  string change_amount = 2;
+}
+
+// Order Modifications
+message VoidOrderRequest {
+  int64 id = 1;
+  int64 voided_by = 2;
+  string reason = 3;
+}
+
+message VoidOrderResponse {
+  OrderDocument order_document = 1;
+}
+
+message ReturnOrderRequest {
+  int64 original_order_id = 1;
+  repeated int64 item_ids = 2;
+  int64 processed_by = 3;
+  optional string reason = 4;
+}
+
+message ReturnOrderResponse {
+  OrderDocument return_document = 1;
+}
+
+// Product Operations
+message GetProductRequest {
+  int32 id = 1;
+}
+
+message GetProductResponse {
+  Product product = 1;
+}
+
+message GetProductByCodeRequest {
+  string product_code = 1;
+}
+
+message GetProductByCodeResponse {
+  Product product = 1;
+}
+
+message ListProductsRequest {
+  PaginationRequest pagination = 1;
+  optional bool is_active = 2;
+  optional int32 product_group_id = 3;
+  optional string search_term = 4;
+}
+
+message ListProductsResponse {
+  repeated Product products = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Product Group Operations
+message ListProductGroupsRequest {
+  PaginationRequest pagination = 1;
+  optional bool is_active = 2;
+  optional int32 parent_group_id = 3;
+}
+
+message ListProductGroupsResponse {
+  repeated ProductGroup product_groups = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Discount Operations
+message ListDiscountsRequest {
+  PaginationRequest pagination = 1;
+  optional bool is_active = 2;
+  optional int32 product_id = 3;
+}
+
+message ListDiscountsResponse {
+  repeated Discount discounts = 1;
+  PaginationResponse pagination = 2;
+}
+
+message ValidateDiscountRequest {
+  int32 discount_id = 1;
+  optional int32 product_id = 2;
+  optional int32 quantity = 3;
+}
+
+message ValidateDiscountResponse {
+  bool is_valid = 1;
+  optional string reason = 2;
+  string calculated_discount_amount = 3;
+}
+
+// Payment Type Operations
+message ListPaymentTypesRequest {
+  optional bool is_active = 1;
+}
+
+message ListPaymentTypesResponse {
+  repeated PaymentType payment_types = 1;
+}
+
+service POSService {
+  // Cart Management
+  rpc CreateCart(CreateCartRequest) returns (CreateCartResponse);
+  rpc GetCart(GetCartRequest) returns (GetCartResponse);
+  rpc AddItemToCart(AddItemToCartRequest) returns (AddItemToCartResponse);
+  rpc RemoveItemFromCart(RemoveItemFromCartRequest) returns (RemoveItemFromCartResponse);
+  rpc ApplyDiscount(ApplyDiscountRequest) returns (ApplyDiscountResponse);
+  
+  // Order Management
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc CreateOrderFromCart(CreateOrderFromCartRequest) returns (CreateOrderFromCartResponse);
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
+  rpc VoidOrder(VoidOrderRequest) returns (VoidOrderResponse);
+  rpc ReturnOrder(ReturnOrderRequest) returns (ReturnOrderResponse);
+  
+  // Payment Processing
+  rpc ProcessPayment(ProcessPaymentRequest) returns (ProcessPaymentResponse);
+  
+  // Product Operations
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+  rpc GetProductByCode(GetProductByCodeRequest) returns (GetProductByCodeResponse);
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc ListProductGroups(ListProductGroupsRequest) returns (ListProductGroupsResponse);
+  
+  // Discount Operations
+  rpc ListDiscounts(ListDiscountsRequest) returns (ListDiscountsResponse);
+  rpc ValidateDiscount(ValidateDiscountRequest) returns (ValidateDiscountResponse);
+  
+  // Payment Type Operations
+  rpc ListPaymentTypes(ListPaymentTypesRequest) returns (ListPaymentTypesResponse);
+}

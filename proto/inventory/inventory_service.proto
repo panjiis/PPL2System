@@ -1,0 +1,399 @@
+syntax = "proto3";
+
+package inventory;
+
+option go_package = "syntra-system/proto/protogen;protogen";
+import "google/protobuf/timestamp.proto";
+
+enum MovementType {
+  MOVEMENT_TYPE_UNSPECIFIED = 0;
+  MOVEMENT_TYPE_IN = 1;
+  MOVEMENT_TYPE_OUT = 2;
+  MOVEMENT_TYPE_ADJUSTMENT = 3;
+  MOVEMENT_TYPE_TRANSFER = 4;
+}
+
+enum ReferenceType {
+  REFERENCE_TYPE_UNSPECIFIED = 0;
+  REFERENCE_TYPE_PURCHASE = 1;
+  REFERENCE_TYPE_SALE = 2;
+  REFERENCE_TYPE_ADJUSTMENT = 3;
+  REFERENCE_TYPE_TRANSFER = 4;
+  REFERENCE_TYPE_RETURN = 5;
+}
+
+message PaginationRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message PaginationResponse {
+  string next_page_token = 1;
+  int32 total_count = 2;
+}
+
+message DateRange {
+  string start_date = 1;
+  string end_date = 2;
+}
+
+message InventoryProduct {
+  int32 id = 1;
+  string product_code = 2;
+  string product_name = 3;
+  int32 product_type_id = 4;
+  int32 supplier_id = 5;
+  string unit_of_measure = 6;
+  int32 reorder_level = 7;
+  int32 max_stock_level = 8;
+  bool is_active = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  
+  optional ProductType product_type = 12;
+  optional Supplier supplier = 13;
+  repeated Stock stocks = 14;
+}
+
+message Warehouse {
+  int32 id = 1;
+  string warehouse_code = 2;
+  string warehouse_name = 3;
+  optional string location = 4;
+  optional int64 manager_id = 5;
+  bool is_active = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message ProductType {
+  int32 id = 1;
+  string product_type_name = 2;
+  optional string description = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+message Supplier {
+  int32 id = 1;
+  string supplier_code = 2;
+  string supplier_name = 3;
+  optional string contact_person = 4;
+  optional string phone = 5;
+  optional string email = 6;
+  optional string address = 7;
+  bool is_active = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message Stock {
+  int64 id = 1;
+  int32 product_id = 2;
+  int32 warehouse_id = 3;
+  int32 available_quantity = 4;
+  int32 reserved_quantity = 5;
+  string unit_cost = 6;
+  optional string last_restock_date = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  
+  optional InventoryProduct product = 10;
+  optional Warehouse warehouse = 11;
+}
+
+message StockMovement {
+  int64 id = 1;
+  int32 product_id = 2;
+  int32 warehouse_id = 3;
+  MovementType movement_type = 4;
+  int32 quantity = 5;
+  optional string unit_cost = 6;
+  ReferenceType reference_type = 7;
+  optional string reference_id = 8;
+  optional string notes = 9;
+  int64 created_by = 10;
+  google.protobuf.Timestamp created_at = 11;
+}
+
+// Stock Operations
+message CheckStockRequest {
+  int32 product_id = 1;
+  optional int32 warehouse_id = 2;
+  int32 required_quantity = 3;
+}
+
+message CheckStockResponse {
+  bool is_available = 1;
+  int32 total_available_quantity = 2;
+  repeated Stock stock_details = 3;
+}
+
+message ReserveStockRequest {
+  int32 product_id = 1;
+  int32 warehouse_id = 2;
+  int32 quantity = 3;
+  string reference_id = 4;
+  int64 reserved_by = 5;
+}
+
+message ReserveStockResponse {
+  Stock updated_stock = 1;
+  bool success = 2;
+  optional string message = 3;
+}
+
+message ReleaseStockRequest {
+  int32 product_id = 1;
+  int32 warehouse_id = 2;
+  int32 quantity = 3;
+  string reference_id = 4;
+  int64 released_by = 5;
+}
+
+message ReleaseStockResponse {
+  Stock updated_stock = 1;
+  bool success = 2;
+  optional string message = 3;
+}
+
+message UpdateStockRequest {
+  int32 product_id = 1;
+  int32 warehouse_id = 2;
+  MovementType movement_type = 3;
+  int32 quantity = 4;
+  optional string unit_cost = 5;
+  ReferenceType reference_type = 6;
+  optional string reference_id = 7;
+  optional string notes = 8;
+  int64 created_by = 9;
+}
+
+message UpdateStockResponse {
+  StockMovement stock_movement = 1;
+  Stock updated_stock = 2;
+}
+
+message GetStockRequest {
+  int32 product_id = 1;
+  optional int32 warehouse_id = 2;
+}
+
+message GetStockResponse {
+  repeated Stock stocks = 1;
+}
+
+message ListLowStockRequest {
+  optional int32 warehouse_id = 1;
+  PaginationRequest pagination = 2;
+}
+
+message ListLowStockResponse {
+  repeated Stock low_stocks = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Stock Movement Operations
+message ListStockMovementsRequest {
+  PaginationRequest pagination = 1;
+  optional int32 product_id = 2;
+  optional int32 warehouse_id = 3;
+  optional MovementType movement_type = 4;
+  optional DateRange date_range = 5;
+}
+
+message ListStockMovementsResponse {
+  repeated StockMovement stock_movements = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Product Operations
+message CreateProductRequest {
+  string product_code = 1;
+  string product_name = 2;
+  int32 product_type_id = 3;
+  int32 supplier_id = 4;
+  optional string unit_of_measure = 5;
+  optional int32 reorder_level = 6;
+  optional int32 max_stock_level = 7;
+}
+
+message CreateProductResponse {
+  InventoryProduct product = 1;
+}
+
+message UpdateProductRequest {
+  int32 id = 1;
+  optional string product_name = 2;
+  optional int32 product_type_id = 3;
+  optional int32 supplier_id = 4;
+  optional string unit_of_measure = 5;
+  optional int32 reorder_level = 6;
+  optional int32 max_stock_level = 7;
+  optional bool is_active = 8;
+}
+
+message UpdateProductResponse {
+  InventoryProduct product = 1;
+}
+
+message GetProductRequest {
+  int32 id = 1;
+}
+
+message GetProductResponse {
+  InventoryProduct product = 1;
+}
+
+message GetProductByCodeRequest {
+  string product_code = 1;
+}
+
+message GetProductByCodeResponse {
+  InventoryProduct product = 1;
+}
+
+message ListProductsRequest {
+  PaginationRequest pagination = 1;
+  optional bool is_active = 2;
+  optional int32 product_type_id = 3;
+  optional int32 supplier_id = 4;
+  optional string search_term = 5;
+}
+
+message ListProductsResponse {
+  repeated InventoryProduct products = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Warehouse Operations
+message CreateWarehouseRequest {
+  string warehouse_code = 1;
+  string warehouse_name = 2;
+  optional string location = 3;
+  optional int64 manager_id = 4;
+}
+
+message CreateWarehouseResponse {
+  Warehouse warehouse = 1;
+}
+
+message GetWarehouseRequest {
+  int32 id = 1;
+}
+
+message GetWarehouseResponse {
+  Warehouse warehouse = 1;
+}
+
+message ListWarehousesRequest {
+  PaginationRequest pagination = 1;
+  optional bool is_active = 2;
+}
+
+message ListWarehousesResponse {
+  repeated Warehouse warehouses = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Supplier Operations
+message CreateSupplierRequest {
+  string supplier_code = 1;
+  string supplier_name = 2;
+  optional string contact_person = 3;
+  optional string phone = 4;
+  optional string email = 5;
+  optional string address = 6;
+}
+
+message CreateSupplierResponse {
+  Supplier supplier = 1;
+}
+
+message GetSupplierRequest {
+  int32 id = 1;
+}
+
+message GetSupplierResponse {
+  Supplier supplier = 1;
+}
+
+message ListSuppliersRequest {
+  PaginationRequest pagination = 1;
+  optional bool is_active = 2;
+}
+
+message ListSuppliersResponse {
+  repeated Supplier suppliers = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Product Type Operations
+message CreateProductTypeRequest {
+  string product_type_name = 1;
+  optional string description = 2;
+}
+
+message CreateProductTypeResponse {
+  ProductType product_type = 1;
+}
+
+message ListProductTypesRequest {
+  PaginationRequest pagination = 1;
+}
+
+message ListProductTypesResponse {
+  repeated ProductType product_types = 1;
+  PaginationResponse pagination = 2;
+}
+
+// Stock Transfer Operations
+message TransferStockRequest {
+  int32 product_id = 1;
+  int32 from_warehouse_id = 2;
+  int32 to_warehouse_id = 3;
+  int32 quantity = 4;
+  optional string notes = 5;
+  int64 transferred_by = 6;
+}
+
+message TransferStockResponse {
+  repeated StockMovement stock_movements = 1; 
+  Stock source_stock = 2;
+  Stock destination_stock = 3;
+}
+
+service InventoryService {
+  // Stock Operations
+  rpc CheckStock(CheckStockRequest) returns (CheckStockResponse);
+  rpc ReserveStock(ReserveStockRequest) returns (ReserveStockResponse);
+  rpc ReleaseStock(ReleaseStockRequest) returns (ReleaseStockResponse);
+  rpc UpdateStock(UpdateStockRequest) returns (UpdateStockResponse);
+  rpc GetStock(GetStockRequest) returns (GetStockResponse);
+  rpc ListLowStock(ListLowStockRequest) returns (ListLowStockResponse);
+  rpc TransferStock(TransferStockRequest) returns (TransferStockResponse);
+  
+  // Stock Movement Operations
+  rpc ListStockMovements(ListStockMovementsRequest) returns (ListStockMovementsResponse);
+  
+  // Product Operations
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+  rpc GetProductByCode(GetProductByCodeRequest) returns (GetProductByCodeResponse);
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  
+  // Warehouse Operations
+  rpc CreateWarehouse(CreateWarehouseRequest) returns (CreateWarehouseResponse);
+  rpc GetWarehouse(GetWarehouseRequest) returns (GetWarehouseResponse);
+  rpc ListWarehouses(ListWarehousesRequest) returns (ListWarehousesResponse);
+  
+  // Supplier Operations
+  rpc CreateSupplier(CreateSupplierRequest) returns (CreateSupplierResponse);
+  rpc GetSupplier(GetSupplierRequest) returns (GetSupplierResponse);
+  rpc ListSuppliers(ListSuppliersRequest) returns (ListSuppliersResponse);
+  
+  // Product Type Operations
+  rpc CreateProductType(CreateProductTypeRequest) returns (CreateProductTypeResponse);
+  rpc ListProductTypes(ListProductTypesRequest) returns (ListProductTypesResponse);
+}
