@@ -33,10 +33,10 @@ func main() {
 		userHandler = handlers.NewUserHTTPHandler(grpcClients.User)
 	}
 
-	// var inventoryHandler *handlers.InventoryHTTPHandler
-	// if grpcClients.Inventory != nil {
-	// 	inventoryHandler = handlers.NewInventoryHTTPHandler(grpcClients.Inventory)
-	// }
+	var inventoryHandler *handlers.InventoryHTTPHandler
+	if grpcClients.Inventory != nil {
+		inventoryHandler = handlers.NewInventoryHTTPHandler(grpcClients.Inventory)
+	}
 
 	// var posHandler *handlers.POSHTTPHandler
 	// if grpcClients.POS != nil {
@@ -106,22 +106,81 @@ func main() {
 			}
 		}
 
-		// inventoryGroup := protected.Group("/inventory")
-		// {
-		// 	if inventoryHandler != nil {
-		// 		inventoryGroup.POST("/products", inventoryHandler.CreateProduct)
-		// 		inventoryGroup.GET("/products", inventoryHandler.ListProducts)
-		// 		inventoryGroup.GET("/products/:id", inventoryHandler.GetProduct)
-		// 		inventoryGroup.PUT("/products/:id", inventoryHandler.UpdateProduct)
-		// 		inventoryGroup.DELETE("/products/:id", inventoryHandler.DeleteProduct)
-		// 	} else {
-		// 		inventoryGroup.POST("/products", serviceUnavailableHandler("Inventory service"))
-		// 		inventoryGroup.GET("/products", serviceUnavailableHandler("Inventory service"))
-		// 		inventoryGroup.GET("/products/:id", serviceUnavailableHandler("Inventory service"))
-		// 		inventoryGroup.PUT("/products/:id", serviceUnavailableHandler("Inventory service"))
-		// 		inventoryGroup.DELETE("/products/:id", serviceUnavailableHandler("Inventory service"))
-		// 	}
-		// }
+		inventoryGroup := protected.Group("/inventory")
+		{
+			if inventoryHandler != nil {
+				// Product routes
+				inventoryGroup.POST("/products", inventoryHandler.CreateProduct)
+				inventoryGroup.GET("/products", inventoryHandler.ListProducts)
+				inventoryGroup.GET("/products/:id", inventoryHandler.GetProduct)
+				inventoryGroup.GET("/products/code/:code", inventoryHandler.GetProductByCode)
+				inventoryGroup.PUT("/products/:id", inventoryHandler.UpdateProduct)
+
+				// Stock routes
+				inventoryGroup.POST("/stocks/check", inventoryHandler.CheckStock)
+				inventoryGroup.POST("/stocks/reserve", inventoryHandler.ReserveStock)
+				inventoryGroup.POST("/stocks/release", inventoryHandler.ReleaseStock)
+				inventoryGroup.POST("/stocks/update", inventoryHandler.UpdateStock)
+				inventoryGroup.POST("/stocks/transfer", inventoryHandler.TransferStock)
+				inventoryGroup.GET("/stocks", inventoryHandler.GetStock)
+				inventoryGroup.GET("/stocks/low", inventoryHandler.ListLowStock)
+
+				// Stock movement routes
+				inventoryGroup.GET("/movements", inventoryHandler.ListStockMovements)
+
+				// Warehouse routes
+				inventoryGroup.POST("/warehouses", inventoryHandler.CreateWarehouse)
+				inventoryGroup.GET("/warehouses", inventoryHandler.ListWarehouses)
+				inventoryGroup.GET("/warehouses/:code", inventoryHandler.GetWarehouse)
+
+				// Supplier routes
+				inventoryGroup.POST("/suppliers", inventoryHandler.CreateSupplier)
+				inventoryGroup.GET("/suppliers", inventoryHandler.ListSuppliers)
+				inventoryGroup.GET("/suppliers/:id", inventoryHandler.GetSupplier)
+
+				// Product Type routes
+				inventoryGroup.POST("/product-types", inventoryHandler.CreateProductType)
+				inventoryGroup.GET("/product-types", inventoryHandler.ListProductTypes)
+
+			} else {
+				// Product routes
+				inventoryGroup.POST("/products", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/products", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/products/:id", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/products/code/:code", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.PUT("/products/:id", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.DELETE("/products/:id", serviceUnavailableHandler("Inventory service"))
+
+				// Stock routes
+				inventoryGroup.POST("/stocks/check", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.POST("/stocks/reserve", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.POST("/stocks/release", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.POST("/stocks/update", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.POST("/stocks/transfer", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/stocks", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/stocks/low", serviceUnavailableHandler("Inventory service"))
+
+				// Stock movement routes
+				inventoryGroup.GET("/movements", serviceUnavailableHandler("Inventory service"))
+
+				// Warehouse routes
+				inventoryGroup.POST("/warehouses", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/warehouses", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/warehouses/:code", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.DELETE("/warehouses/:code", serviceUnavailableHandler("Inventory service"))
+
+				// Supplier routes
+				inventoryGroup.POST("/suppliers", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/suppliers", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/suppliers/:id", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.DELETE("/suppliers/:id", serviceUnavailableHandler("Inventory service"))
+
+				// Product Type routes
+				inventoryGroup.POST("/product-types", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/product-types", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.DELETE("/product-types/:id", serviceUnavailableHandler("Inventory service"))
+			}
+		}
 
 		// posGroup := protected.Group("/pos")
 		// {

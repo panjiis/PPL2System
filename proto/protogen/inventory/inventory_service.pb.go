@@ -1045,6 +1045,8 @@ type CheckStockResponse struct {
 	IsAvailable            bool                   `protobuf:"varint,1,opt,name=is_available,json=isAvailable,proto3" json:"is_available,omitempty"`
 	TotalAvailableQuantity int32                  `protobuf:"varint,2,opt,name=total_available_quantity,json=totalAvailableQuantity,proto3" json:"total_available_quantity,omitempty"`
 	StockDetails           []*Stock               `protobuf:"bytes,3,rep,name=stock_details,json=stockDetails,proto3" json:"stock_details,omitempty"`
+	Success                bool                   `protobuf:"varint,4,opt,name=success,proto3" json:"success,omitempty"`
+	Message                *string                `protobuf:"bytes,5,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -1098,6 +1100,20 @@ func (x *CheckStockResponse) GetStockDetails() []*Stock {
 		return x.StockDetails
 	}
 	return nil
+}
+
+func (x *CheckStockResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CheckStockResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 type ReserveStockRequest struct {
@@ -1484,6 +1500,8 @@ type UpdateStockResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	StockMovement *StockMovement         `protobuf:"bytes,1,opt,name=stock_movement,json=stockMovement,proto3" json:"stock_movement,omitempty"`
 	UpdatedStock  *Stock                 `protobuf:"bytes,2,opt,name=updated_stock,json=updatedStock,proto3" json:"updated_stock,omitempty"`
+	Success       bool                   `protobuf:"varint,3,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,4,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1530,6 +1548,20 @@ func (x *UpdateStockResponse) GetUpdatedStock() *Stock {
 		return x.UpdatedStock
 	}
 	return nil
+}
+
+func (x *UpdateStockResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UpdateStockResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 type GetStockRequest struct {
@@ -1587,6 +1619,8 @@ func (x *GetStockRequest) GetWarehouseId() int32 {
 type GetStockResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Stocks        []*Stock               `protobuf:"bytes,1,rep,name=stocks,proto3" json:"stocks,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1626,6 +1660,20 @@ func (x *GetStockResponse) GetStocks() []*Stock {
 		return x.Stocks
 	}
 	return nil
+}
+
+func (x *GetStockResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetStockResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 type ListLowStockRequest struct {
@@ -1684,6 +1732,8 @@ type ListLowStockResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	LowStocks     []*Stock               `protobuf:"bytes,1,rep,name=low_stocks,json=lowStocks,proto3" json:"low_stocks,omitempty"`
 	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,3,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,4,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1730,6 +1780,20 @@ func (x *ListLowStockResponse) GetPagination() *PaginationResponse {
 		return x.Pagination
 	}
 	return nil
+}
+
+func (x *ListLowStockResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListLowStockResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 // Stock Movement Operations
@@ -1813,6 +1877,8 @@ type ListStockMovementsResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	StockMovements []*StockMovement       `protobuf:"bytes,1,rep,name=stock_movements,json=stockMovements,proto3" json:"stock_movements,omitempty"`
 	Pagination     *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success        bool                   `protobuf:"varint,3,opt,name=success,proto3" json:"success,omitempty"`
+	Message        *string                `protobuf:"bytes,4,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1859,6 +1925,20 @@ func (x *ListStockMovementsResponse) GetPagination() *PaginationResponse {
 		return x.Pagination
 	}
 	return nil
+}
+
+func (x *ListStockMovementsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListStockMovementsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 // Product Operations
@@ -1957,6 +2037,8 @@ func (x *CreateProductRequest) GetMaxStockLevel() int32 {
 type CreateProductResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Product       *InventoryProduct      `protobuf:"bytes,1,opt,name=product,proto3" json:"product,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1996,6 +2078,20 @@ func (x *CreateProductResponse) GetProduct() *InventoryProduct {
 		return x.Product
 	}
 	return nil
+}
+
+func (x *CreateProductResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateProductResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 type UpdateProductRequest struct {
@@ -2101,6 +2197,8 @@ func (x *UpdateProductRequest) GetIsActive() bool {
 type UpdateProductResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Product       *InventoryProduct      `protobuf:"bytes,1,opt,name=product,proto3" json:"product,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2140,6 +2238,20 @@ func (x *UpdateProductResponse) GetProduct() *InventoryProduct {
 		return x.Product
 	}
 	return nil
+}
+
+func (x *UpdateProductResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UpdateProductResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 type GetProductRequest struct {
@@ -2189,6 +2301,8 @@ func (x *GetProductRequest) GetId() int32 {
 type GetProductResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Product       *InventoryProduct      `protobuf:"bytes,1,opt,name=product,proto3" json:"product,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2228,6 +2342,20 @@ func (x *GetProductResponse) GetProduct() *InventoryProduct {
 		return x.Product
 	}
 	return nil
+}
+
+func (x *GetProductResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetProductResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 type GetProductByCodeRequest struct {
@@ -2277,6 +2405,8 @@ func (x *GetProductByCodeRequest) GetProductCode() string {
 type GetProductByCodeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Product       *InventoryProduct      `protobuf:"bytes,1,opt,name=product,proto3" json:"product,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2316,6 +2446,20 @@ func (x *GetProductByCodeResponse) GetProduct() *InventoryProduct {
 		return x.Product
 	}
 	return nil
+}
+
+func (x *GetProductByCodeResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetProductByCodeResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 type ListProductsRequest struct {
@@ -2398,6 +2542,8 @@ type ListProductsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Products      []*InventoryProduct    `protobuf:"bytes,1,rep,name=products,proto3" json:"products,omitempty"`
 	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,3,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,4,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2444,6 +2590,20 @@ func (x *ListProductsResponse) GetPagination() *PaginationResponse {
 		return x.Pagination
 	}
 	return nil
+}
+
+func (x *ListProductsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListProductsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 // Warehouse Operations
@@ -2518,6 +2678,8 @@ func (x *CreateWarehouseRequest) GetManagerId() int64 {
 type CreateWarehouseResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Warehouse     *Warehouse             `protobuf:"bytes,1,opt,name=warehouse,proto3" json:"warehouse,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2559,9 +2721,23 @@ func (x *CreateWarehouseResponse) GetWarehouse() *Warehouse {
 	return nil
 }
 
+func (x *CreateWarehouseResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateWarehouseResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
+}
+
 type GetWarehouseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	WarehouseCode string                 `protobuf:"bytes,1,opt,name=warehouse_code,json=warehouseCode,proto3" json:"warehouse_code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2596,16 +2772,18 @@ func (*GetWarehouseRequest) Descriptor() ([]byte, []int) {
 	return file_inventory_inventory_service_proto_rawDescGZIP(), []int{35}
 }
 
-func (x *GetWarehouseRequest) GetId() int32 {
+func (x *GetWarehouseRequest) GetWarehouseCode() string {
 	if x != nil {
-		return x.Id
+		return x.WarehouseCode
 	}
-	return 0
+	return ""
 }
 
 type GetWarehouseResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Warehouse     *Warehouse             `protobuf:"bytes,1,opt,name=warehouse,proto3" json:"warehouse,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2647,10 +2825,27 @@ func (x *GetWarehouseResponse) GetWarehouse() *Warehouse {
 	return nil
 }
 
+func (x *GetWarehouseResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetWarehouseResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
+}
+
 type ListWarehousesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Pagination    *PaginationRequest     `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	IsActive      *bool                  `protobuf:"varint,2,opt,name=is_active,json=isActive,proto3,oneof" json:"is_active,omitempty"`
+	WarehouseCode *int32                 `protobuf:"varint,3,opt,name=warehouse_code,json=warehouseCode,proto3,oneof" json:"warehouse_code,omitempty"`
+	WarehouseName *int32                 `protobuf:"varint,4,opt,name=warehouse_name,json=warehouseName,proto3,oneof" json:"warehouse_name,omitempty"`
+	SearchTerm    *string                `protobuf:"bytes,5,opt,name=search_term,json=searchTerm,proto3,oneof" json:"search_term,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2699,10 +2894,33 @@ func (x *ListWarehousesRequest) GetIsActive() bool {
 	return false
 }
 
+func (x *ListWarehousesRequest) GetWarehouseCode() int32 {
+	if x != nil && x.WarehouseCode != nil {
+		return *x.WarehouseCode
+	}
+	return 0
+}
+
+func (x *ListWarehousesRequest) GetWarehouseName() int32 {
+	if x != nil && x.WarehouseName != nil {
+		return *x.WarehouseName
+	}
+	return 0
+}
+
+func (x *ListWarehousesRequest) GetSearchTerm() string {
+	if x != nil && x.SearchTerm != nil {
+		return *x.SearchTerm
+	}
+	return ""
+}
+
 type ListWarehousesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Warehouses    []*Warehouse           `protobuf:"bytes,1,rep,name=warehouses,proto3" json:"warehouses,omitempty"`
 	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,3,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,4,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2749,6 +2967,20 @@ func (x *ListWarehousesResponse) GetPagination() *PaginationResponse {
 		return x.Pagination
 	}
 	return nil
+}
+
+func (x *ListWarehousesResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListWarehousesResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 // Supplier Operations
@@ -2839,6 +3071,8 @@ func (x *CreateSupplierRequest) GetAddress() string {
 type CreateSupplierResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Supplier      *Supplier              `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2878,6 +3112,20 @@ func (x *CreateSupplierResponse) GetSupplier() *Supplier {
 		return x.Supplier
 	}
 	return nil
+}
+
+func (x *CreateSupplierResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateSupplierResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 type GetSupplierRequest struct {
@@ -2927,6 +3175,8 @@ func (x *GetSupplierRequest) GetId() int32 {
 type GetSupplierResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Supplier      *Supplier              `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2968,10 +3218,27 @@ func (x *GetSupplierResponse) GetSupplier() *Supplier {
 	return nil
 }
 
+func (x *GetSupplierResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetSupplierResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
+}
+
 type ListSuppliersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Pagination    *PaginationRequest     `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	IsActive      *bool                  `protobuf:"varint,2,opt,name=is_active,json=isActive,proto3,oneof" json:"is_active,omitempty"`
+	SupplierCode  *int32                 `protobuf:"varint,3,opt,name=supplier_code,json=supplierCode,proto3,oneof" json:"supplier_code,omitempty"`
+	SupplierName  *int32                 `protobuf:"varint,4,opt,name=supplier_name,json=supplierName,proto3,oneof" json:"supplier_name,omitempty"`
+	SearchTerm    *string                `protobuf:"bytes,5,opt,name=search_term,json=searchTerm,proto3,oneof" json:"search_term,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3020,10 +3287,33 @@ func (x *ListSuppliersRequest) GetIsActive() bool {
 	return false
 }
 
+func (x *ListSuppliersRequest) GetSupplierCode() int32 {
+	if x != nil && x.SupplierCode != nil {
+		return *x.SupplierCode
+	}
+	return 0
+}
+
+func (x *ListSuppliersRequest) GetSupplierName() int32 {
+	if x != nil && x.SupplierName != nil {
+		return *x.SupplierName
+	}
+	return 0
+}
+
+func (x *ListSuppliersRequest) GetSearchTerm() string {
+	if x != nil && x.SearchTerm != nil {
+		return *x.SearchTerm
+	}
+	return ""
+}
+
 type ListSuppliersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Suppliers     []*Supplier            `protobuf:"bytes,1,rep,name=suppliers,proto3" json:"suppliers,omitempty"`
 	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,3,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,4,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3070,6 +3360,20 @@ func (x *ListSuppliersResponse) GetPagination() *PaginationResponse {
 		return x.Pagination
 	}
 	return nil
+}
+
+func (x *ListSuppliersResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListSuppliersResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 // Product Type Operations
@@ -3128,6 +3432,8 @@ func (x *CreateProductTypeRequest) GetDescription() string {
 type CreateProductTypeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ProductType   *ProductType           `protobuf:"bytes,1,opt,name=product_type,json=productType,proto3" json:"product_type,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3169,9 +3475,24 @@ func (x *CreateProductTypeResponse) GetProductType() *ProductType {
 	return nil
 }
 
+func (x *CreateProductTypeResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateProductTypeResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
+}
+
 type ListProductTypesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Pagination    *PaginationRequest     `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	SearchTerm    *string                `protobuf:"bytes,2,opt,name=search_term,json=searchTerm,proto3,oneof" json:"search_term,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3213,10 +3534,19 @@ func (x *ListProductTypesRequest) GetPagination() *PaginationRequest {
 	return nil
 }
 
+func (x *ListProductTypesRequest) GetSearchTerm() string {
+	if x != nil && x.SearchTerm != nil {
+		return *x.SearchTerm
+	}
+	return ""
+}
+
 type ListProductTypesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ProductTypes  []*ProductType         `protobuf:"bytes,1,rep,name=product_types,json=productTypes,proto3" json:"product_types,omitempty"`
 	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,3,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,4,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3263,6 +3593,20 @@ func (x *ListProductTypesResponse) GetPagination() *PaginationResponse {
 		return x.Pagination
 	}
 	return nil
+}
+
+func (x *ListProductTypesResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListProductTypesResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 // Stock Transfer Operations
@@ -3355,6 +3699,8 @@ type TransferStockResponse struct {
 	StockMovements   []*StockMovement       `protobuf:"bytes,1,rep,name=stock_movements,json=stockMovements,proto3" json:"stock_movements,omitempty"`
 	SourceStock      *Stock                 `protobuf:"bytes,2,opt,name=source_stock,json=sourceStock,proto3" json:"source_stock,omitempty"`
 	DestinationStock *Stock                 `protobuf:"bytes,3,opt,name=destination_stock,json=destinationStock,proto3" json:"destination_stock,omitempty"`
+	Success          bool                   `protobuf:"varint,4,opt,name=success,proto3" json:"success,omitempty"`
+	Message          *string                `protobuf:"bytes,5,opt,name=message,proto3,oneof" json:"message,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -3408,6 +3754,20 @@ func (x *TransferStockResponse) GetDestinationStock() *Stock {
 		return x.DestinationStock
 	}
 	return nil
+}
+
+func (x *TransferStockResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *TransferStockResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 var File_inventory_inventory_service_proto protoreflect.FileDescriptor
@@ -3536,11 +3896,15 @@ const file_inventory_inventory_service_proto_rawDesc = "" +
 	"product_id\x18\x01 \x01(\x05R\tproductId\x12&\n" +
 	"\fwarehouse_id\x18\x02 \x01(\x05H\x00R\vwarehouseId\x88\x01\x01\x12+\n" +
 	"\x11required_quantity\x18\x03 \x01(\x05R\x10requiredQuantityB\x0f\n" +
-	"\r_warehouse_id\"\xa8\x01\n" +
+	"\r_warehouse_id\"\xed\x01\n" +
 	"\x12CheckStockResponse\x12!\n" +
 	"\fis_available\x18\x01 \x01(\bR\visAvailable\x128\n" +
 	"\x18total_available_quantity\x18\x02 \x01(\x05R\x16totalAvailableQuantity\x125\n" +
-	"\rstock_details\x18\x03 \x03(\v2\x10.inventory.StockR\fstockDetails\"\xb7\x01\n" +
+	"\rstock_details\x18\x03 \x03(\v2\x10.inventory.StockR\fstockDetails\x12\x18\n" +
+	"\asuccess\x18\x04 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x05 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\xb7\x01\n" +
 	"\x13ReserveStockRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x05R\tproductId\x12!\n" +
@@ -3584,29 +3948,41 @@ const file_inventory_inventory_service_proto_rawDesc = "" +
 	"\n" +
 	"_unit_costB\x0f\n" +
 	"\r_reference_idB\b\n" +
-	"\x06_notes\"\x8d\x01\n" +
+	"\x06_notes\"\xd2\x01\n" +
 	"\x13UpdateStockResponse\x12?\n" +
 	"\x0estock_movement\x18\x01 \x01(\v2\x18.inventory.StockMovementR\rstockMovement\x125\n" +
-	"\rupdated_stock\x18\x02 \x01(\v2\x10.inventory.StockR\fupdatedStock\"i\n" +
+	"\rupdated_stock\x18\x02 \x01(\v2\x10.inventory.StockR\fupdatedStock\x12\x18\n" +
+	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x04 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"i\n" +
 	"\x0fGetStockRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x05R\tproductId\x12&\n" +
 	"\fwarehouse_id\x18\x02 \x01(\x05H\x00R\vwarehouseId\x88\x01\x01B\x0f\n" +
-	"\r_warehouse_id\"<\n" +
+	"\r_warehouse_id\"\x81\x01\n" +
 	"\x10GetStockResponse\x12(\n" +
-	"\x06stocks\x18\x01 \x03(\v2\x10.inventory.StockR\x06stocks\"\x8c\x01\n" +
+	"\x06stocks\x18\x01 \x03(\v2\x10.inventory.StockR\x06stocks\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\x8c\x01\n" +
 	"\x13ListLowStockRequest\x12&\n" +
 	"\fwarehouse_id\x18\x01 \x01(\x05H\x00R\vwarehouseId\x88\x01\x01\x12<\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x1c.inventory.PaginationRequestR\n" +
 	"paginationB\x0f\n" +
-	"\r_warehouse_id\"\x86\x01\n" +
+	"\r_warehouse_id\"\xcb\x01\n" +
 	"\x14ListLowStockResponse\x12/\n" +
 	"\n" +
 	"low_stocks\x18\x01 \x03(\v2\x10.inventory.StockR\tlowStocks\x12=\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x1d.inventory.PaginationResponseR\n" +
-	"pagination\"\xe3\x02\n" +
+	"pagination\x12\x18\n" +
+	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x04 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\xe3\x02\n" +
 	"\x19ListStockMovementsRequest\x12<\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x1c.inventory.PaginationRequestR\n" +
@@ -3620,12 +3996,16 @@ const file_inventory_inventory_service_proto_rawDesc = "" +
 	"\v_product_idB\x0f\n" +
 	"\r_warehouse_idB\x10\n" +
 	"\x0e_movement_typeB\r\n" +
-	"\v_date_range\"\x9e\x01\n" +
+	"\v_date_range\"\xe3\x01\n" +
 	"\x1aListStockMovementsResponse\x12A\n" +
 	"\x0fstock_movements\x18\x01 \x03(\v2\x18.inventory.StockMovementR\x0estockMovements\x12=\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x1d.inventory.PaginationResponseR\n" +
-	"pagination\"\xe3\x02\n" +
+	"pagination\x12\x18\n" +
+	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x04 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\xe3\x02\n" +
 	"\x14CreateProductRequest\x12!\n" +
 	"\fproduct_code\x18\x01 \x01(\tR\vproductCode\x12!\n" +
 	"\fproduct_name\x18\x02 \x01(\tR\vproductName\x12&\n" +
@@ -3637,9 +4017,13 @@ const file_inventory_inventory_service_proto_rawDesc = "" +
 	"\x0fmax_stock_level\x18\a \x01(\x05H\x02R\rmaxStockLevel\x88\x01\x01B\x12\n" +
 	"\x10_unit_of_measureB\x10\n" +
 	"\x0e_reorder_levelB\x12\n" +
-	"\x10_max_stock_level\"N\n" +
+	"\x10_max_stock_level\"\x93\x01\n" +
 	"\x15CreateProductResponse\x125\n" +
-	"\aproduct\x18\x01 \x01(\v2\x1b.inventory.InventoryProductR\aproduct\"\xc4\x03\n" +
+	"\aproduct\x18\x01 \x01(\v2\x1b.inventory.InventoryProductR\aproduct\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\xc4\x03\n" +
 	"\x14UpdateProductRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12&\n" +
 	"\fproduct_name\x18\x02 \x01(\tH\x00R\vproductName\x88\x01\x01\x12+\n" +
@@ -3657,17 +4041,29 @@ const file_inventory_inventory_service_proto_rawDesc = "" +
 	"\x0e_reorder_levelB\x12\n" +
 	"\x10_max_stock_levelB\f\n" +
 	"\n" +
-	"_is_active\"N\n" +
+	"_is_active\"\x93\x01\n" +
 	"\x15UpdateProductResponse\x125\n" +
-	"\aproduct\x18\x01 \x01(\v2\x1b.inventory.InventoryProductR\aproduct\"#\n" +
+	"\aproduct\x18\x01 \x01(\v2\x1b.inventory.InventoryProductR\aproduct\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"#\n" +
 	"\x11GetProductRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\"K\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"\x90\x01\n" +
 	"\x12GetProductResponse\x125\n" +
-	"\aproduct\x18\x01 \x01(\v2\x1b.inventory.InventoryProductR\aproduct\"<\n" +
+	"\aproduct\x18\x01 \x01(\v2\x1b.inventory.InventoryProductR\aproduct\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"<\n" +
 	"\x17GetProductByCodeRequest\x12!\n" +
-	"\fproduct_code\x18\x01 \x01(\tR\vproductCode\"Q\n" +
+	"\fproduct_code\x18\x01 \x01(\tR\vproductCode\"\x96\x01\n" +
 	"\x18GetProductByCodeResponse\x125\n" +
-	"\aproduct\x18\x01 \x01(\v2\x1b.inventory.InventoryProductR\aproduct\"\xb0\x02\n" +
+	"\aproduct\x18\x01 \x01(\v2\x1b.inventory.InventoryProductR\aproduct\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\xb0\x02\n" +
 	"\x13ListProductsRequest\x12<\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x1c.inventory.PaginationRequestR\n" +
@@ -3682,12 +4078,16 @@ const file_inventory_inventory_service_proto_rawDesc = "" +
 	"_is_activeB\x12\n" +
 	"\x10_product_type_idB\x0e\n" +
 	"\f_supplier_idB\x0e\n" +
-	"\f_search_term\"\x8e\x01\n" +
+	"\f_search_term\"\xd3\x01\n" +
 	"\x14ListProductsResponse\x127\n" +
 	"\bproducts\x18\x01 \x03(\v2\x1b.inventory.InventoryProductR\bproducts\x12=\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x1d.inventory.PaginationResponseR\n" +
-	"pagination\"\xc7\x01\n" +
+	"pagination\x12\x18\n" +
+	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x04 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\xc7\x01\n" +
 	"\x16CreateWarehouseRequest\x12%\n" +
 	"\x0ewarehouse_code\x18\x01 \x01(\tR\rwarehouseCode\x12%\n" +
 	"\x0ewarehouse_name\x18\x02 \x01(\tR\rwarehouseName\x12\x1f\n" +
@@ -3695,27 +4095,46 @@ const file_inventory_inventory_service_proto_rawDesc = "" +
 	"\n" +
 	"manager_id\x18\x04 \x01(\x03H\x01R\tmanagerId\x88\x01\x01B\v\n" +
 	"\t_locationB\r\n" +
-	"\v_manager_id\"M\n" +
+	"\v_manager_id\"\x92\x01\n" +
 	"\x17CreateWarehouseResponse\x122\n" +
-	"\twarehouse\x18\x01 \x01(\v2\x14.inventory.WarehouseR\twarehouse\"%\n" +
-	"\x13GetWarehouseRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\"J\n" +
+	"\twarehouse\x18\x01 \x01(\v2\x14.inventory.WarehouseR\twarehouse\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"<\n" +
+	"\x13GetWarehouseRequest\x12%\n" +
+	"\x0ewarehouse_code\x18\x01 \x01(\tR\rwarehouseCode\"\x8f\x01\n" +
 	"\x14GetWarehouseResponse\x122\n" +
-	"\twarehouse\x18\x01 \x01(\v2\x14.inventory.WarehouseR\twarehouse\"\x85\x01\n" +
+	"\twarehouse\x18\x01 \x01(\v2\x14.inventory.WarehouseR\twarehouse\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\xb9\x02\n" +
 	"\x15ListWarehousesRequest\x12<\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x1c.inventory.PaginationRequestR\n" +
 	"pagination\x12 \n" +
-	"\tis_active\x18\x02 \x01(\bH\x00R\bisActive\x88\x01\x01B\f\n" +
+	"\tis_active\x18\x02 \x01(\bH\x00R\bisActive\x88\x01\x01\x12*\n" +
+	"\x0ewarehouse_code\x18\x03 \x01(\x05H\x01R\rwarehouseCode\x88\x01\x01\x12*\n" +
+	"\x0ewarehouse_name\x18\x04 \x01(\x05H\x02R\rwarehouseName\x88\x01\x01\x12$\n" +
+	"\vsearch_term\x18\x05 \x01(\tH\x03R\n" +
+	"searchTerm\x88\x01\x01B\f\n" +
 	"\n" +
-	"_is_active\"\x8d\x01\n" +
+	"_is_activeB\x11\n" +
+	"\x0f_warehouse_codeB\x11\n" +
+	"\x0f_warehouse_nameB\x0e\n" +
+	"\f_search_term\"\xd2\x01\n" +
 	"\x16ListWarehousesResponse\x124\n" +
 	"\n" +
 	"warehouses\x18\x01 \x03(\v2\x14.inventory.WarehouseR\n" +
 	"warehouses\x12=\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x1d.inventory.PaginationResponseR\n" +
-	"pagination\"\x95\x02\n" +
+	"pagination\x12\x18\n" +
+	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x04 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\x95\x02\n" +
 	"\x15CreateSupplierRequest\x12#\n" +
 	"\rsupplier_code\x18\x01 \x01(\tR\fsupplierCode\x12#\n" +
 	"\rsupplier_name\x18\x02 \x01(\tR\fsupplierName\x12*\n" +
@@ -3727,40 +4146,70 @@ const file_inventory_inventory_service_proto_rawDesc = "" +
 	"\x06_phoneB\b\n" +
 	"\x06_emailB\n" +
 	"\n" +
-	"\b_address\"I\n" +
+	"\b_address\"\x8e\x01\n" +
 	"\x16CreateSupplierResponse\x12/\n" +
-	"\bsupplier\x18\x01 \x01(\v2\x13.inventory.SupplierR\bsupplier\"$\n" +
+	"\bsupplier\x18\x01 \x01(\v2\x13.inventory.SupplierR\bsupplier\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"$\n" +
 	"\x12GetSupplierRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\"F\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"\x8b\x01\n" +
 	"\x13GetSupplierResponse\x12/\n" +
-	"\bsupplier\x18\x01 \x01(\v2\x13.inventory.SupplierR\bsupplier\"\x84\x01\n" +
+	"\bsupplier\x18\x01 \x01(\v2\x13.inventory.SupplierR\bsupplier\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\xb2\x02\n" +
 	"\x14ListSuppliersRequest\x12<\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x1c.inventory.PaginationRequestR\n" +
 	"pagination\x12 \n" +
-	"\tis_active\x18\x02 \x01(\bH\x00R\bisActive\x88\x01\x01B\f\n" +
+	"\tis_active\x18\x02 \x01(\bH\x00R\bisActive\x88\x01\x01\x12(\n" +
+	"\rsupplier_code\x18\x03 \x01(\x05H\x01R\fsupplierCode\x88\x01\x01\x12(\n" +
+	"\rsupplier_name\x18\x04 \x01(\x05H\x02R\fsupplierName\x88\x01\x01\x12$\n" +
+	"\vsearch_term\x18\x05 \x01(\tH\x03R\n" +
+	"searchTerm\x88\x01\x01B\f\n" +
 	"\n" +
-	"_is_active\"\x89\x01\n" +
+	"_is_activeB\x10\n" +
+	"\x0e_supplier_codeB\x10\n" +
+	"\x0e_supplier_nameB\x0e\n" +
+	"\f_search_term\"\xce\x01\n" +
 	"\x15ListSuppliersResponse\x121\n" +
 	"\tsuppliers\x18\x01 \x03(\v2\x13.inventory.SupplierR\tsuppliers\x12=\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x1d.inventory.PaginationResponseR\n" +
-	"pagination\"}\n" +
+	"pagination\x12\x18\n" +
+	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x04 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"}\n" +
 	"\x18CreateProductTypeRequest\x12*\n" +
 	"\x11product_type_name\x18\x01 \x01(\tR\x0fproductTypeName\x12%\n" +
 	"\vdescription\x18\x02 \x01(\tH\x00R\vdescription\x88\x01\x01B\x0e\n" +
-	"\f_description\"V\n" +
+	"\f_description\"\x9b\x01\n" +
 	"\x19CreateProductTypeResponse\x129\n" +
-	"\fproduct_type\x18\x01 \x01(\v2\x16.inventory.ProductTypeR\vproductType\"W\n" +
+	"\fproduct_type\x18\x01 \x01(\v2\x16.inventory.ProductTypeR\vproductType\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\x8d\x01\n" +
 	"\x17ListProductTypesRequest\x12<\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x1c.inventory.PaginationRequestR\n" +
-	"pagination\"\x96\x01\n" +
+	"pagination\x12$\n" +
+	"\vsearch_term\x18\x02 \x01(\tH\x00R\n" +
+	"searchTerm\x88\x01\x01B\x0e\n" +
+	"\f_search_term\"\xdb\x01\n" +
 	"\x18ListProductTypesResponse\x12;\n" +
 	"\rproduct_types\x18\x01 \x03(\v2\x16.inventory.ProductTypeR\fproductTypes\x12=\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x1d.inventory.PaginationResponseR\n" +
-	"pagination\"\xf1\x01\n" +
+	"pagination\x12\x18\n" +
+	"\asuccess\x18\x03 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x04 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message\"\xf1\x01\n" +
 	"\x14TransferStockRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x05R\tproductId\x12*\n" +
@@ -3769,11 +4218,15 @@ const file_inventory_inventory_service_proto_rawDesc = "" +
 	"\bquantity\x18\x04 \x01(\x05R\bquantity\x12\x19\n" +
 	"\x05notes\x18\x05 \x01(\tH\x00R\x05notes\x88\x01\x01\x12%\n" +
 	"\x0etransferred_by\x18\x06 \x01(\x03R\rtransferredByB\b\n" +
-	"\x06_notes\"\xce\x01\n" +
+	"\x06_notes\"\x93\x02\n" +
 	"\x15TransferStockResponse\x12A\n" +
 	"\x0fstock_movements\x18\x01 \x03(\v2\x18.inventory.StockMovementR\x0estockMovements\x123\n" +
 	"\fsource_stock\x18\x02 \x01(\v2\x10.inventory.StockR\vsourceStock\x12=\n" +
-	"\x11destination_stock\x18\x03 \x01(\v2\x10.inventory.StockR\x10destinationStock*\x94\x01\n" +
+	"\x11destination_stock\x18\x03 \x01(\v2\x10.inventory.StockR\x10destinationStock\x12\x18\n" +
+	"\asuccess\x18\x04 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x05 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\n" +
+	"\b_message*\x94\x01\n" +
 	"\fMovementType\x12\x1d\n" +
 	"\x19MOVEMENT_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MOVEMENT_TYPE_IN\x10\x01\x12\x15\n" +
@@ -4002,21 +4455,41 @@ func file_inventory_inventory_service_proto_init() {
 	file_inventory_inventory_service_proto_msgTypes[7].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[8].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[9].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[10].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[12].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[14].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[15].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[16].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[17].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[18].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[19].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[20].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[21].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[22].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[23].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[24].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[25].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[26].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[28].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[30].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[31].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[32].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[33].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[34].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[36].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[37].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[38].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[39].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[40].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[42].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[43].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[44].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[45].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[46].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[47].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[48].OneofWrappers = []any{}
 	file_inventory_inventory_service_proto_msgTypes[49].OneofWrappers = []any{}
+	file_inventory_inventory_service_proto_msgTypes[50].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

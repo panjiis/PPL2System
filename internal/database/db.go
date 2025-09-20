@@ -69,3 +69,13 @@ func MigrateUserDB(db *gorm.DB) error {
 	db.AutoMigrate(&models.CommissionTier{})
 	return nil
 }
+
+func MigrateInventoryDB(db *gorm.DB) error {
+	db.AutoMigrate(&models.InventoryProduct{})
+	db.AutoMigrate(&models.ProductType{})
+	db.AutoMigrate(&models.Stock{})
+	db.AutoMigrate(&models.StockMovement{})
+	db.AutoMigrate(&models.Warehouse{})
+	db.AutoMigrate(&models.Supplier{})
+	return nil
+}

@@ -1,7 +1,5 @@
 syntax = "proto3";
-
 package inventory;
-
 option go_package = "syntra-system/proto/protogen;protogen";
 import "google/protobuf/timestamp.proto";
 
@@ -127,6 +125,8 @@ message CheckStockResponse {
   bool is_available = 1;
   int32 total_available_quantity = 2;
   repeated Stock stock_details = 3;
+  bool success = 4;
+  optional string message = 5;
 }
 
 message ReserveStockRequest {
@@ -172,6 +172,8 @@ message UpdateStockRequest {
 message UpdateStockResponse {
   StockMovement stock_movement = 1;
   Stock updated_stock = 2;
+  bool success = 3;
+  optional string message = 4;
 }
 
 message GetStockRequest {
@@ -181,6 +183,8 @@ message GetStockRequest {
 
 message GetStockResponse {
   repeated Stock stocks = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message ListLowStockRequest {
@@ -191,6 +195,8 @@ message ListLowStockRequest {
 message ListLowStockResponse {
   repeated Stock low_stocks = 1;
   PaginationResponse pagination = 2;
+  bool success = 3;
+  optional string message = 4;
 }
 
 // Stock Movement Operations
@@ -205,6 +211,8 @@ message ListStockMovementsRequest {
 message ListStockMovementsResponse {
   repeated StockMovement stock_movements = 1;
   PaginationResponse pagination = 2;
+  bool success = 3;
+  optional string message = 4;
 }
 
 // Product Operations
@@ -220,6 +228,8 @@ message CreateProductRequest {
 
 message CreateProductResponse {
   InventoryProduct product = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message UpdateProductRequest {
@@ -235,6 +245,8 @@ message UpdateProductRequest {
 
 message UpdateProductResponse {
   InventoryProduct product = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message GetProductRequest {
@@ -243,6 +255,8 @@ message GetProductRequest {
 
 message GetProductResponse {
   InventoryProduct product = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message GetProductByCodeRequest {
@@ -251,6 +265,8 @@ message GetProductByCodeRequest {
 
 message GetProductByCodeResponse {
   InventoryProduct product = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message ListProductsRequest {
@@ -264,6 +280,8 @@ message ListProductsRequest {
 message ListProductsResponse {
   repeated InventoryProduct products = 1;
   PaginationResponse pagination = 2;
+  bool success = 3;
+  optional string message = 4;
 }
 
 // Warehouse Operations
@@ -276,24 +294,33 @@ message CreateWarehouseRequest {
 
 message CreateWarehouseResponse {
   Warehouse warehouse = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message GetWarehouseRequest {
-  int32 id = 1;
+  string warehouse_code = 1;
 }
 
 message GetWarehouseResponse {
   Warehouse warehouse = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message ListWarehousesRequest {
   PaginationRequest pagination = 1;
   optional bool is_active = 2;
+  optional int32 warehouse_code = 3;
+  optional int32 warehouse_name = 4;
+  optional string search_term = 5;
 }
 
 message ListWarehousesResponse {
   repeated Warehouse warehouses = 1;
   PaginationResponse pagination = 2;
+  bool success = 3;
+  optional string message = 4;
 }
 
 // Supplier Operations
@@ -308,6 +335,8 @@ message CreateSupplierRequest {
 
 message CreateSupplierResponse {
   Supplier supplier = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message GetSupplierRequest {
@@ -316,16 +345,23 @@ message GetSupplierRequest {
 
 message GetSupplierResponse {
   Supplier supplier = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message ListSuppliersRequest {
   PaginationRequest pagination = 1;
   optional bool is_active = 2;
+  optional int32 supplier_code = 3;
+  optional int32 supplier_name = 4;
+  optional string search_term = 5;
 }
 
 message ListSuppliersResponse {
   repeated Supplier suppliers = 1;
   PaginationResponse pagination = 2;
+  bool success = 3;
+  optional string message = 4;
 }
 
 // Product Type Operations
@@ -336,15 +372,20 @@ message CreateProductTypeRequest {
 
 message CreateProductTypeResponse {
   ProductType product_type = 1;
+  bool success = 2;
+  optional string message = 3;
 }
 
 message ListProductTypesRequest {
   PaginationRequest pagination = 1;
+  optional string search_term = 2;
 }
 
 message ListProductTypesResponse {
   repeated ProductType product_types = 1;
   PaginationResponse pagination = 2;
+  bool success = 3;
+  optional string message = 4;
 }
 
 // Stock Transfer Operations
@@ -361,6 +402,8 @@ message TransferStockResponse {
   repeated StockMovement stock_movements = 1; 
   Stock source_stock = 2;
   Stock destination_stock = 3;
+  bool success = 4;
+  optional string message = 5;
 }
 
 service InventoryService {
