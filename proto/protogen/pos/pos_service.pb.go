@@ -77,28 +77,22 @@ func (DocumentType) EnumDescriptor() ([]byte, []int) {
 type PaidStatus int32
 
 const (
-	PaidStatus_PAID_STATUS_UNSPECIFIED PaidStatus = 0
-	PaidStatus_PAID_STATUS_PENDING     PaidStatus = 1
-	PaidStatus_PAID_STATUS_PAID        PaidStatus = 2
-	PaidStatus_PAID_STATUS_PARTIAL     PaidStatus = 3
-	PaidStatus_PAID_STATUS_REFUNDED    PaidStatus = 4
+	PaidStatus_PAID_STATUS_PENDING  PaidStatus = 0
+	PaidStatus_PAID_STATUS_PAID     PaidStatus = 1
+	PaidStatus_PAID_STATUS_REFUNDED PaidStatus = 2
 )
 
 // Enum value maps for PaidStatus.
 var (
 	PaidStatus_name = map[int32]string{
-		0: "PAID_STATUS_UNSPECIFIED",
-		1: "PAID_STATUS_PENDING",
-		2: "PAID_STATUS_PAID",
-		3: "PAID_STATUS_PARTIAL",
-		4: "PAID_STATUS_REFUNDED",
+		0: "PAID_STATUS_PENDING",
+		1: "PAID_STATUS_PAID",
+		2: "PAID_STATUS_REFUNDED",
 	}
 	PaidStatus_value = map[string]int32{
-		"PAID_STATUS_UNSPECIFIED": 0,
-		"PAID_STATUS_PENDING":     1,
-		"PAID_STATUS_PAID":        2,
-		"PAID_STATUS_PARTIAL":     3,
-		"PAID_STATUS_REFUNDED":    4,
+		"PAID_STATUS_PENDING":  0,
+		"PAID_STATUS_PAID":     1,
+		"PAID_STATUS_REFUNDED": 2,
 	}
 )
 
@@ -480,7 +474,7 @@ func (x *OrderDocument) GetPaidStatus() PaidStatus {
 	if x != nil {
 		return x.PaidStatus
 	}
-	return PaidStatus_PAID_STATUS_UNSPECIFIED
+	return PaidStatus_PAID_STATUS_PENDING
 }
 
 func (x *OrderDocument) GetAdditionalInfo() string {
@@ -1449,7 +1443,9 @@ func (x *CreateCartRequest) GetCashierId() int64 {
 
 type CreateCartResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cart          *Cart                  `protobuf:"bytes,1,opt,name=cart,proto3" json:"cart,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Cart          *Cart                  `protobuf:"bytes,3,opt,name=cart,proto3" json:"cart,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1482,6 +1478,20 @@ func (x *CreateCartResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateCartResponse.ProtoReflect.Descriptor instead.
 func (*CreateCartResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *CreateCartResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateCartResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *CreateCartResponse) GetCart() *Cart {
@@ -1561,7 +1571,9 @@ func (x *AddItemToCartRequest) GetServingEmployeeId() int64 {
 
 type AddItemToCartResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cart          *Cart                  `protobuf:"bytes,1,opt,name=cart,proto3" json:"cart,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Cart          *Cart                  `protobuf:"bytes,3,opt,name=cart,proto3" json:"cart,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1594,6 +1606,20 @@ func (x *AddItemToCartResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use AddItemToCartResponse.ProtoReflect.Descriptor instead.
 func (*AddItemToCartResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *AddItemToCartResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *AddItemToCartResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *AddItemToCartResponse) GetCart() *Cart {
@@ -1657,7 +1683,9 @@ func (x *RemoveItemFromCartRequest) GetItemId() string {
 
 type RemoveItemFromCartResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cart          *Cart                  `protobuf:"bytes,1,opt,name=cart,proto3" json:"cart,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Cart          *Cart                  `protobuf:"bytes,3,opt,name=cart,proto3" json:"cart,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1690,6 +1718,20 @@ func (x *RemoveItemFromCartResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RemoveItemFromCartResponse.ProtoReflect.Descriptor instead.
 func (*RemoveItemFromCartResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *RemoveItemFromCartResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *RemoveItemFromCartResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *RemoveItemFromCartResponse) GetCart() *Cart {
@@ -1761,7 +1803,9 @@ func (x *ApplyDiscountRequest) GetItemIds() []string {
 
 type ApplyDiscountResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cart          *Cart                  `protobuf:"bytes,1,opt,name=cart,proto3" json:"cart,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Cart          *Cart                  `protobuf:"bytes,3,opt,name=cart,proto3" json:"cart,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1794,6 +1838,20 @@ func (x *ApplyDiscountResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ApplyDiscountResponse.ProtoReflect.Descriptor instead.
 func (*ApplyDiscountResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ApplyDiscountResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ApplyDiscountResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ApplyDiscountResponse) GetCart() *Cart {
@@ -1849,7 +1907,9 @@ func (x *GetCartRequest) GetCartId() string {
 
 type GetCartResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cart          *Cart                  `protobuf:"bytes,1,opt,name=cart,proto3" json:"cart,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Cart          *Cart                  `protobuf:"bytes,3,opt,name=cart,proto3" json:"cart,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1882,6 +1942,20 @@ func (x *GetCartResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetCartResponse.ProtoReflect.Descriptor instead.
 func (*GetCartResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetCartResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetCartResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetCartResponse) GetCart() *Cart {
@@ -1962,7 +2036,9 @@ func (x *CreateOrderFromCartRequest) GetNotes() string {
 
 type CreateOrderFromCartResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderDocument *OrderDocument         `protobuf:"bytes,1,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	OrderDocument *OrderDocument         `protobuf:"bytes,3,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1995,6 +2071,20 @@ func (x *CreateOrderFromCartResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateOrderFromCartResponse.ProtoReflect.Descriptor instead.
 func (*CreateOrderFromCartResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *CreateOrderFromCartResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateOrderFromCartResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *CreateOrderFromCartResponse) GetOrderDocument() *OrderDocument {
@@ -2158,7 +2248,9 @@ func (x *CreateOrderItemRequest) GetDiscountId() int32 {
 
 type CreateOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderDocument *OrderDocument         `protobuf:"bytes,1,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	OrderDocument *OrderDocument         `protobuf:"bytes,3,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2191,6 +2283,20 @@ func (x *CreateOrderResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CreateOrderResponse.ProtoReflect.Descriptor instead.
 func (*CreateOrderResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *CreateOrderResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CreateOrderResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *CreateOrderResponse) GetOrderDocument() *OrderDocument {
@@ -2246,7 +2352,9 @@ func (x *GetOrderRequest) GetId() int64 {
 
 type GetOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderDocument *OrderDocument         `protobuf:"bytes,1,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	OrderDocument *OrderDocument         `protobuf:"bytes,3,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2279,6 +2387,20 @@ func (x *GetOrderResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetOrderResponse.ProtoReflect.Descriptor instead.
 func (*GetOrderResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *GetOrderResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetOrderResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetOrderResponse) GetOrderDocument() *OrderDocument {
@@ -2354,7 +2476,7 @@ func (x *ListOrdersRequest) GetPaidStatus() PaidStatus {
 	if x != nil && x.PaidStatus != nil {
 		return *x.PaidStatus
 	}
-	return PaidStatus_PAID_STATUS_UNSPECIFIED
+	return PaidStatus_PAID_STATUS_PENDING
 }
 
 func (x *ListOrdersRequest) GetDateRange() *DateRange {
@@ -2366,8 +2488,10 @@ func (x *ListOrdersRequest) GetDateRange() *DateRange {
 
 type ListOrdersResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	OrderDocuments []*OrderDocument       `protobuf:"bytes,1,rep,name=order_documents,json=orderDocuments,proto3" json:"order_documents,omitempty"`
-	Pagination     *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success        bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message        *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	OrderDocuments []*OrderDocument       `protobuf:"bytes,3,rep,name=order_documents,json=orderDocuments,proto3" json:"order_documents,omitempty"`
+	Pagination     *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -2400,6 +2524,20 @@ func (x *ListOrdersResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListOrdersResponse.ProtoReflect.Descriptor instead.
 func (*ListOrdersResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ListOrdersResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListOrdersResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ListOrdersResponse) GetOrderDocuments() []*OrderDocument {
@@ -2487,8 +2625,10 @@ func (x *ProcessPaymentRequest) GetReferenceNumber() string {
 
 type ProcessPaymentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderDocument *OrderDocument         `protobuf:"bytes,1,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
-	ChangeAmount  string                 `protobuf:"bytes,2,opt,name=change_amount,json=changeAmount,proto3" json:"change_amount,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	OrderDocument *OrderDocument         `protobuf:"bytes,3,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
+	ChangeAmount  string                 `protobuf:"bytes,4,opt,name=change_amount,json=changeAmount,proto3" json:"change_amount,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2521,6 +2661,20 @@ func (x *ProcessPaymentResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ProcessPaymentResponse.ProtoReflect.Descriptor instead.
 func (*ProcessPaymentResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *ProcessPaymentResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ProcessPaymentResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ProcessPaymentResponse) GetOrderDocument() *OrderDocument {
@@ -2600,7 +2754,9 @@ func (x *VoidOrderRequest) GetReason() string {
 
 type VoidOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderDocument *OrderDocument         `protobuf:"bytes,1,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	OrderDocument *OrderDocument         `protobuf:"bytes,3,opt,name=order_document,json=orderDocument,proto3" json:"order_document,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2633,6 +2789,20 @@ func (x *VoidOrderResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use VoidOrderResponse.ProtoReflect.Descriptor instead.
 func (*VoidOrderResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *VoidOrderResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *VoidOrderResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *VoidOrderResponse) GetOrderDocument() *OrderDocument {
@@ -2712,7 +2882,9 @@ func (x *ReturnOrderRequest) GetReason() string {
 
 type ReturnOrderResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	ReturnDocument *OrderDocument         `protobuf:"bytes,1,opt,name=return_document,json=returnDocument,proto3" json:"return_document,omitempty"`
+	Success        bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message        *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	ReturnDocument *OrderDocument         `protobuf:"bytes,3,opt,name=return_document,json=returnDocument,proto3" json:"return_document,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -2745,6 +2917,20 @@ func (x *ReturnOrderResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ReturnOrderResponse.ProtoReflect.Descriptor instead.
 func (*ReturnOrderResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *ReturnOrderResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ReturnOrderResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ReturnOrderResponse) GetReturnDocument() *OrderDocument {
@@ -2801,7 +2987,9 @@ func (x *GetProductRequest) GetId() int32 {
 
 type GetProductResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Product       *Product               `protobuf:"bytes,1,opt,name=product,proto3" json:"product,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Product       *Product               `protobuf:"bytes,3,opt,name=product,proto3" json:"product,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2834,6 +3022,20 @@ func (x *GetProductResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetProductResponse.ProtoReflect.Descriptor instead.
 func (*GetProductResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *GetProductResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetProductResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetProductResponse) GetProduct() *Product {
@@ -2889,7 +3091,9 @@ func (x *GetProductByCodeRequest) GetProductCode() string {
 
 type GetProductByCodeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Product       *Product               `protobuf:"bytes,1,opt,name=product,proto3" json:"product,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Product       *Product               `protobuf:"bytes,3,opt,name=product,proto3" json:"product,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2922,6 +3126,20 @@ func (x *GetProductByCodeResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetProductByCodeResponse.ProtoReflect.Descriptor instead.
 func (*GetProductByCodeResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *GetProductByCodeResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetProductByCodeResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetProductByCodeResponse) GetProduct() *Product {
@@ -3001,8 +3219,10 @@ func (x *ListProductsRequest) GetSearchTerm() string {
 
 type ListProductsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Products      []*Product             `protobuf:"bytes,1,rep,name=products,proto3" json:"products,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Products      []*Product             `protobuf:"bytes,3,rep,name=products,proto3" json:"products,omitempty"`
+	Pagination    *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3035,6 +3255,20 @@ func (x *ListProductsResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListProductsResponse.ProtoReflect.Descriptor instead.
 func (*ListProductsResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *ListProductsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListProductsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ListProductsResponse) GetProducts() []*Product {
@@ -3114,8 +3348,10 @@ func (x *ListProductGroupsRequest) GetParentGroupId() int32 {
 
 type ListProductGroupsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ProductGroups []*ProductGroup        `protobuf:"bytes,1,rep,name=product_groups,json=productGroups,proto3" json:"product_groups,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	ProductGroups []*ProductGroup        `protobuf:"bytes,3,rep,name=product_groups,json=productGroups,proto3" json:"product_groups,omitempty"`
+	Pagination    *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3150,6 +3386,20 @@ func (*ListProductGroupsResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{43}
 }
 
+func (x *ListProductGroupsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListProductGroupsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
+}
+
 func (x *ListProductGroupsResponse) GetProductGroups() []*ProductGroup {
 	if x != nil {
 		return x.ProductGroups
@@ -3169,7 +3419,8 @@ type ListDiscountsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Pagination    *PaginationRequest     `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	IsActive      *bool                  `protobuf:"varint,2,opt,name=is_active,json=isActive,proto3,oneof" json:"is_active,omitempty"`
-	ProductId     *int32                 `protobuf:"varint,3,opt,name=product_id,json=productId,proto3,oneof" json:"product_id,omitempty"`
+	SearchTerm    *string                `protobuf:"bytes,3,opt,name=search_term,json=searchTerm,proto3,oneof" json:"search_term,omitempty"`
+	ProductId     *int32                 `protobuf:"varint,4,opt,name=product_id,json=productId,proto3,oneof" json:"product_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3218,6 +3469,13 @@ func (x *ListDiscountsRequest) GetIsActive() bool {
 	return false
 }
 
+func (x *ListDiscountsRequest) GetSearchTerm() string {
+	if x != nil && x.SearchTerm != nil {
+		return *x.SearchTerm
+	}
+	return ""
+}
+
 func (x *ListDiscountsRequest) GetProductId() int32 {
 	if x != nil && x.ProductId != nil {
 		return *x.ProductId
@@ -3227,8 +3485,10 @@ func (x *ListDiscountsRequest) GetProductId() int32 {
 
 type ListDiscountsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Discounts     []*Discount            `protobuf:"bytes,1,rep,name=discounts,proto3" json:"discounts,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Discounts     []*Discount            `protobuf:"bytes,3,rep,name=discounts,proto3" json:"discounts,omitempty"`
+	Pagination    *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3261,6 +3521,20 @@ func (x *ListDiscountsResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListDiscountsResponse.ProtoReflect.Descriptor instead.
 func (*ListDiscountsResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *ListDiscountsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListDiscountsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ListDiscountsResponse) GetDiscounts() []*Discount {
@@ -3339,9 +3613,11 @@ func (x *ValidateDiscountRequest) GetQuantity() int32 {
 
 type ValidateDiscountResponse struct {
 	state                    protoimpl.MessageState `protogen:"open.v1"`
-	IsValid                  bool                   `protobuf:"varint,1,opt,name=is_valid,json=isValid,proto3" json:"is_valid,omitempty"`
-	Reason                   *string                `protobuf:"bytes,2,opt,name=reason,proto3,oneof" json:"reason,omitempty"`
-	CalculatedDiscountAmount string                 `protobuf:"bytes,3,opt,name=calculated_discount_amount,json=calculatedDiscountAmount,proto3" json:"calculated_discount_amount,omitempty"`
+	Success                  bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message                  *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	IsValid                  bool                   `protobuf:"varint,3,opt,name=is_valid,json=isValid,proto3" json:"is_valid,omitempty"`
+	Reason                   *string                `protobuf:"bytes,4,opt,name=reason,proto3,oneof" json:"reason,omitempty"`
+	CalculatedDiscountAmount string                 `protobuf:"bytes,5,opt,name=calculated_discount_amount,json=calculatedDiscountAmount,proto3" json:"calculated_discount_amount,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -3374,6 +3650,20 @@ func (x *ValidateDiscountResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ValidateDiscountResponse.ProtoReflect.Descriptor instead.
 func (*ValidateDiscountResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *ValidateDiscountResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ValidateDiscountResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ValidateDiscountResponse) GetIsValid() bool {
@@ -3444,7 +3734,9 @@ func (x *ListPaymentTypesRequest) GetIsActive() bool {
 
 type ListPaymentTypesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PaymentTypes  []*PaymentType         `protobuf:"bytes,1,rep,name=payment_types,json=paymentTypes,proto3" json:"payment_types,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	PaymentTypes  []*PaymentType         `protobuf:"bytes,3,rep,name=payment_types,json=paymentTypes,proto3" json:"payment_types,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3477,6 +3769,20 @@ func (x *ListPaymentTypesResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListPaymentTypesResponse.ProtoReflect.Descriptor instead.
 func (*ListPaymentTypesResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *ListPaymentTypesResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListPaymentTypesResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ListPaymentTypesResponse) GetPaymentTypes() []*PaymentType {
@@ -3679,43 +3985,67 @@ const file_pos_pos_service_proto_rawDesc = "" +
 	"\t_discount\"2\n" +
 	"\x11CreateCartRequest\x12\x1d\n" +
 	"\n" +
-	"cashier_id\x18\x01 \x01(\x03R\tcashierId\"3\n" +
-	"\x12CreateCartResponse\x12\x1d\n" +
-	"\x04cart\x18\x01 \x01(\v2\t.pos.CartR\x04cart\"\xb7\x01\n" +
+	"cashier_id\x18\x01 \x01(\x03R\tcashierId\"x\n" +
+	"\x12CreateCartResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12\x1d\n" +
+	"\x04cart\x18\x03 \x01(\v2\t.pos.CartR\x04cartB\n" +
+	"\n" +
+	"\b_message\"\xb7\x01\n" +
 	"\x14AddItemToCartRequest\x12\x17\n" +
 	"\acart_id\x18\x01 \x01(\tR\x06cartId\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x02 \x01(\x05R\tproductId\x12\x1a\n" +
 	"\bquantity\x18\x03 \x01(\x05R\bquantity\x123\n" +
 	"\x13serving_employee_id\x18\x04 \x01(\x03H\x00R\x11servingEmployeeId\x88\x01\x01B\x16\n" +
-	"\x14_serving_employee_id\"6\n" +
-	"\x15AddItemToCartResponse\x12\x1d\n" +
-	"\x04cart\x18\x01 \x01(\v2\t.pos.CartR\x04cart\"M\n" +
+	"\x14_serving_employee_id\"{\n" +
+	"\x15AddItemToCartResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12\x1d\n" +
+	"\x04cart\x18\x03 \x01(\v2\t.pos.CartR\x04cartB\n" +
+	"\n" +
+	"\b_message\"M\n" +
 	"\x19RemoveItemFromCartRequest\x12\x17\n" +
 	"\acart_id\x18\x01 \x01(\tR\x06cartId\x12\x17\n" +
-	"\aitem_id\x18\x02 \x01(\tR\x06itemId\";\n" +
-	"\x1aRemoveItemFromCartResponse\x12\x1d\n" +
-	"\x04cart\x18\x01 \x01(\v2\t.pos.CartR\x04cart\"k\n" +
+	"\aitem_id\x18\x02 \x01(\tR\x06itemId\"\x80\x01\n" +
+	"\x1aRemoveItemFromCartResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12\x1d\n" +
+	"\x04cart\x18\x03 \x01(\v2\t.pos.CartR\x04cartB\n" +
+	"\n" +
+	"\b_message\"k\n" +
 	"\x14ApplyDiscountRequest\x12\x17\n" +
 	"\acart_id\x18\x01 \x01(\tR\x06cartId\x12\x1f\n" +
 	"\vdiscount_id\x18\x02 \x01(\x05R\n" +
 	"discountId\x12\x19\n" +
-	"\bitem_ids\x18\x03 \x03(\tR\aitemIds\"6\n" +
-	"\x15ApplyDiscountResponse\x12\x1d\n" +
-	"\x04cart\x18\x01 \x01(\v2\t.pos.CartR\x04cart\")\n" +
+	"\bitem_ids\x18\x03 \x03(\tR\aitemIds\"{\n" +
+	"\x15ApplyDiscountResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12\x1d\n" +
+	"\x04cart\x18\x03 \x01(\v2\t.pos.CartR\x04cartB\n" +
+	"\n" +
+	"\b_message\")\n" +
 	"\x0eGetCartRequest\x12\x17\n" +
-	"\acart_id\x18\x01 \x01(\tR\x06cartId\"0\n" +
-	"\x0fGetCartResponse\x12\x1d\n" +
-	"\x04cart\x18\x01 \x01(\v2\t.pos.CartR\x04cart\"\xc5\x01\n" +
+	"\acart_id\x18\x01 \x01(\tR\x06cartId\"u\n" +
+	"\x0fGetCartResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12\x1d\n" +
+	"\x04cart\x18\x03 \x01(\v2\t.pos.CartR\x04cartB\n" +
+	"\n" +
+	"\b_message\"\xc5\x01\n" +
 	"\x1aCreateOrderFromCartRequest\x12\x17\n" +
 	"\acart_id\x18\x01 \x01(\tR\x06cartId\x12'\n" +
 	"\x0fdocument_number\x18\x02 \x01(\tR\x0edocumentNumber\x12,\n" +
 	"\x0fadditional_info\x18\x03 \x01(\tH\x00R\x0eadditionalInfo\x88\x01\x01\x12\x19\n" +
 	"\x05notes\x18\x04 \x01(\tH\x01R\x05notes\x88\x01\x01B\x12\n" +
 	"\x10_additional_infoB\b\n" +
-	"\x06_notes\"X\n" +
-	"\x1bCreateOrderFromCartResponse\x129\n" +
-	"\x0eorder_document\x18\x01 \x01(\v2\x12.pos.OrderDocumentR\rorderDocument\"\xb9\x02\n" +
+	"\x06_notes\"\x9d\x01\n" +
+	"\x1bCreateOrderFromCartResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x129\n" +
+	"\x0eorder_document\x18\x03 \x01(\v2\x12.pos.OrderDocumentR\rorderDocumentB\n" +
+	"\n" +
+	"\b_message\"\xb9\x02\n" +
 	"\x12CreateOrderRequest\x12'\n" +
 	"\x0fdocument_number\x18\x01 \x01(\tR\x0edocumentNumber\x12\x1d\n" +
 	"\n" +
@@ -3735,13 +4065,21 @@ const file_pos_pos_service_proto_rawDesc = "" +
 	"\vdiscount_id\x18\x04 \x01(\x05H\x01R\n" +
 	"discountId\x88\x01\x01B\x16\n" +
 	"\x14_serving_employee_idB\x0e\n" +
-	"\f_discount_id\"P\n" +
-	"\x13CreateOrderResponse\x129\n" +
-	"\x0eorder_document\x18\x01 \x01(\v2\x12.pos.OrderDocumentR\rorderDocument\"!\n" +
+	"\f_discount_id\"\x95\x01\n" +
+	"\x13CreateOrderResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x129\n" +
+	"\x0eorder_document\x18\x03 \x01(\v2\x12.pos.OrderDocumentR\rorderDocumentB\n" +
+	"\n" +
+	"\b_message\"!\n" +
 	"\x0fGetOrderRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"M\n" +
-	"\x10GetOrderResponse\x129\n" +
-	"\x0eorder_document\x18\x01 \x01(\v2\x12.pos.OrderDocumentR\rorderDocument\"\xd7\x02\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\x92\x01\n" +
+	"\x10GetOrderResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x129\n" +
+	"\x0eorder_document\x18\x03 \x01(\v2\x12.pos.OrderDocumentR\rorderDocumentB\n" +
+	"\n" +
+	"\b_message\"\xd7\x02\n" +
 	"\x11ListOrdersRequest\x126\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x16.pos.PaginationRequestR\n" +
@@ -3756,44 +4094,68 @@ const file_pos_pos_service_proto_rawDesc = "" +
 	"\v_cashier_idB\x10\n" +
 	"\x0e_document_typeB\x0e\n" +
 	"\f_paid_statusB\r\n" +
-	"\v_date_range\"\x8a\x01\n" +
-	"\x12ListOrdersResponse\x12;\n" +
-	"\x0forder_documents\x18\x01 \x03(\v2\x12.pos.OrderDocumentR\x0eorderDocuments\x127\n" +
+	"\v_date_range\"\xcf\x01\n" +
+	"\x12ListOrdersResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12;\n" +
+	"\x0forder_documents\x18\x03 \x03(\v2\x12.pos.OrderDocumentR\x0eorderDocuments\x127\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x17.pos.PaginationResponseR\n" +
-	"pagination\"\xc0\x01\n" +
+	"pagination\x18\x04 \x01(\v2\x17.pos.PaginationResponseR\n" +
+	"paginationB\n" +
+	"\n" +
+	"\b_message\"\xc0\x01\n" +
 	"\x15ProcessPaymentRequest\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\x03R\aorderId\x12\x1f\n" +
 	"\vpaid_amount\x18\x02 \x01(\tR\n" +
 	"paidAmount\x12&\n" +
 	"\x0fpayment_type_id\x18\x03 \x01(\x05R\rpaymentTypeId\x12.\n" +
 	"\x10reference_number\x18\x04 \x01(\tH\x00R\x0freferenceNumber\x88\x01\x01B\x13\n" +
-	"\x11_reference_number\"x\n" +
-	"\x16ProcessPaymentResponse\x129\n" +
-	"\x0eorder_document\x18\x01 \x01(\v2\x12.pos.OrderDocumentR\rorderDocument\x12#\n" +
-	"\rchange_amount\x18\x02 \x01(\tR\fchangeAmount\"W\n" +
+	"\x11_reference_number\"\xbd\x01\n" +
+	"\x16ProcessPaymentResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x129\n" +
+	"\x0eorder_document\x18\x03 \x01(\v2\x12.pos.OrderDocumentR\rorderDocument\x12#\n" +
+	"\rchange_amount\x18\x04 \x01(\tR\fchangeAmountB\n" +
+	"\n" +
+	"\b_message\"W\n" +
 	"\x10VoidOrderRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1b\n" +
 	"\tvoided_by\x18\x02 \x01(\x03R\bvoidedBy\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"N\n" +
-	"\x11VoidOrderResponse\x129\n" +
-	"\x0eorder_document\x18\x01 \x01(\v2\x12.pos.OrderDocumentR\rorderDocument\"\xa6\x01\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"\x93\x01\n" +
+	"\x11VoidOrderResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x129\n" +
+	"\x0eorder_document\x18\x03 \x01(\v2\x12.pos.OrderDocumentR\rorderDocumentB\n" +
+	"\n" +
+	"\b_message\"\xa6\x01\n" +
 	"\x12ReturnOrderRequest\x12*\n" +
 	"\x11original_order_id\x18\x01 \x01(\x03R\x0foriginalOrderId\x12\x19\n" +
 	"\bitem_ids\x18\x02 \x03(\x03R\aitemIds\x12!\n" +
 	"\fprocessed_by\x18\x03 \x01(\x03R\vprocessedBy\x12\x1b\n" +
 	"\x06reason\x18\x04 \x01(\tH\x00R\x06reason\x88\x01\x01B\t\n" +
-	"\a_reason\"R\n" +
-	"\x13ReturnOrderResponse\x12;\n" +
-	"\x0freturn_document\x18\x01 \x01(\v2\x12.pos.OrderDocumentR\x0ereturnDocument\"#\n" +
+	"\a_reason\"\x97\x01\n" +
+	"\x13ReturnOrderResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12;\n" +
+	"\x0freturn_document\x18\x03 \x01(\v2\x12.pos.OrderDocumentR\x0ereturnDocumentB\n" +
+	"\n" +
+	"\b_message\"#\n" +
 	"\x11GetProductRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\"<\n" +
-	"\x12GetProductResponse\x12&\n" +
-	"\aproduct\x18\x01 \x01(\v2\f.pos.ProductR\aproduct\"<\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"\x81\x01\n" +
+	"\x12GetProductResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12&\n" +
+	"\aproduct\x18\x03 \x01(\v2\f.pos.ProductR\aproductB\n" +
+	"\n" +
+	"\b_message\"<\n" +
 	"\x17GetProductByCodeRequest\x12!\n" +
-	"\fproduct_code\x18\x01 \x01(\tR\vproductCode\"B\n" +
-	"\x18GetProductByCodeResponse\x12&\n" +
-	"\aproduct\x18\x01 \x01(\v2\f.pos.ProductR\aproduct\"\xf7\x01\n" +
+	"\fproduct_code\x18\x01 \x01(\tR\vproductCode\"\x87\x01\n" +
+	"\x18GetProductByCodeResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12&\n" +
+	"\aproduct\x18\x03 \x01(\v2\f.pos.ProductR\aproductB\n" +
+	"\n" +
+	"\b_message\"\xf7\x01\n" +
 	"\x13ListProductsRequest\x126\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x16.pos.PaginationRequestR\n" +
@@ -3805,12 +4167,16 @@ const file_pos_pos_service_proto_rawDesc = "" +
 	"\n" +
 	"_is_activeB\x13\n" +
 	"\x11_product_group_idB\x0e\n" +
-	"\f_search_term\"y\n" +
-	"\x14ListProductsResponse\x12(\n" +
-	"\bproducts\x18\x01 \x03(\v2\f.pos.ProductR\bproducts\x127\n" +
+	"\f_search_term\"\xbe\x01\n" +
+	"\x14ListProductsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12(\n" +
+	"\bproducts\x18\x03 \x03(\v2\f.pos.ProductR\bproducts\x127\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x17.pos.PaginationResponseR\n" +
-	"pagination\"\xc3\x01\n" +
+	"pagination\x18\x04 \x01(\v2\x17.pos.PaginationResponseR\n" +
+	"paginationB\n" +
+	"\n" +
+	"\b_message\"\xc3\x01\n" +
 	"\x18ListProductGroupsRequest\x126\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x16.pos.PaginationRequestR\n" +
@@ -3819,27 +4185,38 @@ const file_pos_pos_service_proto_rawDesc = "" +
 	"\x0fparent_group_id\x18\x03 \x01(\x05H\x01R\rparentGroupId\x88\x01\x01B\f\n" +
 	"\n" +
 	"_is_activeB\x12\n" +
-	"\x10_parent_group_id\"\x8e\x01\n" +
-	"\x19ListProductGroupsResponse\x128\n" +
-	"\x0eproduct_groups\x18\x01 \x03(\v2\x11.pos.ProductGroupR\rproductGroups\x127\n" +
+	"\x10_parent_group_id\"\xd3\x01\n" +
+	"\x19ListProductGroupsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x128\n" +
+	"\x0eproduct_groups\x18\x03 \x03(\v2\x11.pos.ProductGroupR\rproductGroups\x127\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x17.pos.PaginationResponseR\n" +
-	"pagination\"\xb1\x01\n" +
+	"pagination\x18\x04 \x01(\v2\x17.pos.PaginationResponseR\n" +
+	"paginationB\n" +
+	"\n" +
+	"\b_message\"\xe7\x01\n" +
 	"\x14ListDiscountsRequest\x126\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x16.pos.PaginationRequestR\n" +
 	"pagination\x12 \n" +
-	"\tis_active\x18\x02 \x01(\bH\x00R\bisActive\x88\x01\x01\x12\"\n" +
+	"\tis_active\x18\x02 \x01(\bH\x00R\bisActive\x88\x01\x01\x12$\n" +
+	"\vsearch_term\x18\x03 \x01(\tH\x01R\n" +
+	"searchTerm\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"product_id\x18\x03 \x01(\x05H\x01R\tproductId\x88\x01\x01B\f\n" +
+	"product_id\x18\x04 \x01(\x05H\x02R\tproductId\x88\x01\x01B\f\n" +
 	"\n" +
-	"_is_activeB\r\n" +
-	"\v_product_id\"}\n" +
-	"\x15ListDiscountsResponse\x12+\n" +
-	"\tdiscounts\x18\x01 \x03(\v2\r.pos.DiscountR\tdiscounts\x127\n" +
+	"_is_activeB\x0e\n" +
+	"\f_search_termB\r\n" +
+	"\v_product_id\"\xc2\x01\n" +
+	"\x15ListDiscountsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12+\n" +
+	"\tdiscounts\x18\x03 \x03(\v2\r.pos.DiscountR\tdiscounts\x127\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x17.pos.PaginationResponseR\n" +
-	"pagination\"\x9b\x01\n" +
+	"pagination\x18\x04 \x01(\v2\x17.pos.PaginationResponseR\n" +
+	"paginationB\n" +
+	"\n" +
+	"\b_message\"\x9b\x01\n" +
 	"\x17ValidateDiscountRequest\x12\x1f\n" +
 	"\vdiscount_id\x18\x01 \x01(\x05R\n" +
 	"discountId\x12\"\n" +
@@ -3847,30 +4224,36 @@ const file_pos_pos_service_proto_rawDesc = "" +
 	"product_id\x18\x02 \x01(\x05H\x00R\tproductId\x88\x01\x01\x12\x1f\n" +
 	"\bquantity\x18\x03 \x01(\x05H\x01R\bquantity\x88\x01\x01B\r\n" +
 	"\v_product_idB\v\n" +
-	"\t_quantity\"\x9b\x01\n" +
-	"\x18ValidateDiscountResponse\x12\x19\n" +
-	"\bis_valid\x18\x01 \x01(\bR\aisValid\x12\x1b\n" +
-	"\x06reason\x18\x02 \x01(\tH\x00R\x06reason\x88\x01\x01\x12<\n" +
-	"\x1acalculated_discount_amount\x18\x03 \x01(\tR\x18calculatedDiscountAmountB\t\n" +
+	"\t_quantity\"\xe0\x01\n" +
+	"\x18ValidateDiscountResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12\x19\n" +
+	"\bis_valid\x18\x03 \x01(\bR\aisValid\x12\x1b\n" +
+	"\x06reason\x18\x04 \x01(\tH\x01R\x06reason\x88\x01\x01\x12<\n" +
+	"\x1acalculated_discount_amount\x18\x05 \x01(\tR\x18calculatedDiscountAmountB\n" +
+	"\n" +
+	"\b_messageB\t\n" +
 	"\a_reason\"I\n" +
 	"\x17ListPaymentTypesRequest\x12 \n" +
 	"\tis_active\x18\x01 \x01(\bH\x00R\bisActive\x88\x01\x01B\f\n" +
 	"\n" +
-	"_is_active\"Q\n" +
-	"\x18ListPaymentTypesResponse\x125\n" +
-	"\rpayment_types\x18\x01 \x03(\v2\x10.pos.PaymentTypeR\fpaymentTypes*w\n" +
+	"_is_active\"\x96\x01\n" +
+	"\x18ListPaymentTypesResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x125\n" +
+	"\rpayment_types\x18\x03 \x03(\v2\x10.pos.PaymentTypeR\fpaymentTypesB\n" +
+	"\n" +
+	"\b_message*w\n" +
 	"\fDocumentType\x12\x1d\n" +
 	"\x19DOCUMENT_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12DOCUMENT_TYPE_SALE\x10\x01\x12\x18\n" +
 	"\x14DOCUMENT_TYPE_RETURN\x10\x02\x12\x16\n" +
-	"\x12DOCUMENT_TYPE_VOID\x10\x03*\x8b\x01\n" +
+	"\x12DOCUMENT_TYPE_VOID\x10\x03*U\n" +
 	"\n" +
-	"PaidStatus\x12\x1b\n" +
-	"\x17PAID_STATUS_UNSPECIFIED\x10\x00\x12\x17\n" +
-	"\x13PAID_STATUS_PENDING\x10\x01\x12\x14\n" +
-	"\x10PAID_STATUS_PAID\x10\x02\x12\x17\n" +
-	"\x13PAID_STATUS_PARTIAL\x10\x03\x12\x18\n" +
-	"\x14PAID_STATUS_REFUNDED\x10\x04*\x8a\x01\n" +
+	"PaidStatus\x12\x17\n" +
+	"\x13PAID_STATUS_PENDING\x10\x00\x12\x14\n" +
+	"\x10PAID_STATUS_PAID\x10\x01\x12\x18\n" +
+	"\x14PAID_STATUS_REFUNDED\x10\x02*\x8a\x01\n" +
 	"\fDiscountType\x12\x1d\n" +
 	"\x19DISCOUNT_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18DISCOUNT_TYPE_PERCENTAGE\x10\x01\x12\x1e\n" +
@@ -4092,19 +4475,37 @@ func file_pos_pos_service_proto_init() {
 	file_pos_pos_service_proto_msgTypes[7].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[8].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[10].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[12].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[13].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[14].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[16].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[18].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[20].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[21].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[22].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[23].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[24].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[25].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[27].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[28].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[29].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[30].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[31].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[33].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[34].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[35].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[37].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[39].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[40].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[41].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[42].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[43].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[44].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[45].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[46].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[47].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[48].OneofWrappers = []any{}
+	file_pos_pos_service_proto_msgTypes[49].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

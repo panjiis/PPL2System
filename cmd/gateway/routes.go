@@ -38,10 +38,10 @@ func main() {
 	// 	inventoryHandler = handlers.NewInventoryHTTPHandler(grpcClients.Inventory)
 	// }
 
-	// var posHandler *handlers.POSHTTPHandler
-	// if grpcClients.POS != nil {
-	// 	posHandler = handlers.NewPOSHTTPHandler(grpcClients.POS)
-	// }
+	var posHandler *handlers.POSHTTPHandler
+	if grpcClients.POS != nil {
+		posHandler = handlers.NewPOSHTTPHandler(grpcClients.POS)
+	}
 
 	// var commissionsHandler *handlers.CommissionsHTTPHandler
 	// if grpcClients.Commissions != nil {
@@ -123,18 +123,48 @@ func main() {
 		// 	}
 		// }
 
-		// posGroup := protected.Group("/pos")
-		// {
-		// 	if posHandler != nil {
-		// 		posGroup.POST("/sales", posHandler.CreateSale)
-		// 		posGroup.GET("/sales", posHandler.ListSales)
-		// 		posGroup.GET("/sales/:id", posHandler.GetSale)
-		// 	} else {
-		// 		posGroup.POST("/sales", serviceUnavailableHandler("POS service"))
-		// 		posGroup.GET("/sales", serviceUnavailableHandler("POS service"))
-		// 		posGroup.GET("/sales/:id", serviceUnavailableHandler("POS service"))
-		// 	}
-		// }
+		posGroup := protected.Group("/pos")
+		{
+			if posHandler != nil {
+				// Products
+				posGroup.GET("/products", posHandler.ListProducts)
+				posGroup.GET("/products/:id", posHandler.GetProduct)
+				posGroup.GET("/products/code/:code", posHandler.GetProductByCode)
+
+				// Product Groups
+				posGroup.GET("/product-groups", posHandler.ListProductGroups)
+
+				// Payment Types
+				posGroup.GET("/payment-types", posHandler.ListPaymentTypes)
+
+				// Payment Processing
+				posGroup.POST("/payments/process", posHandler.ProcessPayment)
+
+				// Discounts
+				posGroup.GET("/discounts", posHandler.ListDiscounts)
+				posGroup.POST("/discounts/validate", posHandler.ValidateDiscount)
+
+				// Carts
+				posGroup.POST("/carts", posHandler.CreateCart)
+				posGroup.GET("/carts/:id", posHandler.GetCart)
+				posGroup.POST("/carts/items", posHandler.AddItemToCart)
+				posGroup.DELETE("/carts/:cart_id/items/:item_id", posHandler.RemoveItemFromCart)
+				posGroup.POST("/carts/discounts", posHandler.ApplyDiscount)
+
+				// Orders
+				posGroup.POST("/orders", posHandler.CreateOrder)
+				posGroup.POST("/orders/from-cart", posHandler.CreateOrderFromCart)
+				posGroup.GET("/orders", posHandler.ListOrders)
+				posGroup.GET("/orders/:id", posHandler.GetOrder)
+				posGroup.POST("/orders/void", posHandler.VoidOrder)
+				posGroup.POST("/orders/return", posHandler.ReturnOrder)
+			} else {
+				posGroup.GET("/*any", serviceUnavailableHandler("POS service"))
+				posGroup.POST("/*any", serviceUnavailableHandler("POS service"))
+				posGroup.PUT("/*any", serviceUnavailableHandler("POS service"))
+				posGroup.DELETE("/*any", serviceUnavailableHandler("POS service"))
+			}
+		}
 
 		// commissionsGroup := protected.Group("/commissions")
 		// {

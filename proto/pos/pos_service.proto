@@ -13,11 +13,9 @@ enum DocumentType {
 }
 
 enum PaidStatus {
-  PAID_STATUS_UNSPECIFIED = 0;
-  PAID_STATUS_PENDING = 1;
-  PAID_STATUS_PAID = 2;
-  PAID_STATUS_PARTIAL = 3;
-  PAID_STATUS_REFUNDED = 4;
+  PAID_STATUS_PENDING = 0;
+  PAID_STATUS_PAID = 1;
+  PAID_STATUS_REFUNDED = 2;
 }
 
 enum DiscountType {
@@ -60,7 +58,7 @@ message OrderDocument {
   optional string notes = 15;
   google.protobuf.Timestamp created_at = 16;
   google.protobuf.Timestamp updated_at = 17;
-  
+
   repeated OrderItem order_items = 18;
   optional PaymentType payment_type = 19;
 }
@@ -78,7 +76,7 @@ message OrderItem {
   string line_total = 10;
   string commission_amount = 11;
   google.protobuf.Timestamp created_at = 12;
-  
+
   optional Product product = 13;
   optional Discount discount = 14;
 }
@@ -106,7 +104,7 @@ message Discount {
   bool is_active = 11;
   google.protobuf.Timestamp created_at = 12;
   google.protobuf.Timestamp updated_at = 13;
-  
+
   optional Product product = 14;
   optional ProductGroup product_group = 15;
 }
@@ -123,7 +121,7 @@ message Product {
   bool is_active = 9;
   google.protobuf.Timestamp created_at = 10;
   google.protobuf.Timestamp updated_at = 11;
-  
+
   optional ProductGroup product_group = 12;
 }
 
@@ -137,7 +135,7 @@ message ProductGroup {
   bool is_active = 7;
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
-  
+
   optional ProductGroup parent_group = 10;
   repeated ProductGroup child_groups = 11;
   repeated Product products = 12;
@@ -165,7 +163,7 @@ message CartItem {
   optional int32 discount_id = 6;
   string discount_amount = 7;
   string line_total = 8;
-  
+
   optional Product product = 9;
   optional Discount discount = 10;
 }
@@ -176,7 +174,9 @@ message CreateCartRequest {
 }
 
 message CreateCartResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 message AddItemToCartRequest {
@@ -187,7 +187,9 @@ message AddItemToCartRequest {
 }
 
 message AddItemToCartResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 message RemoveItemFromCartRequest {
@@ -196,7 +198,9 @@ message RemoveItemFromCartRequest {
 }
 
 message RemoveItemFromCartResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 message ApplyDiscountRequest {
@@ -206,7 +210,9 @@ message ApplyDiscountRequest {
 }
 
 message ApplyDiscountResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 message GetCartRequest {
@@ -214,7 +220,9 @@ message GetCartRequest {
 }
 
 message GetCartResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 // Order Operations
@@ -226,7 +234,9 @@ message CreateOrderFromCartRequest {
 }
 
 message CreateOrderFromCartResponse {
-  OrderDocument order_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
 }
 
 message CreateOrderRequest {
@@ -246,7 +256,9 @@ message CreateOrderItemRequest {
 }
 
 message CreateOrderResponse {
-  OrderDocument order_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
 }
 
 message GetOrderRequest {
@@ -254,7 +266,9 @@ message GetOrderRequest {
 }
 
 message GetOrderResponse {
-  OrderDocument order_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
 }
 
 message ListOrdersRequest {
@@ -266,8 +280,10 @@ message ListOrdersRequest {
 }
 
 message ListOrdersResponse {
-  repeated OrderDocument order_documents = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated OrderDocument order_documents = 3;
+  PaginationResponse pagination = 4;
 }
 
 // Payment Operations
@@ -279,8 +295,10 @@ message ProcessPaymentRequest {
 }
 
 message ProcessPaymentResponse {
-  OrderDocument order_document = 1;
-  string change_amount = 2;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
+  string change_amount = 4;
 }
 
 // Order Modifications
@@ -291,7 +309,9 @@ message VoidOrderRequest {
 }
 
 message VoidOrderResponse {
-  OrderDocument order_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
 }
 
 message ReturnOrderRequest {
@@ -302,7 +322,9 @@ message ReturnOrderRequest {
 }
 
 message ReturnOrderResponse {
-  OrderDocument return_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument return_document = 3;
 }
 
 // Product Operations
@@ -311,7 +333,9 @@ message GetProductRequest {
 }
 
 message GetProductResponse {
-  Product product = 1;
+  bool success = 1;
+  optional string message = 2;
+  Product product = 3;
 }
 
 message GetProductByCodeRequest {
@@ -319,7 +343,9 @@ message GetProductByCodeRequest {
 }
 
 message GetProductByCodeResponse {
-  Product product = 1;
+  bool success = 1;
+  optional string message = 2;
+  Product product = 3;
 }
 
 message ListProductsRequest {
@@ -330,8 +356,10 @@ message ListProductsRequest {
 }
 
 message ListProductsResponse {
-  repeated Product products = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated Product products = 3;
+  PaginationResponse pagination = 4;
 }
 
 // Product Group Operations
@@ -342,20 +370,25 @@ message ListProductGroupsRequest {
 }
 
 message ListProductGroupsResponse {
-  repeated ProductGroup product_groups = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated ProductGroup product_groups = 3;
+  PaginationResponse pagination = 4;
 }
 
 // Discount Operations
 message ListDiscountsRequest {
   PaginationRequest pagination = 1;
   optional bool is_active = 2;
-  optional int32 product_id = 3;
+  optional string search_term = 3;
+  optional int32 product_id = 4;
 }
 
 message ListDiscountsResponse {
-  repeated Discount discounts = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated Discount discounts = 3;
+  PaginationResponse pagination = 4;
 }
 
 message ValidateDiscountRequest {
@@ -365,9 +398,11 @@ message ValidateDiscountRequest {
 }
 
 message ValidateDiscountResponse {
-  bool is_valid = 1;
-  optional string reason = 2;
-  string calculated_discount_amount = 3;
+  bool success = 1;
+  optional string message = 2;
+  bool is_valid = 3;
+  optional string reason = 4;
+  string calculated_discount_amount = 5;
 }
 
 // Payment Type Operations
@@ -376,7 +411,9 @@ message ListPaymentTypesRequest {
 }
 
 message ListPaymentTypesResponse {
-  repeated PaymentType payment_types = 1;
+  bool success = 1;
+  optional string message = 2;
+  repeated PaymentType payment_types = 3;
 }
 
 service POSService {
@@ -386,7 +423,7 @@ service POSService {
   rpc AddItemToCart(AddItemToCartRequest) returns (AddItemToCartResponse);
   rpc RemoveItemFromCart(RemoveItemFromCartRequest) returns (RemoveItemFromCartResponse);
   rpc ApplyDiscount(ApplyDiscountRequest) returns (ApplyDiscountResponse);
-  
+
   // Order Management
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
   rpc CreateOrderFromCart(CreateOrderFromCartRequest) returns (CreateOrderFromCartResponse);
@@ -394,20 +431,20 @@ service POSService {
   rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
   rpc VoidOrder(VoidOrderRequest) returns (VoidOrderResponse);
   rpc ReturnOrder(ReturnOrderRequest) returns (ReturnOrderResponse);
-  
+
   // Payment Processing
   rpc ProcessPayment(ProcessPaymentRequest) returns (ProcessPaymentResponse);
-  
+
   // Product Operations
   rpc GetProduct(GetProductRequest) returns (GetProductResponse);
   rpc GetProductByCode(GetProductByCodeRequest) returns (GetProductByCodeResponse);
   rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
   rpc ListProductGroups(ListProductGroupsRequest) returns (ListProductGroupsResponse);
-  
+
   // Discount Operations
   rpc ListDiscounts(ListDiscountsRequest) returns (ListDiscountsResponse);
   rpc ValidateDiscount(ValidateDiscountRequest) returns (ValidateDiscountResponse);
-  
+
   // Payment Type Operations
   rpc ListPaymentTypes(ListPaymentTypesRequest) returns (ListPaymentTypesResponse);
 }
