@@ -91,7 +91,11 @@ def _get_peak_hours_logic_from_db(
   except ValueError:
     raise ValueError("Invalid date format. Use YYYY-MM-DD.")
   
-  raw_data = customer_repo.get_peak_hour_data_from_pos(
+  # raw_data = customer_repo.get_peak_hour_data_from_pos(
+  #   db, start_date, end_date
+  # )
+
+  raw_data = customer_repo.get_peak_hour_data(
     db, start_date, end_date
   )
 
@@ -123,7 +127,7 @@ def _get_peak_hours_logic_from_db(
 def get_peak_hours_logic(
   db: Session,
   date_range: object,
-) -> list[dict]:
+) -> list[dict]:  
   cache_key = (
     f"reports:peak-hours:" # Key prefix baru
     f"start={date_range.start_date}:end={date_range.end_date}"
@@ -132,7 +136,7 @@ def get_peak_hours_logic(
   cached_data = get_cache(cache_key)
 
   if cached_data:
-    print("CACHE KEY")
+    print("CACHE HIT")
     return cached_data
   
   try:

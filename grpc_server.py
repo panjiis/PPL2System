@@ -1,6 +1,8 @@
 # grpc_server.py
 import grpc
 from concurrent import futures
+import asyncio
+import threading
 
 import analytics.analytics_service_pb2 as pb
 import analytics.analytics_service_pb2_grpc as rpc
@@ -12,6 +14,8 @@ from core_logic.dashboard_logic import *
 from core_logic.utils import *
 from repositories.db_connection import *
 from google.protobuf.timestamp_pb2 import Timestamp
+
+from pubsub_subscriber import run_subscriber
 
 def to_proto_timestamp(dt) -> Timestamp:
     if not dt:
@@ -60,12 +64,12 @@ class AnalyticsService(rpc.AnalyticsService):
                         cashier_id=item['cashier_id'],
                         total_transactions=item['total_transactions'],
                         total_items_sold=item['total_items_sold'],
-                        gross_sales=to_string(item['gross_sales']),
-                        total_discounts=to_string(item['total_discounts']),
-                        net_sales=to_string(item['net_sales']),
-                        total_tax=to_string(item['total_tax']),
-                        total_cost=to_string(item['total_cost']),
-                        gross_profit=to_string(item['gross_profit']),
+                        gross_sales=item['gross_sales'],
+                        total_discounts=item['total_discounts'],
+                        net_sales=item['net_sales'],
+                        total_tax=item['total_tax'],
+                        total_cost=item['total_cost'],
+                        gross_profit=item['gross_profit'],
                         created_at=to_proto_timestamp(item['created_at']),
                         updated_at=to_proto_timestamp(item['updated_at'])
                     )
@@ -79,11 +83,11 @@ class AnalyticsService(rpc.AnalyticsService):
                         product_id=item['product_id'],
                         product_group_id=item['product_group_id'],
                         quantity_sold=int(item['total_quantity_sold']), 
-                        gross_sales=to_string(item['total_gross_sales']),
-                        total_discounts=to_string(item['total_discounts_given']),
-                        net_sales=to_string(item['total_net_sales']), 
-                        total_cost=to_string(item['total_cost_of_goods']),
-                        gross_profit=to_string(item['total_gross_profit']),
+                        gross_sales=item['total_gross_sales'],
+                        total_discounts=item['total_discounts_given'],
+                        net_sales=item['total_net_sales'], 
+                        total_cost=item['total_cost_of_goods'],
+                        gross_profit=item['total_gross_profit'],
                         created_at=None,
                         updated_at=None
                     )
@@ -213,11 +217,12 @@ class AnalyticsService(rpc.AnalyticsService):
     def GetProductSales(self, request, context):
         db = get_analytics_db_session()
         try:
-            result_dict = get_daily_summary_logic(
+            result_dict = get_product_sales_logic(  
                 db=db,
                 date_range=request.date_range,
                 product_id=request.product_id if request.HasField('product_id') else None,
                 product_group_id=request.product_group_id if request.HasField('product_group_id') else None,
+                pagination=request.pagination  
             )
 
             response = pb.GetProductSalesResponse()
@@ -264,7 +269,8 @@ class AnalyticsService(rpc.AnalyticsService):
                 db=db,
                 date_range=request.date_range,
                 limit=request.limit,
-                product_id=request.product_id if request.HasField('product_id') else None,
+                product_group_id=request.product_group_id if request.HasField('product_group_id') else None,
+                # product_id=request.product_id if request.HasField('product_id') else None,
             )
 
             response = pb.GetTopSellingProductsResponse()
@@ -364,14 +370,14 @@ class AnalyticsService(rpc.AnalyticsService):
 
             response = pb.GetPerformanceReportResponse()
 
-            report_pb = pb.PeformanceReport(
+            report_pb = pb.PerformanceReport(
                 period=pb.DateRange(
-                    start_date=report_dict["period"]["start_date"],
-                    end_date=report_dict["period"]["end_date"]
+                    start_date=report_dict.get("period", {}).get("start_date", ""),
+                    end_date=report_dict.get("period", {}).get("end_date", "")
                 ),
-                total_commissions=report_dict["total_commissions"],
-                top_performer_employee_id=report_dict["top_performer_employee_id"],
-                top_performer_sales=report_dict["top_performer_sales"]
+                total_commissions=report_dict.get("total_commissions", "0"),
+                top_performer_employee_id=report_dict.get("top_performer_employee_id", 0),
+                top_performer_sales=report_dict.get("top_performer_sales", "0") 
             )
 
             for item in report_dict["employee_performances"]:
@@ -455,7 +461,8 @@ class AnalyticsService(rpc.AnalyticsService):
                 db.close()
 
     def GetPeakHours(self, request, context):
-        db = get_pos_db_session()
+        # db = get_pos_db_session()
+        db = get_analytics_db_session()
         
         try:
             formatted_data = get_peak_hours_logic(
@@ -515,16 +522,34 @@ class AnalyticsService(rpc.AnalyticsService):
 
             dashboard_pb.low_stock_alerts.extend(result_dict['low_stock_alerts'])
 
-            for item in result_dict['top_products_today']:
+            # for item in result_dict['top_products_today']:
+            #     dashboard_pb.top_products_today.append(
+            #         pb.EmployeePerformance(
+            #             id=0, date="",
+            #             employee_id=item['employee_id'],
+            #             total_sales=to_string(item['total_sales']),
+            #         )
+            #     )
+            
+            for item in result_dict.get('top_products_today', []):
                 dashboard_pb.top_products_today.append(
-                    pb.EmployeePerformance(
-                        id=0, date="",
-                        employee_id=item['employee_id'],
-                        total_sales=to_string(item['total_sales']),
+                    pb.ProductSalesSummary(
+                        # Asumsi 'item' memiliki kunci ini, sesuaikan jika perlu
+                        product_id=item.get('product_id', 0),
+                        net_sales=str(item.get('net_sales', 0)),
+                        quantity_sold=int(item.get('quantity_sold', 0))
                     )
                 )
             
-            return pb.GetDashboardDataResponse(dashboard_data=dashboard_pb)
+            for item in result_dict.get('top_performers_today', []):
+                dashboard_pb.top_performers_today.append(
+                    pb.EmployeePerformance(
+                        employee_id=item.get('employee_id', 0),
+                        total_sales=str(item.get('total_sales', 0))
+                    )
+                )
+
+            return pb.GetDashboardDataResponse(dashboard=dashboard_pb)
         
         except ValueError as ve:
             print(f"Input error in GetDashboardData gRPC: {ve}")
@@ -583,6 +608,14 @@ def start_grpc_server():
 
     server_instance.start()
     print("gRPC server started")
+
+    # Jalankan NATS subscriber di background thread
+    print("Starting NATS Subscriber on background thread...")
+    subscriber_thread = threading.Thread(
+        target=lambda: asyncio.run(run_subscriber()),
+        daemon=True # Pastikan thread ini berhenti saat aplikasi utama berhenti
+    )
+    subscriber_thread.start()
 
 def stop_grpc_server():
     global server_instance

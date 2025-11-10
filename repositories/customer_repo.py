@@ -70,11 +70,38 @@ def count_total_customer_analytics(
 
   return result or 0
 
-def get_peak_hour_data_from_pos(
+# def get_peak_hour_data_from_pos(
+#   db: Session,
+#   start_date: datetime.date,
+#   end_date: datetime.date
+# ) -> list[dict]:
+#   start_dt = datetime.datetime.combine(start_date, datetime.time.min)
+#   end_dt = datetime.datetime.combine(end_date, datetime.time.max)
+
+#   params = {
+#     "start_dt": start_dt,
+#     "end_dt": end_dt
+#   }
+
+#   query_str = """
+#     SELECT
+#       EXTRACT(HOUR FROM orders_date) as hour_of_day,
+#       COUNT(id) as transaction_count,
+#       SUM(CAST(total_amount AS decimal)) as total_revenue
+#     FROM order_documents
+#     WHERE orders_date BETWEEN :start_dt AND :end_dt
+#     GROUP BY hour_of_day
+#     ORDER BY hour_of_day ASC
+#   """
+
+#   result = db.execute(text(query_str), params).all()
+#   return [dict(row._mapping) for row in result]
+
+def get_peak_hour_data( # from analytics  
   db: Session,
   start_date: datetime.date,
   end_date: datetime.date
-) -> list[dict]:
+): 
   start_dt = datetime.datetime.combine(start_date, datetime.time.min)
   end_dt = datetime.datetime.combine(end_date, datetime.time.max)
 
@@ -85,11 +112,11 @@ def get_peak_hour_data_from_pos(
 
   query_str = """
     SELECT
-      EXTRACT(HOUR FROM orders_date) as hour_of_day,
+      EXTRACT(HOUR FROM order_timestamp) as hour_of_day,
       COUNT(id) as transaction_count,
-      SUM(CAST(total_amount AS decimal)) as total_revenue
-    FROM order_documents
-    WHERE orders_date BETWEEN :start_dt AND :end_dt
+      SUM(total_amount) as total_revenue
+    FROM raw_sales_events
+    WHERE order_timestamp BETWEEN :start_dt AND :end_dt
     GROUP BY hour_of_day
     ORDER BY hour_of_day ASC
   """

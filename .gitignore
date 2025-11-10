@@ -1,3 +1,14 @@
 venv
 
 __pycache__
+
+.env
+
+migrate.py
+
+seed_db_analytics.py
+seed_db_pos.py
+
+*.sql
+
+tree*

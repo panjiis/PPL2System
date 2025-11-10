@@ -129,7 +129,7 @@ def get_active_transactions_count(db: Session) -> int:
   query_str = """
     SELECT COUNT(id) 
     FROM order_documents
-    WHERE paid_status = 1;
+    WHERE paid_status = 0;
   """
 
   result = db.execute(text(query_str)).scalar_one_or_none()

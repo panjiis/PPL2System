@@ -118,15 +118,15 @@ def get_real_time_metrics_logic(db: Session) -> dict:
   )
 
   recent_large_transactions = [
-    f"ID: {tx['id']} - Amount: {to_string(tx['total_amount'])}" for tx in large_tx_raw
+    f"ID: {tx['id']} - Amount: {str(tx['total_amount'])}" for tx in large_tx_raw
   ]
 
   real_time_data = {
     "last_updated": datetime.datetime.now(datetime.timezone.utc),
     "active_transactions": int(active_tx_count),
-    "hourly_revenue": to_string(hourly_revenue),
+    "hourly_revenue": str(hourly_revenue),
     "hourly_transaction_count": int(hourly_tx_count),
-    "average_transaction_value": to_string(avg_tx_value),
+    "average_transaction_value": str(avg_tx_value),
     "recent_large_transactions": recent_large_transactions
   }
 

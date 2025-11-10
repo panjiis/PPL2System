@@ -1,33 +1,42 @@
-# main.py
-import uvicorn
-import threading
-from contextlib import asynccontextmanager
+import time
+import sys
+import signal
 
-from grpc_server import start_grpc_server, stop_grpc_server
-from api_server import app  
+# Impor server gRPC Anda
+import grpc_server 
 
-HTTP_PORT = 8000
+def serve():
+    """
+    Fungsi utama untuk menjalankan server gRPC.
+    """
+    print("Starting gRPC Analytics Service...")
+    
+    # Panggil fungsi start_grpc_server dari file grpc_server.py
+    # Ini akan berjalan di port 50055
+    grpc_server.start_grpc_server()
+    print(f"gRPC Server Running on {grpc_server.GRPC_PORT}")
 
-@asynccontextmanager
-async def lifespan(app_instance):
-    print("FastAPI application starting up...")
-    start_grpc_server()
-
+    # Jaga agar thread utama tetap hidup
+    # server.start() tidak memblokir, jadi kita perlu cara
+    # untuk menjaga aplikasi tetap berjalan.
     try:
-        yield
-    finally:
-        print("FastAPI application shutting down...")
-        stop_grpc_server()
+        while True:
+            time.sleep(86400) # Tidur selama satu hari
+    except KeyboardInterrupt:
+        # Ini tidak akan tertangkap jika server.start() memblokir,
+        # jadi kita juga butuh signal handler.
+        pass
 
-app.router.lifespan = lifespan
+def handle_shutdown(sig, frame):
+    """Menangani sinyal shutdown (seperti Ctrl+C) dengan bersih."""
+    print("\nStop command received. Stopping service...")
+    grpc_server.stop_grpc_server()
+    print("Analytics gRPC service stopped.")
+    sys.exit(0)
 
-if __name__ == "__main__":
-    print(f"Running server on --reload mode")
-    print(f"FastAPI HTTP server running on http://0.0.0.0:{HTTP_PORT}")
-
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=HTTP_PORT,
-        reload=True
-    )
+if __name__ == '__main__':
+    # Menambahkan signal handler untuk Ctrl+C
+    signal.signal(signal.SIGINT, handle_shutdown)
+    signal.signal(signal.SIGTERM, handle_shutdown)
+    
+    serve()
