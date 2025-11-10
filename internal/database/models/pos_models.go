@@ -29,9 +29,9 @@ type OrderDocument struct {
 }
 
 type OrderItem struct {
-	ID                  int64 `gorm:"primaryKey;autoIncrement"`
-	DocumentId          int64 `gorm:"index;not null"`
-	ProductId           int32 `gorm:"not null"`
+	ID                  int64  `gorm:"primaryKey;autoIncrement"`
+	DocumentId          int64  `gorm:"index;not null"`
+	ProductCode         string `gorm:"not null"`
 	ServingEmployeeId   *int64
 	Quantity            int32  `gorm:"not null"`
 	UnitPrice           string `gorm:"type:varchar(32);not null"`
@@ -42,7 +42,7 @@ type OrderItem struct {
 	CommissionAmount    string `gorm:"type:varchar(32);not null"`
 	CreatedAt           time.Time
 
-	Product  *Product  `gorm:"foreignKey:ProductId"`
+	Product  *Product  `gorm:"foreignKey:ProductCode;references:ProductCode;->"`
 	Discount *Discount `gorm:"foreignKey:DiscountId"`
 }
 
@@ -56,30 +56,33 @@ type PaymentType struct {
 }
 
 type Discount struct {
-	ID                     int32  `gorm:"primaryKey;autoIncrement"`
+	Id                     int32  `gorm:"primaryKey;autoIncrement"`
 	DiscountName           string `gorm:"type:varchar(64);not null"`
 	DiscountType           int32  `gorm:"not null"`
 	DiscountValue          string `gorm:"type:varchar(32);not null"`
-	ProductId              *int32
-	ProductGroupId         *int32
-	MinQuantity            int32 `gorm:"not null"`
-	MaxUsagePerTransaction *int32
+	ProductCode            string `gorm:"type:varchar(32);default:null"`
+	ProductGroupId         int32  `gorm:"default:null"`
+	MinQuantity            int32  `gorm:"not null"`
+	MaxUsagePerTransaction *int64
 	ValidFrom              *time.Time
 	ValidUntil             *time.Time
 	IsActive               bool `gorm:"not null"`
 	CreatedAt              time.Time
 	UpdatedAt              time.Time
+	BuyQuantity            *int32 `gorm:"column:buy_quantity"`
+	GetQuantity            *int32 `gorm:"column:get_quantity"`
 
-	Product      *Product      `gorm:"foreignKey:ProductId"`
-	ProductGroup *ProductGroup `gorm:"foreignKey:ProductGroupId"`
+	Product      *Product      `gorm:"foreignKey:ProductCode;references:ProductCode;default:null"`
+	ProductGroup *ProductGroup `gorm:"foreignKey:ProductGroupId;references:ID;default:null"`
 }
 
 type Product struct {
-	ID                      int32  `gorm:"primaryKey;autoIncrement"`
-	ProductCode             string `gorm:"type:varchar(32);uniqueIndex;not null"`
-	ProductName             string `gorm:"type:varchar(128);not null"`
-	ProductPrice            string `gorm:"type:varchar(32);not null"`
-	CostPrice               string `gorm:"type:varchar(32);not null"`
+	ProductCode             string  `gorm:"type:varchar(32);primaryKey"`
+	ProductName             string  `gorm:"type:varchar(128);not null"`
+	ProductPrice            string  `gorm:"type:varchar(32);not null"`
+	CostPrice               string  `gorm:"type:varchar(32);not null"`
+	ImageUrl                *string `gorm:"type:varchar(256)"`
+	Color                   *string `gorm:"type:varchar(32)"`
 	ProductGroupId          *int32
 	CommissionEligible      bool `gorm:"not null"`
 	RequiresServiceEmployee bool `gorm:"not null"`
@@ -97,6 +100,7 @@ type ProductGroup struct {
 	Color            *string `gorm:"type:varchar(32)"`
 	ImageUrl         *string `gorm:"type:varchar(256)"`
 	CommissionRate   string  `gorm:"type:varchar(32);not null"`
+	LastServiceId    *int32  `gorm:"default:0"`
 	IsActive         bool    `gorm:"not null"`
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
@@ -121,9 +125,9 @@ type Cart struct {
 }
 
 type CartItem struct {
-	ID                int64 `gorm:"primaryKey;autoIncrement"`
-	CartId            int64 `gorm:"not null;index"`
-	ProductId         int32 `gorm:"not null"`
+	ID                int64  `gorm:"primaryKey;autoIncrement"`
+	CartId            int64  `gorm:"not null;index"`
+	ProductCode       string `gorm:"not null"`
 	ServingEmployeeId *int64
 	Quantity          int32  `gorm:"not null"`
 	UnitPrice         string `gorm:"type:varchar(32);not null"`
@@ -132,6 +136,6 @@ type CartItem struct {
 	LineTotal         string `gorm:"type:varchar(32);not null"`
 	CreatedAt         time.Time
 
-	Product  *Product  `gorm:"foreignKey:ProductId"`
+	Product  *Product  `gorm:"foreignKey:ProductCode;references:ProductCode"`
 	Discount *Discount `gorm:"foreignKey:DiscountId"`
 }
