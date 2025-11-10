@@ -3323,20 +3323,6 @@ func (x *ListProductsResponse) GetMessage() string {
 	return ""
 }
 
-func (x *ListProductsResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *ListProductsResponse) GetMessage() string {
-	if x != nil && x.Message != nil {
-		return *x.Message
-	}
-	return ""
-}
-
 func (x *ListProductsResponse) GetProducts() []*Product {
 	if x != nil {
 		return x.Products
@@ -3881,20 +3867,6 @@ func (x *ListProductGroupsResponse) GetMessage() string {
 	return ""
 }
 
-func (x *ListProductGroupsResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *ListProductGroupsResponse) GetMessage() string {
-	if x != nil && x.Message != nil {
-		return *x.Message
-	}
-	return ""
-}
-
 func (x *ListProductGroupsResponse) GetProductGroups() []*ProductGroup {
 	if x != nil {
 		return x.ProductGroups
@@ -4370,20 +4342,6 @@ func (x *ListDiscountsResponse) GetMessage() string {
 	return ""
 }
 
-func (x *ListDiscountsResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *ListDiscountsResponse) GetMessage() string {
-	if x != nil && x.Message != nil {
-		return *x.Message
-	}
-	return ""
-}
-
 func (x *ListDiscountsResponse) GetDiscounts() []*Discount {
 	if x != nil {
 		return x.Discounts
@@ -4823,20 +4781,6 @@ func (x *ValidateDiscountResponse) GetMessage() string {
 	return ""
 }
 
-func (x *ValidateDiscountResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *ValidateDiscountResponse) GetMessage() string {
-	if x != nil && x.Message != nil {
-		return *x.Message
-	}
-	return ""
-}
-
 func (x *ValidateDiscountResponse) GetIsValid() bool {
 	if x != nil {
 		return x.IsValid
@@ -5068,20 +5012,6 @@ func (x *ListPaymentTypesResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListPaymentTypesResponse.ProtoReflect.Descriptor instead.
 func (*ListPaymentTypesResponse) Descriptor() ([]byte, []int) {
 	return file_pos_pos_service_proto_rawDescGZIP(), []int{64}
-}
-
-func (x *ListPaymentTypesResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *ListPaymentTypesResponse) GetMessage() string {
-	if x != nil && x.Message != nil {
-		return *x.Message
-	}
-	return ""
 }
 
 func (x *ListPaymentTypesResponse) GetSuccess() bool {
@@ -6056,7 +5986,6 @@ func file_pos_pos_service_proto_init() {
 	file_pos_pos_service_proto_msgTypes[42].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[43].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[44].OneofWrappers = []any{}
-	file_pos_pos_service_proto_msgTypes[45].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[46].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[47].OneofWrappers = []any{}
 	file_pos_pos_service_proto_msgTypes[48].OneofWrappers = []any{}
