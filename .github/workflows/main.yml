@@ -42,7 +42,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.go  
+          file: ./dockerfile.go  
           push: ${{ github.event_name != 'pull_request' }} 
           tags: ${{ steps.meta-go.outputs.tags }}
           labels: ${{ steps.meta-go.outputs.labels }}
@@ -83,7 +83,7 @@ jobs:
   #       uses: docker/build-push-action@v5
   #       with:
   #         context: ./analytical_service
-  #         file: ./analytical_service/Dockerfile.py   
+  #         file: ./analytical_service/dockerfile.py   
   #         push: ${{ github.event_name != 'pull_request' }} 
   #         tags: ${{ steps.meta-py.outputs.tags }}
   #         labels: ${{ steps.meta-py.outputs.labels }}
