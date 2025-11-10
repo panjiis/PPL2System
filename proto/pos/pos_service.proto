@@ -13,11 +13,9 @@ enum DocumentType {
 }
 
 enum PaidStatus {
-  PAID_STATUS_UNSPECIFIED = 0;
-  PAID_STATUS_PENDING = 1;
-  PAID_STATUS_PAID = 2;
-  PAID_STATUS_PARTIAL = 3;
-  PAID_STATUS_REFUNDED = 4;
+  PAID_STATUS_PENDING = 0;
+  PAID_STATUS_PAID = 1;
+  PAID_STATUS_REFUNDED = 2;
 }
 
 enum DiscountType {
@@ -60,7 +58,7 @@ message OrderDocument {
   optional string notes = 15;
   google.protobuf.Timestamp created_at = 16;
   google.protobuf.Timestamp updated_at = 17;
-  
+
   repeated OrderItem order_items = 18;
   optional PaymentType payment_type = 19;
 }
@@ -68,7 +66,7 @@ message OrderDocument {
 message OrderItem {
   int64 id = 1;
   int64 document_id = 2;
-  int32 product_id = 3;
+  string product_code = 3;
   optional int64 serving_employee_id = 4;
   int32 quantity = 5;
   string unit_price = 6;
@@ -78,7 +76,7 @@ message OrderItem {
   string line_total = 10;
   string commission_amount = 11;
   google.protobuf.Timestamp created_at = 12;
-  
+
   optional Product product = 13;
   optional Discount discount = 14;
 }
@@ -93,26 +91,28 @@ message PaymentType {
 }
 
 message Discount {
-  int32 id = 1;
+  int64 id = 1;
   string discount_name = 2;
   DiscountType discount_type = 3;
   string discount_value = 4;
-  optional int32 product_id = 5;
+  optional string product_code = 5;
   optional int32 product_group_id = 6;
   int32 min_quantity = 7;
-  optional int32 max_usage_per_transaction = 8;
+  optional int64 max_usage_per_transaction = 8;
   optional google.protobuf.Timestamp valid_from = 9;
   optional google.protobuf.Timestamp valid_until = 10;
   bool is_active = 11;
-  google.protobuf.Timestamp created_at = 12;
-  google.protobuf.Timestamp updated_at = 13;
-  
-  optional Product product = 14;
-  optional ProductGroup product_group = 15;
+  optional google.protobuf.Timestamp created_at = 12;
+  optional google.protobuf.Timestamp updated_at = 13;
+  optional int32 buy_quantity = 14;    // For BUY_X_GET_Y type
+  optional int32 get_quantity = 15;    // For BUY_X_GET_Y type
+
+  optional Product product = 16;
+  optional ProductGroup product_group = 17;
+  optional string discount_type_label = 18;
 }
 
 message Product {
-  int32 id = 1;
   string product_code = 2;
   string product_name = 3;
   string product_price = 4;
@@ -120,15 +120,17 @@ message Product {
   optional int32 product_group_id = 6;
   bool commission_eligible = 7;
   bool requires_service_employee = 8;
-  bool is_active = 9;
-  google.protobuf.Timestamp created_at = 10;
-  google.protobuf.Timestamp updated_at = 11;
-  
-  optional ProductGroup product_group = 12;
+  optional string image_url = 9;
+  optional string color = 10;
+  bool is_active = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+
+  optional ProductGroup product_group = 14;
 }
 
 message ProductGroup {
-  int32 id = 1;
+  int32 id =1;
   string product_group_name = 2;
   optional int32 parent_group_id = 3;
   optional string color = 4;
@@ -137,7 +139,7 @@ message ProductGroup {
   bool is_active = 7;
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
-  
+
   optional ProductGroup parent_group = 10;
   repeated ProductGroup child_groups = 11;
   repeated Product products = 12;
@@ -158,14 +160,14 @@ message Cart {
 
 message CartItem {
   string item_id = 1;
-  int32 product_id = 2;
+  string product_code = 2;
   optional int64 serving_employee_id = 3;
   int32 quantity = 4;
   string unit_price = 5;
   optional int32 discount_id = 6;
   string discount_amount = 7;
   string line_total = 8;
-  
+
   optional Product product = 9;
   optional Discount discount = 10;
 }
@@ -176,18 +178,22 @@ message CreateCartRequest {
 }
 
 message CreateCartResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 message AddItemToCartRequest {
   string cart_id = 1;
-  int32 product_id = 2;
+  string product_code = 2;
   int32 quantity = 3;
   optional int64 serving_employee_id = 4;
 }
 
 message AddItemToCartResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 message RemoveItemFromCartRequest {
@@ -196,7 +202,9 @@ message RemoveItemFromCartRequest {
 }
 
 message RemoveItemFromCartResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 message ApplyDiscountRequest {
@@ -206,7 +214,9 @@ message ApplyDiscountRequest {
 }
 
 message ApplyDiscountResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 message GetCartRequest {
@@ -214,7 +224,9 @@ message GetCartRequest {
 }
 
 message GetCartResponse {
-  Cart cart = 1;
+  bool success = 1;
+  optional string message = 2;
+  Cart cart = 3;
 }
 
 // Order Operations
@@ -226,7 +238,9 @@ message CreateOrderFromCartRequest {
 }
 
 message CreateOrderFromCartResponse {
-  OrderDocument order_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
 }
 
 message CreateOrderRequest {
@@ -239,14 +253,16 @@ message CreateOrderRequest {
 }
 
 message CreateOrderItemRequest {
-  int32 product_id = 1;
+  string product_code = 1;
   optional int64 serving_employee_id = 2;
   int32 quantity = 3;
   optional int32 discount_id = 4;
 }
 
 message CreateOrderResponse {
-  OrderDocument order_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
 }
 
 message GetOrderRequest {
@@ -254,7 +270,9 @@ message GetOrderRequest {
 }
 
 message GetOrderResponse {
-  OrderDocument order_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
 }
 
 message ListOrdersRequest {
@@ -266,8 +284,10 @@ message ListOrdersRequest {
 }
 
 message ListOrdersResponse {
-  repeated OrderDocument order_documents = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated OrderDocument order_documents = 3;
+  PaginationResponse pagination = 4;
 }
 
 // Payment Operations
@@ -279,8 +299,10 @@ message ProcessPaymentRequest {
 }
 
 message ProcessPaymentResponse {
-  OrderDocument order_document = 1;
-  string change_amount = 2;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
+  string change_amount = 4;
 }
 
 // Order Modifications
@@ -291,7 +313,9 @@ message VoidOrderRequest {
 }
 
 message VoidOrderResponse {
-  OrderDocument order_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument order_document = 3;
 }
 
 message ReturnOrderRequest {
@@ -302,24 +326,35 @@ message ReturnOrderRequest {
 }
 
 message ReturnOrderResponse {
-  OrderDocument return_document = 1;
+  bool success = 1;
+  optional string message = 2;
+  OrderDocument return_document = 3;
 }
 
 // Product Operations
+message UpdateProductRequest {
+  string product_code = 1;
+  optional string product_name = 2;
+  optional string product_price = 3;
+  optional string image_url = 4;
+  optional string cost_price = 5;
+  optional int32 product_group_id = 6;
+  optional bool commission_eligible = 7;
+  optional bool requires_service_employee = 8;
+  optional bool is_active = 9;
+  optional string color = 10;
+
+  optional ProductGroup product_group = 11;
+}
+
 message GetProductRequest {
-  int32 id = 1;
-}
-
-message GetProductResponse {
-  Product product = 1;
-}
-
-message GetProductByCodeRequest {
   string product_code = 1;
 }
 
-message GetProductByCodeResponse {
-  Product product = 1;
+message GetProductResponse {
+  bool success = 1;
+  optional string message = 2;
+  Product product = 3;
 }
 
 message ListProductsRequest {
@@ -330,11 +365,57 @@ message ListProductsRequest {
 }
 
 message ListProductsResponse {
-  repeated Product products = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated Product products = 3;
+  PaginationResponse pagination = 4;
 }
 
 // Product Group Operations
+
+message CreateProductGroupRequest {
+  string product_group_name = 2;
+  optional int32 parent_group_id = 3;
+  optional string color = 4;
+  optional string image_url = 5;
+  string commission_rate = 6;
+  bool is_active = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message CreateProductGroupResponse {
+  bool success = 1;
+  optional string message = 2;
+  ProductGroup product_group = 3; 
+}
+
+message UpdateProductGroupRequest {
+  int32 id =1;
+  optional string product_group_name = 2;
+  optional int32 parent_group_id = 3;
+  optional string color = 4;
+  optional string image_url = 5;
+  optional string commission_rate = 6;
+  optional bool is_active = 7;
+}
+
+message UpdateProductGroupResponse {
+  bool success = 1;
+  optional string message = 2;
+  ProductGroup product_group = 3; 
+}
+
+message GetProductGroupRequest {
+  int32 id = 1;
+}
+
+message GetProductGroupResponse {
+  bool success = 1;
+  optional string message = 2;
+  ProductGroup product_group = 3;
+}
+
 message ListProductGroupsRequest {
   PaginationRequest pagination = 1;
   optional bool is_active = 2;
@@ -342,41 +423,133 @@ message ListProductGroupsRequest {
 }
 
 message ListProductGroupsResponse {
-  repeated ProductGroup product_groups = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated ProductGroup product_groups = 3;
+  PaginationResponse pagination = 4;
 }
 
 // Discount Operations
+message CreateDiscountRequest {
+  string discount_name = 1;
+  DiscountType discount_type = 2;
+  string discount_value = 3;  // Format varies by type: percentage (e.g., "15"), fixed amount (e.g., "50000"), buy_x_get_y (e.g., "2:1")
+  optional string product_code = 4;
+  optional int32 product_group_id = 5;
+  int32 min_quantity = 6;
+  optional int64 max_usage_per_transaction = 7;
+  optional google.protobuf.Timestamp valid_from = 8;
+  optional google.protobuf.Timestamp valid_until = 9;
+  bool is_active = 10;
+  optional int32 buy_quantity = 11;    // For BUY_X_GET_Y type - X in "Buy X Get Y"
+  optional int32 get_quantity = 12;    // For BUY_X_GET_Y type - Y in "Buy X Get Y"
+
+  optional Product product = 14;
+  optional ProductGroup product_group = 15;
+}
+
+message CreateDiscountResponse {
+  bool success = 1;
+  optional string message = 2;
+  optional Discount discount = 3;
+}
+
+message GetDiscountRequest {
+  int64 id = 1;
+}
+
+message GetDiscountResponse {
+  bool success = 1;
+  optional string message = 2;
+  optional Discount discount = 3;
+}
+
 message ListDiscountsRequest {
-  PaginationRequest pagination = 1;
-  optional bool is_active = 2;
-  optional int32 product_id = 3;
+  int32 page = 1;
+  int32 page_size = 2;
+  optional int32 search = 3;
+  optional bool is_active = 4;
+  optional DiscountType discount_type = 5;
+  optional string product_code = 6;
+  optional int32 product_group_id = 7;
 }
 
 message ListDiscountsResponse {
-  repeated Discount discounts = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated Discount discounts = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+message UpdateDiscountRequest {
+  int64 id = 1;
+  optional string discount_name = 2;
+  optional DiscountType discount_type = 3;
+  optional string discount_value = 4;
+  optional string product_code = 5;
+  optional int32 product_group_id = 6;
+  optional int32 min_quantity = 7;
+  optional int64 max_usage_per_transaction = 8;
+  optional google.protobuf.Timestamp valid_from = 9;
+  optional google.protobuf.Timestamp valid_until = 10;
+  optional bool is_active = 11;
+  optional int32 buy_quantity = 12;
+  optional int32 get_quantity = 13;
+}
+
+message UpdateDiscountResponse {
+  bool success = 1;
+  optional string message = 2;
+  optional Discount discount = 3;
+}
+
+message DeleteDiscountRequest {
+  int64 id = 1;
+}
+
+message DeleteDiscountResponse {
+  bool success = 1;
+  optional string message = 2;
 }
 
 message ValidateDiscountRequest {
   int32 discount_id = 1;
-  optional int32 product_id = 2;
+  optional string product_code = 2;
   optional int32 quantity = 3;
 }
 
 message ValidateDiscountResponse {
-  bool is_valid = 1;
-  optional string reason = 2;
-  string calculated_discount_amount = 3;
+  bool success = 1;
+  optional string message = 2;
+  bool is_valid = 3;
+  optional string reason = 4;
+  string calculated_discount_amount = 5;
 }
 
 // Payment Type Operations
+message CreatePaymentTypesResponse {
+  bool success = 1;
+  optional string message = 2;
+  PaymentType payment_types = 3;
+}
+
+message UpdatePaymentTypeRequest {
+  int32 id = 1;
+  optional string payment_name = 2;
+  optional bool is_active = 3;
+  optional string processing_fee_rate = 4;
+}
+
 message ListPaymentTypesRequest {
   optional bool is_active = 1;
 }
 
 message ListPaymentTypesResponse {
-  repeated PaymentType payment_types = 1;
+  bool success = 1;
+  optional string message = 2;
+  repeated PaymentType payment_types = 3;
 }
 
 service POSService {
@@ -386,7 +559,7 @@ service POSService {
   rpc AddItemToCart(AddItemToCartRequest) returns (AddItemToCartResponse);
   rpc RemoveItemFromCart(RemoveItemFromCartRequest) returns (RemoveItemFromCartResponse);
   rpc ApplyDiscount(ApplyDiscountRequest) returns (ApplyDiscountResponse);
-  
+
   // Order Management
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
   rpc CreateOrderFromCart(CreateOrderFromCartRequest) returns (CreateOrderFromCartResponse);
@@ -394,20 +567,30 @@ service POSService {
   rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
   rpc VoidOrder(VoidOrderRequest) returns (VoidOrderResponse);
   rpc ReturnOrder(ReturnOrderRequest) returns (ReturnOrderResponse);
-  
+
   // Payment Processing
   rpc ProcessPayment(ProcessPaymentRequest) returns (ProcessPaymentResponse);
-  
+
   // Product Operations
+  rpc CreateProduct(Product) returns (GetProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (GetProductResponse);
   rpc GetProduct(GetProductRequest) returns (GetProductResponse);
-  rpc GetProductByCode(GetProductByCodeRequest) returns (GetProductByCodeResponse);
   rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc CreateProductGroup (CreateProductGroupRequest) returns (CreateProductGroupResponse);
+  rpc UpdateProductGroup (UpdateProductGroupRequest) returns (UpdateProductGroupResponse);
+  rpc GetProductGroup (GetProductGroupRequest) returns (GetProductGroupResponse);
   rpc ListProductGroups(ListProductGroupsRequest) returns (ListProductGroupsResponse);
-  
+
   // Discount Operations
+  rpc CreateDiscount(CreateDiscountRequest) returns (CreateDiscountResponse);
+  rpc GetDiscount(GetDiscountRequest) returns (GetDiscountResponse);
   rpc ListDiscounts(ListDiscountsRequest) returns (ListDiscountsResponse);
+  rpc UpdateDiscount(UpdateDiscountRequest) returns (UpdateDiscountResponse);
+  rpc DeleteDiscount(DeleteDiscountRequest) returns (DeleteDiscountResponse);
   rpc ValidateDiscount(ValidateDiscountRequest) returns (ValidateDiscountResponse);
-  
+
   // Payment Type Operations
+  rpc CreatePaymentTypes(PaymentType) returns (CreatePaymentTypesResponse);
+  rpc UpdatePaymentTypes(UpdatePaymentTypeRequest) returns (CreatePaymentTypesResponse);
   rpc ListPaymentTypes(ListPaymentTypesRequest) returns (ListPaymentTypesResponse);
 }
