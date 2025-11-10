@@ -2,9 +2,9 @@ name: Build and Push Backend Docker Images
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "features/AnalyticService" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "features/AnalyticService" ]
   workflow_dispatch:
 
 jobs:
