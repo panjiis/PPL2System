@@ -3,6 +3,7 @@ import grpc
 from concurrent import futures
 import asyncio
 import threading
+from dateutil import parser
 
 import analytics.analytics_service_pb2 as pb
 import analytics.analytics_service_pb2_grpc as rpc
@@ -119,6 +120,9 @@ class AnalyticsService(rpc.AnalyticsService):
             response = pb.GetDailySummaryResponse()
             
             for item in list_of_summaries:
+                created_at_dt = parser.isoparse(item['created_at']) if isinstance(item['created_at'], str) else item['created_at']
+                updated_at_dt = parser.isoparse(item['updated_at']) if isinstance(item['updated_at'], str) else item['updated_at']
+
                 summary_pb = pb.SalesSummaryDaily(
                     id=item['id'],
                     date=item['date'], 
@@ -131,8 +135,8 @@ class AnalyticsService(rpc.AnalyticsService):
                     total_tax=item['total_tax'], 
                     total_cost=item['total_cost'], 
                     gross_profit=item['gross_profit'], 
-                    created_at=to_proto_timestamp(item['created_at']), 
-                    updated_at=to_proto_timestamp(item['updated_at'])  
+                    created_at=to_proto_timestamp(created_at_dt), 
+                    updated_at=to_proto_timestamp(updated_at_dt)  
                 )
                 response.daily_summaries.append(summary_pb)
             return response
@@ -151,16 +155,13 @@ class AnalyticsService(rpc.AnalyticsService):
             db.close()
         
     def GenerateDailySummary(self, request, context):
-        analytics_db = None
-        pos_db = None
+        db = None
         
         try:
-            analytics_db = get_analytics_db_session()
-            pos_db = get_pos_db_session()
+            db = get_analytics_db_session()
 
             formatted_summaries = generate_daily_summary_logic(
-                analytics_db=analytics_db,
-                pos_db=pos_db,
+                db=db,
                 date_str=request.date,
                 cashier_id=request.cashier_id if request.HasField('cashier_id') else None
             )
@@ -171,6 +172,9 @@ class AnalyticsService(rpc.AnalyticsService):
             )
             
             for item in formatted_summaries:
+                created_at_dt = parser.isoparse(item['created_at']) if isinstance(item['created_at'], str) else item['created_at']
+                updated_at_dt = parser.isoparse(item['updated_at']) if isinstance(item['updated_at'], str) else item['updated_at']
+
                 response.generated_summaries.append(
                     pb.SalesSummaryDaily(
                         id=item['id'],
@@ -184,8 +188,8 @@ class AnalyticsService(rpc.AnalyticsService):
                         total_tax=item['total_tax'],         
                         total_cost=item['total_cost'],       
                         gross_profit=item['gross_profit'],     
-                        created_at=to_proto_timestamp(item['created_at']),
-                        updated_at=to_proto_timestamp(item['updated_at'])
+                        created_at=to_proto_timestamp(created_at_dt), # <-- Gunakan variabel baru
+                        updated_at=to_proto_timestamp(updated_at_dt)  # <-- Gunakan variabel baru
                     )
                 )
             
@@ -208,10 +212,8 @@ class AnalyticsService(rpc.AnalyticsService):
                 message=f"Internal error: {e}"
             )
         finally:
-            if analytics_db:
-                analytics_db.close()
-            if pos_db:
-                pos_db.close()
+            if db:
+                db.close()
 
     # --- Product Analytics ---
     def GetProductSales(self, request, context):
@@ -461,25 +463,32 @@ class AnalyticsService(rpc.AnalyticsService):
                 db.close()
 
     def GetPeakHours(self, request, context):
-        # db = get_pos_db_session()
         db = get_analytics_db_session()
         
         try:
-            formatted_data = get_peak_hours_logic(
+            weekly_data_list = get_weekly_peak_hours_logic(
                 db=db,
-                date_range=request.date_range
             )
 
             response = pb.GetPeakHoursResponse()
 
-            for item in formatted_data:
-                response.peak_hours.append(
-                    pb.PeakHourData(
-                        hour=item['hour'],
-                        transaction_count=item['transaction_count'],
-                        total_revenue=item['total_revenue']
-                    )
+            for week_day_data in weekly_data_list:
+                # 1. Buat data hari (WeeklyPeakData)
+                pb_week_day = pb.WeeklyPeakData(
+                    day_of_week=week_day_data['day_of_week']
                 )
+                
+                # 2. Isi data per jam (HourlyData)
+                for hour_data in week_day_data['hourly_data']:
+                    pb_hour = pb.HourlyData(
+                        hour=hour_data['hour'],
+                        transaction_count=hour_data['transaction_count'],
+                        total_revenue=hour_data['total_revenue']
+                    )
+                    pb_week_day.hourly_data.append(pb_hour)
+                
+                # 3. Tambahkan data hari yang sudah lengkap ke respons
+                response.peak_data_by_week.append(pb_week_day)
             
             return response
         

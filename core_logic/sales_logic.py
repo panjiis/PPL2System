@@ -188,8 +188,7 @@ def get_daily_summary_logic(
     return db_data
 
 def generate_daily_summary_logic(
-    analytics_db: Session,
-    pos_db: Session,
+    db: Session, # Hanya butuh DB Analytics
     date_str: str,
     cashier_id: int | None
 ) -> list[dict]:
@@ -198,8 +197,8 @@ def generate_daily_summary_logic(
     except ValueError:
         raise ValueError("Incorrect date format. Use YYYY-MM-DD.")
         
-    raw_sales_data = etl_repo.get_raw_sales_data_from_pos(
-        pos_db, date, cashier_id
+    raw_sales_data = etl_repo.get_raw_sales_data(
+        db, date, cashier_id # Panggil fungsi baru
     )
     
     if not raw_sales_data:
@@ -208,7 +207,7 @@ def generate_daily_summary_logic(
         
     generated_ids = []
     for summary_row in raw_sales_data:
-        new_id = etl_repo.upsert_sales_summary_daily(analytics_db, summary_row)
+        new_id = etl_repo.upsert_sales_summary_daily(db, summary_row)
         generated_ids.append(new_id)
     
     cache_pattern_to_delete = ""
@@ -220,10 +219,48 @@ def generate_daily_summary_logic(
     delete_cache(cache_pattern_to_delete)
         
     final_summaries = get_daily_summary_logic(
-        analytics_db, date_str, cashier_id
+        db, date_str, cashier_id
     )
     
     return final_summaries
+
+# def generate_daily_summary_logic(
+#     analytics_db: Session,
+#     pos_db: Session,
+#     date_str: str,
+#     cashier_id: int | None
+# ) -> list[dict]:
+#     try:
+#         date = datetime.date.fromisoformat(date_str)
+#     except ValueError:
+#         raise ValueError("Incorrect date format. Use YYYY-MM-DD.")
+        
+#     raw_sales_data = etl_repo.get_raw_sales_data_from_pos(
+#         pos_db, date, cashier_id
+#     )
+    
+#     if not raw_sales_data:
+#         print("[Logic] No sales data found for the given date and cashier.")
+#         return []
+        
+#     generated_ids = []
+#     for summary_row in raw_sales_data:
+#         new_id = etl_repo.upsert_sales_summary_daily(analytics_db, summary_row)
+#         generated_ids.append(new_id)
+    
+#     cache_pattern_to_delete = ""
+#     if cashier_id:
+#         cache_pattern_to_delete = f"reports:daily-summary:date={date_str}:cashier={cashier_id}"
+#     else:
+#         cache_pattern_to_delete = f"reports:daily-summary:date={date_str}:cashier=*"
+    
+#     delete_cache(cache_pattern_to_delete)
+        
+#     final_summaries = get_daily_summary_logic(
+#         analytics_db, date_str, cashier_id
+#     )
+    
+#     return final_summaries
 
 def get_product_sales_logic(
     db: Session,

@@ -81,75 +81,139 @@ def get_customer_analytics_logic(
     "next_page_token": next_page_token,
   }
 
-def _get_peak_hours_logic_from_db(
-  db: Session,
-  date_range: object,
-) -> list[dict]:
-  try:
-    start_date = datetime.date.fromisoformat(date_range.start_date)
-    end_date = datetime.date.fromisoformat(date_range.end_date)
-  except ValueError:
-    raise ValueError("Invalid date format. Use YYYY-MM-DD.")
+# def _get_peak_hours_logic_from_db(
+#   db: Session,
+#   date_range: object,
+# ) -> list[dict]:
+#   try:
+#     start_date = datetime.date.fromisoformat(date_range.start_date)
+#     end_date = datetime.date.fromisoformat(date_range.end_date)
+#   except ValueError:
+#     raise ValueError("Invalid date format. Use YYYY-MM-DD.")
   
-  # raw_data = customer_repo.get_peak_hour_data_from_pos(
-  #   db, start_date, end_date
-  # )
+#   # raw_data = customer_repo.get_peak_hour_data_from_pos(
+#   #   db, start_date, end_date
+#   # )
 
-  raw_data = customer_repo.get_peak_hour_data(
-    db, start_date, end_date
-  )
+#   raw_data = customer_repo.get_peak_hour_data(
+#     db, start_date, end_date
+#   )
 
-  hourly_map = {
-    hour: {
-      "transaction_count": 0,
-      "total_revenue": Decimal(0)
-    } for hour in range(24)
-  }
+#   hourly_map = {
+#     hour: {
+#       "transaction_count": 0,
+#       "total_revenue": Decimal(0)
+#     } for hour in range(24)
+#   }
 
-  for item in raw_data:
-    hour = int(item['hour_of_day'])
-    if hour in hourly_map:
-      hourly_map[hour] = {
-        "transaction_count": item['transaction_count'],
-        "total_revenue": item['total_revenue']
-      }
+#   for item in raw_data:
+#     hour = int(item['hour_of_day'])
+#     if hour in hourly_map:
+#       hourly_map[hour] = {
+#         "transaction_count": item['transaction_count'],
+#         "total_revenue": item['total_revenue']
+#       }
   
-  formatted_data = []
-  for hour, data in hourly_map.items():
-    formatted_data.append({
-      "hour": f"{hour:02d}:00",
-      "transaction_count": data['transaction_count'],
-      "total_revenue": to_string(data['total_revenue'])
-    })
+#   formatted_data = []
+#   for hour, data in hourly_map.items():
+#     formatted_data.append({
+#       "hour": f"{hour:02d}:00",
+#       "transaction_count": data['transaction_count'],
+#       "total_revenue": to_string(data['total_revenue'])
+#     })
   
-  return formatted_data
+#   return formatted_data
 
-def get_peak_hours_logic(
-  db: Session,
-  date_range: object,
-) -> list[dict]:  
-  cache_key = (
-    f"reports:peak-hours:" # Key prefix baru
-    f"start={date_range.start_date}:end={date_range.end_date}"
-  )
+# def get_peak_hours_logic(
+#   db: Session,
+#   date_range: object,
+# ) -> list[dict]:  
+#   cache_key = (
+#     f"reports:peak-hours:" # Key prefix baru
+#     f"start={date_range.start_date}:end={date_range.end_date}"
+#   )
 
-  cached_data = get_cache(cache_key)
+#   cached_data = get_cache(cache_key)
 
-  if cached_data:
-    print("CACHE HIT")
-    return cached_data
+#   if cached_data:
+#     print("CACHE HIT")
+#     return cached_data
   
-  try:
-    db_data = _get_peak_hours_logic_from_db(
-      db, date_range
-    )
-  except Exception as e:
-    print(f"Error querying database: {e}")
-    raise e
+#   try:
+#     db_data = _get_peak_hours_logic_from_db(
+#       db, date_range
+#     )
+#   except Exception as e:
+#     print(f"Error querying database: {e}")
+#     raise e
 
-  if db_data:
-    set_cache(
-      cache_key, db_data, CACHE_KEY
-    )
+#   if db_data:
+#     set_cache(
+#       cache_key, db_data, CACHE_KEY
+#     )
   
-  return db_data
+#   return db_data
+
+def get_weekly_peak_hours_logic(db: Session) -> list[dict]:
+    """
+    Mengambil data pola jam sibuk mingguan, diformat untuk respons gRPC baru.
+    """
+    cache_key = "reports:weekly-peak-hours:v1" # Kunci cache statis baru
+
+    cached_data = get_cache(cache_key)
+    if cached_data:
+        print("CACHE HIT")
+        return cached_data
+    
+    # 1. Inisialisasi struktur data lengkap
+    # Ini memastikan Anda mengembalikan 24 jam untuk setiap hari,
+    # bahkan jika tidak ada penjualan (transaction_count: 0)
+    weekly_map = {}
+    for day in range(1, 8): 
+        weekly_map[day] = {
+            hour: {"transaction_count": 0, "total_revenue": Decimal(0)}
+            for hour in range(24) # 0 (00:00) sampai 23 (23:00)
+        }
+
+    # 2. Ambil data mentah dari database
+    try:
+        raw_data = customer_repo.get_weekly_peak_hour_data(db)
+    except Exception as e:
+        print(f"Error querying database: {e}")
+        raise e
+
+    # 3. Isi struktur data dengan data dari DB
+    for row in raw_data:
+        day = int(row['day_of_week'])
+        hour = int(row['hour_of_day'])
+        
+        # Pastikan data ada di dalam rentang yang diharapkan
+        if day in weekly_map and hour in weekly_map[day]:
+            weekly_map[day][hour] = {
+                "transaction_count": int(row['transaction_count']),
+                "total_revenue": row['total_revenue'] or Decimal(0)
+            }
+
+    # 4. Ubah format map menjadi daftar yang diminta oleh .proto
+    response_list = []
+    for day_of_week, hourly_map in weekly_map.items():
+        day_data = {
+            "day_of_week": day_of_week,
+            "hourly_data": []
+        }
+        
+        # Urutkan berdasarkan jam
+        for hour in sorted(hourly_map.keys()):
+            data = hourly_map[hour]
+            day_data["hourly_data"].append({
+                "hour": f"{hour:02d}:00", # Format jam: "09:00"
+                "transaction_count": data['transaction_count'],
+                "total_revenue": to_string(data['total_revenue'])
+            })
+            
+        response_list.append(day_data)
+
+    # 5. Simpan ke cache
+    set_cache(cache_key, response_list, CACHE_KEY) # Menggunakan TTL 900 detik
+  
+    return response_list

@@ -15,7 +15,7 @@ class SalesSummaryDaily(Base):
     __tablename__ = 'sales_summary_daily'
     
     # Definisi kolom berdasarkan analytics_syntra_microservice.sql
-    id = Column(BigInteger, Identity(), primary_key=True)
+    id = Column(BigInteger, Identity(always=False), primary_key=True)
     date = Column(Date, nullable=False)
     cashier_id = Column(BigInteger, nullable=False)
     total_transactions = Column(Integer, server_default='0')
@@ -37,7 +37,7 @@ class SalesSummaryDaily(Base):
 class ProductSalesSummary(Base):
     __tablename__ = 'product_sales_summary'
     
-    id = Column(BigInteger, Identity(), primary_key=True)
+    id = Column(BigInteger, Identity(always=False), primary_key=True)
     date = Column(Date, nullable=False)
     product_id = Column(Integer, nullable=False)
     product_group_id = Column(Integer, nullable=True)
@@ -57,7 +57,7 @@ class ProductSalesSummary(Base):
 class EmployeePerformance(Base):
     __tablename__ = 'employee_performance'
     
-    id = Column(BigInteger, Identity(), primary_key=True)
+    id = Column(BigInteger, Identity(always=False), primary_key=True)
     date = Column(Date, nullable=False)
     employee_id = Column(BigInteger, nullable=False)
     total_sales = Column(Numeric(15, 2), server_default='0.00')
@@ -75,7 +75,7 @@ class EmployeePerformance(Base):
 class CustomerAnalytics(Base):
     __tablename__ = 'customer_analytics'
     
-    id = Column(BigInteger, Identity(), primary_key=True)
+    id = Column(BigInteger, Identity(always=False), primary_key=True)
     date = Column(Date, nullable=False)
     product_group_id = Column(Integer, nullable=True)
     total_transactions = Column(Integer, server_default='0')
@@ -93,7 +93,7 @@ class RawSalesEvent(Base):
     __tablename__ = 'raw_sales_events'
     
     # Ini adalah tabel baru dari diskusi kita sebelumnya
-    id = Column(BigInteger, Identity(), primary_key=True)
+    id = Column(BigInteger, Identity(always=False), primary_key=True)
     order_document_number = Column(String(255), nullable=False, unique=True)
     order_timestamp = Column(DateTime(timezone=True), nullable=False, index=True)
     total_amount = Column(Numeric(18, 2), nullable=False)
@@ -103,3 +103,28 @@ class RawSalesEvent(Base):
     __table_args__ = (
         Index('idx_raw_sales_events_order_timestamp', 'order_timestamp'),
     )
+
+# ... (model-model lain) ...
+
+class RawOrderDocument(Base):
+    __tablename__ = 'raw_order_documents'
+
+    id = Column(BigInteger, Identity(always=False), primary_key=True) # ID dari event, BUKAN auto-increment
+    document_number = Column(String(255), unique=True, nullable=False)
+    cashier_id = Column(BigInteger, nullable=False)
+    order_timestamp = Column(DateTime(timezone=True), nullable=False, index=True)
+    tax_amount = Column(Numeric(18, 2), nullable=False, server_default='0.00')
+    # Tambahkan field lain dari 'order_documents' jika perlu
+
+class RawOrderItem(Base):
+    __tablename__ = 'raw_order_items'
+
+    id = Column(BigInteger, Identity(always=False), primary_key=True)
+    document_number = Column(String(255), nullable=False, index=True)
+    product_code = Column(String(255), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    price_before_discount = Column(Numeric(18, 2), nullable=False)
+    discount_amount = Column(Numeric(18, 2), nullable=False)
+    line_total = Column(Numeric(18, 2), nullable=False)
+    cost_price = Column(Numeric(18, 2), nullable=False) # KOLOM KUNCI!
+    # Tambahkan field lain dari 'order_items' jika perlu

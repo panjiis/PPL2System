@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 import datetime
 
-def get_raw_sales_data_from_pos(
-    pos_db: Session,
+def get_raw_sales_data(
+    db: Session,
     date: datetime.date,
     cashier_id: int | None
 ) -> list[dict]:
@@ -22,13 +22,14 @@ def get_raw_sales_data_from_pos(
             COALESCE(ia.total_cost, 0) as total_cost,
             (COALESCE(ia.net_sales, 0) - COALESCE(ia.total_cost, 0)) as gross_profit
         FROM (
+            -- Subquery Dokumen (dari raw_order_documents)
             SELECT
-                CAST(od.orders_date AS date) as date,
+                CAST(od.order_timestamp AS date) as date,
                 od.cashier_id,
                 COUNT(od.id) as total_transactions,
-                SUM(CAST(od.tax_amount AS decimal)) as total_tax
-            FROM order_documents od
-            WHERE CAST(od.orders_date AS date) = :date
+                SUM(od.tax_amount) as total_tax
+            FROM raw_order_documents od -- <-- TABEL LOKAL
+            WHERE CAST(od.order_timestamp AS date) = :date
     """
     
     if cashier_id:
@@ -36,21 +37,21 @@ def get_raw_sales_data_from_pos(
         params["cashier_id"] = cashier_id
         
     query_str += """
-            GROUP BY CAST(od.orders_date AS date), od.cashier_id
+            GROUP BY CAST(od.order_timestamp AS date), od.cashier_id
         ) da
         FULL OUTER JOIN (
+            -- Subquery Item (dari raw_order_items)
             SELECT
-                CAST(od.orders_date AS date) as date,
+                CAST(od.order_timestamp AS date) as date,
                 od.cashier_id,
                 SUM(oi.quantity) as total_items_sold,
-                SUM(CAST(oi.price_before_discount AS decimal)) as gross_sales,
-                SUM(CAST(oi.discount_amount AS decimal)) as total_discounts,
-                SUM(CAST(oi.line_total AS decimal)) as net_sales,
-                SUM(oi.quantity * CAST(p.cost_price AS decimal)) as total_cost
-            FROM order_items oi
-            JOIN order_documents od ON oi.document_id = od.id
-            JOIN products p ON oi.product_code = p.product_code
-            WHERE CAST(od.orders_date AS date) = :date
+                SUM(oi.price_before_discount) as gross_sales,
+                SUM(oi.discount_amount) as total_discounts,
+                SUM(oi.line_total) as net_sales,
+                SUM(oi.quantity * oi.cost_price) as total_cost -- <-- DARI ITEM LOKAL
+            FROM raw_order_items oi -- <-- TABEL LOKAL
+            JOIN raw_order_documents od ON oi.document_number = od.document_number -- <-- JOIN LOKAL
+            WHERE CAST(od.order_timestamp AS date) = :date
     """
     
     if cashier_id:
@@ -58,12 +59,74 @@ def get_raw_sales_data_from_pos(
         params["cashier_id"] = cashier_id
         
     query_str += """
-            GROUP BY CAST(od.orders_date AS date), od.cashier_id
+            GROUP BY CAST(od.order_timestamp AS date), od.cashier_id
         ) ia ON da.date = ia.date AND da.cashier_id = ia.cashier_id
     """
 
-    result = pos_db.execute(text(query_str), params).all()
+    result = db.execute(text(query_str), params).all()
     return [dict(row._mapping) for row in result]
+
+# def get_raw_sales_data_from_pos(
+#     pos_db: Session,
+#     date: datetime.date,
+#     cashier_id: int | None
+# ) -> list[dict]:
+#     params = {"date": date}
+#     query_str = """
+#         SELECT
+#             COALESCE(da.date, ia.date) as date,
+#             COALESCE(da.cashier_id, ia.cashier_id) as cashier_id,
+#             COALESCE(da.total_transactions, 0) as total_transactions,
+#             COALESCE(ia.total_items_sold, 0) as total_items_sold,
+#             COALESCE(ia.gross_sales, 0) as gross_sales,
+#             COALESCE(ia.total_discounts, 0) as total_discounts,
+#             COALESCE(ia.net_sales, 0) as net_sales,
+#             COALESCE(da.total_tax, 0) as total_tax,
+#             COALESCE(ia.total_cost, 0) as total_cost,
+#             (COALESCE(ia.net_sales, 0) - COALESCE(ia.total_cost, 0)) as gross_profit
+#         FROM (
+#             SELECT
+#                 CAST(od.orders_date AS date) as date,
+#                 od.cashier_id,
+#                 COUNT(od.id) as total_transactions,
+#                 SUM(CAST(od.tax_amount AS decimal)) as total_tax
+#             FROM order_documents od
+#             WHERE CAST(od.orders_date AS date) = :date
+#     """
+    
+#     if cashier_id:
+#         query_str += " AND od.cashier_id = :cashier_id"
+#         params["cashier_id"] = cashier_id
+        
+#     query_str += """
+#             GROUP BY CAST(od.orders_date AS date), od.cashier_id
+#         ) da
+#         FULL OUTER JOIN (
+#             SELECT
+#                 CAST(od.orders_date AS date) as date,
+#                 od.cashier_id,
+#                 SUM(oi.quantity) as total_items_sold,
+#                 SUM(CAST(oi.price_before_discount AS decimal)) as gross_sales,
+#                 SUM(CAST(oi.discount_amount AS decimal)) as total_discounts,
+#                 SUM(CAST(oi.line_total AS decimal)) as net_sales,
+#                 SUM(oi.quantity * CAST(p.cost_price AS decimal)) as total_cost
+#             FROM order_items oi
+#             JOIN order_documents od ON oi.document_id = od.id
+#             JOIN products p ON oi.product_code = p.product_code
+#             WHERE CAST(od.orders_date AS date) = :date
+#     """
+    
+#     if cashier_id:
+#         query_str += " AND od.cashier_id = :cashier_id"
+#         params["cashier_id"] = cashier_id
+        
+#     query_str += """
+#             GROUP BY CAST(od.orders_date AS date), od.cashier_id
+#         ) ia ON da.date = ia.date AND da.cashier_id = ia.cashier_id
+#     """
+
+#     result = pos_db.execute(text(query_str), params).all()
+#     return [dict(row._mapping) for row in result]
 
 
 def upsert_sales_summary_daily(
