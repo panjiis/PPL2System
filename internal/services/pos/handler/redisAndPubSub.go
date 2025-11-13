@@ -165,15 +165,15 @@ type CartItem struct {
 }
 
 type OrderEvent struct {
-	EventType      EventType      `json:"event_type"`
-	OrderID        int64          `json:"order_id"`
-	DocumentNumber string         `json:"document_number"`
-	CashierID      int64          `json:"cashier_id"`
-	TotalAmount    string         `json:"total_amount"`
-	PaidStatus     int32          `json:"paid_status"`
-	DocumentType   int32          `json:"document_type"`
-	Timestamp      time.Time      `json:"timestamp"`
-	OrderData      *OrderDocument `json:"order_data,omitempty"`
+	EventType      EventType       `json:"event_type"`
+	OrderID        int64           `json:"order_id"`
+	DocumentNumber string          `json:"document_number"`
+	CashierID      int64           `json:"cashier_id"`
+	TotalAmount    string          `json:"total_amount"`
+	PaidStatus     int32           `json:"paid_status"`
+	DocumentType   int32           `json:"document_type"`
+	Timestamp      time.Time       `json:"timestamp"`
+	OrderData      *OrderDataEvent `json:"order_data,omitempty"`
 }
 
 type OrderItemEvent struct {
@@ -189,6 +189,43 @@ type OrderItemEvent struct {
 	DiscountAmount      string `json:"discount_amount"`
 	LineTotal           string `json:"line_total"`
 	CommissionAmount    string `json:"commission_amount"`
+	CostPrice           string `json:"cost_price"`
+}
+
+// Struct payload baru yang diratakan
+type OrderDataEvent struct {
+	ID             int64            `json:"ID"`
+	DocumentNumber string           `json:"DocumentNumber"`
+	CashierId      int64            `json:"CashierId"`
+	OrdersDate     *time.Time       `json:"OrdersDate"`
+	TaxAmount      string           `json:"TaxAmount"`
+	TotalAmount    string           `json:"TotalAmount"` // Tambahkan ini juga
+	OrderItems     []OrderItemEvent `json:"OrderItems"`  // Menggunakan slice event
+}
+
+// Sale events (POS → Inventory)
+type SaleItem struct {
+	ProductCode string `json:"product_code"`
+	Quantity    int32  `json:"quantity"`
+	UnitPrice   string `json:"unit_price"`
+}
+
+type SaleCompletedEvent struct {
+	EventID       string     `json:"event_id"`
+	Timestamp     time.Time  `json:"timestamp"`
+	TransactionID string     `json:"transaction_id"`
+	DocumentID    int64      `json:"document_id"`
+	WarehouseID   int32      `json:"warehouse_id"`
+	Items         []SaleItem `json:"items"`
+}
+
+type SaleRefundedEvent struct {
+	EventID       string     `json:"event_id"`
+	Timestamp     time.Time  `json:"timestamp"`
+	TransactionID string     `json:"transaction_id"`
+	DocumentID    int64      `json:"document_id"`
+	WarehouseID   int32      `json:"warehouse_id"`
+	Items         []SaleItem `json:"items"`
 }
 
 // func (s *POSHandler) publishOrderEvent(ctx context.Context, event OrderEvent) error {
@@ -210,7 +247,6 @@ type OrderItemEvent struct {
 // }
 
 func (s *POSHandler) publishOrderEvent(ctx context.Context, event OrderEvent) error {
-	log.Println("test-publishorderevent")
 	eventJSON, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("failed to marshal event: %w", err)
@@ -238,8 +274,10 @@ func (s *POSHandler) createOrderEvent(order *OrderDocument, eventType EventType)
 	items := make([]OrderItemEvent, len(order.OrderItems))
 	for i, item := range order.OrderItems {
 		productName := ""
+		costPrice := "0.00"
 		if item.Product != nil {
 			productName = item.Product.ProductName
+			costPrice = item.Product.CostPrice
 		}
 
 		items[i] = OrderItemEvent{
@@ -255,8 +293,21 @@ func (s *POSHandler) createOrderEvent(order *OrderDocument, eventType EventType)
 			DiscountAmount:      item.DiscountAmount,
 			LineTotal:           item.LineTotal,
 			CommissionAmount:    item.CommissionAmount,
+			CostPrice:           costPrice,
 		}
 	}
+
+	orderDataPayload := &OrderDataEvent{
+		ID:             order.ID,
+		DocumentNumber: order.DocumentNumber,
+		CashierId:      order.CashierId,
+		OrdersDate:     order.OrdersDate,
+		TaxAmount:      order.TaxAmount,
+		TotalAmount:    order.TotalAmount, // Diperlukan untuk subscriber
+		OrderItems:     items,             // <-- Gunakan slice 'items' yang sudah Anda buat!
+	}
+
+	loc, _ := time.LoadLocation("Asia/Jakarta")
 
 	return OrderEvent{
 		EventType:      eventType,
@@ -266,7 +317,42 @@ func (s *POSHandler) createOrderEvent(order *OrderDocument, eventType EventType)
 		TotalAmount:    order.TotalAmount,
 		PaidStatus:     order.PaidStatus,
 		DocumentType:   order.DocumentType,
-		Timestamp:      time.Now(),
-		OrderData:      order,
+		Timestamp:      time.Now().In(loc),
+		OrderData:      orderDataPayload,
 	}
+}
+
+// Sale events (POS → Inventory)
+func (s *POSHandler) publishStockChanges(ctx context.Context, subject string, event interface{}) error {
+	eventJSON, err := json.Marshal(event)
+	if err != nil {
+		log.Printf("Failed to marshal event for subject %s: %v", subject, err)
+		return err
+	}
+
+	err = s.nats.Publish(subject, eventJSON)
+	if err != nil {
+		log.Printf("Failed to publish NATS event to subject %s: %v", subject, err)
+		return err
+	}
+
+	err = s.nats.Flush()
+	if err != nil {
+		log.Printf("Failed to flush NATS connection: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *POSHandler) orderItemsToSaleItems(orderItems []OrderItem) []SaleItem {
+	saleItems := make([]SaleItem, len(orderItems))
+	for i, item := range orderItems {
+		saleItems[i] = SaleItem{
+			ProductCode: item.ProductCode,
+			Quantity:    item.Quantity,
+			UnitPrice:   item.UnitPrice,
+		}
+	}
+	return saleItems
 }

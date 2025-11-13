@@ -3,12 +3,17 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"time"
+
+	lib "syntra-system/internal/utils"
 
 	"github.com/nats-io/nats.go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
 const (
@@ -86,6 +91,7 @@ type SaleRefundedEvent struct {
 	Items         []SaleItem `json:"items"`
 }
 
+// Type Definitions
 type InventoryProduct struct {
 	ProductCode   string `gorm:"size:100;primaryKey"`
 	ProductName   string `gorm:"size:255"`
@@ -245,4 +251,194 @@ func (c *InventoryHandler) GetManagerNamesBatch(ctx context.Context, managerIDs 
 	}
 
 	return managerNameMap, nil
+}
+
+func (h *InventoryHandler) SubscribeToSaleAndRefundEvents() error {
+	_, err := h.nats.Subscribe("sale.completed", func(msg *nats.Msg) {
+		var event SaleCompletedEvent
+		if err := json.Unmarshal(msg.Data, &event); err != nil {
+			log.Printf("Failed to unmarshal sale.completed event: %v", err)
+			return
+		}
+
+		err := h.handleSaleCompleted(context.Background(), &event)
+		if err != nil {
+			log.Printf("Failed to handle sale.completed event: %v", err)
+			return
+		}
+
+		log.Printf("Successfully processed sale event: %s", event.EventID)
+	})
+	if err != nil {
+		return fmt.Errorf("failed to subscribe to sale.completed: %w", err)
+	}
+
+	_, err = h.nats.Subscribe("sale.refunded", func(msg *nats.Msg) {
+		var event SaleRefundedEvent
+		if err := json.Unmarshal(msg.Data, &event); err != nil {
+			log.Printf("Failed to unmarshal sale.refunded event: %v", err)
+			return
+		}
+
+		err = h.handleSaleRefunded(context.Background(), &event)
+		if err != nil {
+			log.Printf("Failed to handle sale.refunded event: %v", err)
+			return
+		}
+
+		log.Printf("Successfully processed refund event: %s", event.EventID)
+	})
+	if err != nil {
+		return fmt.Errorf("failed to subscribe to sale.refunded: %w", err)
+	}
+
+	log.Println("Subscribed to sale.completed and sale.refunded events")
+	return nil
+}
+
+func (h *InventoryHandler) handleSaleCompleted(ctx context.Context, event *SaleCompletedEvent) error {
+	tx := h.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for _, item := range event.Items {
+		var stock Stock
+		err := tx.Where("product_code = ? AND warehouse_id = ?",
+			item.ProductCode, event.WarehouseID).
+			First(&stock).Error
+
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				log.Printf("Stock not found for product %s in warehouse %d",
+					item.ProductCode, event.WarehouseID)
+				continue
+			}
+			tx.Rollback()
+			return fmt.Errorf("failed to find stock for product %s: %w", item.ProductCode, err)
+		}
+
+		if stock.AvailableQuantity < item.Quantity {
+			tx.Rollback()
+			return fmt.Errorf("insufficient available stock for product %s: available %d, requested %d",
+				item.ProductCode, stock.AvailableQuantity, item.Quantity)
+		}
+
+		newAvailableQuantity := stock.AvailableQuantity - item.Quantity
+		err = tx.Model(&Stock{}).
+			Where("id = ?", stock.ID).
+			Updates(map[string]interface{}{
+				"available_quantity": newAvailableQuantity,
+				"updated_at":         time.Now(),
+			}).Error
+
+		if err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to update stock for product %s: %w", item.ProductCode, err)
+		}
+
+		stockMovement := StockMovement{
+			ProductCode:   item.ProductCode,
+			WarehouseID:   event.WarehouseID,
+			MovementType:  2,
+			Quantity:      item.Quantity,
+			UnitCost:      &stock.UnitCost,
+			ReferenceType: 2,
+			ReferenceID:   &event.TransactionID,
+			Notes:         lib.StrPtr(fmt.Sprintf("Sale completed - Document ID: %d | Created by Syntra System", event.DocumentID)),
+			CreatedBy:     0,
+			CreatedAt:     time.Now(),
+		}
+
+		if err := tx.Create(&stockMovement).Error; err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to create stock movement: %w", err)
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (h *InventoryHandler) handleSaleRefunded(ctx context.Context, event *SaleRefundedEvent) error {
+	tx := h.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for _, item := range event.Items {
+		var stock Stock
+		err := tx.Where("product_code = ? AND warehouse_id = ?",
+			item.ProductCode, event.WarehouseID).
+			First(&stock).Error
+
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				log.Printf("Stock not found for product %s in warehouse %d",
+					item.ProductCode, event.WarehouseID)
+				stock = Stock{
+					ProductCode:       item.ProductCode,
+					WarehouseID:       event.WarehouseID,
+					AvailableQuantity: item.Quantity,
+					ReservedQuantity:  0,
+					UnitCost:          "0.00",
+					CreatedAt:         time.Now(),
+					UpdatedAt:         time.Now(),
+				}
+
+				if err := tx.Create(&stock).Error; err != nil {
+					tx.Rollback()
+					return fmt.Errorf("failed to create stock for product %s: %w", item.ProductCode, err)
+				}
+				continue
+			}
+			tx.Rollback()
+			return fmt.Errorf("failed to find stock for product %s: %w", item.ProductCode, err)
+		}
+
+		newAvailableQuantity := stock.AvailableQuantity + item.Quantity
+		err = tx.Model(&Stock{}).
+			Where("id = ?", stock.ID).
+			Updates(map[string]interface{}{
+				"available_quantity": newAvailableQuantity,
+				"updated_at":         time.Now(),
+			}).Error
+
+		if err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to update stock for product %s: %w", item.ProductCode, err)
+		}
+
+		stockMovement := StockMovement{
+			ProductCode:   item.ProductCode,
+			WarehouseID:   event.WarehouseID,
+			MovementType:  1,
+			Quantity:      item.Quantity,
+			UnitCost:      &stock.UnitCost,
+			ReferenceType: 5,
+			ReferenceID:   &event.TransactionID,
+			Notes:         lib.StrPtr(fmt.Sprintf("Sale refunded - Document ID: %d | Created By Syntra System", event.DocumentID)),
+			CreatedBy:     0,
+			CreatedAt:     time.Now(),
+		}
+
+		if err := tx.Create(&stockMovement).Error; err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to create stock movement: %w", err)
+		}
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
 }

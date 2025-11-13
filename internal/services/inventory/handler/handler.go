@@ -49,6 +49,13 @@ func NewInventoryHandler(db *gorm.DB, redisClient *redis.Client) *InventoryHandl
 		}
 	}()
 
+	go func() {
+		log.Println("Starting to listen for sale events...")
+		if err := handler.SubscribeToSaleAndRefundEvents(); err != nil {
+			log.Printf("Error subscribing to sale events: %v", err)
+		}
+	}()
+
 	return handler
 }
 

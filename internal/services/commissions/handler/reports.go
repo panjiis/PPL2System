@@ -96,6 +96,7 @@ func (c *CommissionHandler) GetCommissionSummary(ctx context.Context, req *proto
 	}
 
 	return &proto.GetCommissionSummaryResponse{
+		Success: true,
 		Summary: summary,
 	}, nil
 }
@@ -205,6 +206,7 @@ func (c *CommissionHandler) GetCommissionReport(ctx context.Context, req *proto.
 	}
 
 	return &proto.GetCommissionReportResponse{
+		Success:                    true,
 		EmployeeSummaries:          summariesProto,
 		TotalCommissionsCalculated: totalCalculated.StringFixed(2),
 		TotalCommissionsPaid:       totalPaid.StringFixed(2),

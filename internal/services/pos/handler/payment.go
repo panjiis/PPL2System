@@ -9,6 +9,7 @@ import (
 	proto "syntra-system/proto/protogen/pos"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -212,6 +213,45 @@ func (s *POSHandler) ProcessPayment(ctx context.Context, req *proto.ProcessPayme
 	log.Println("DEBUG POS: Menerbitkan event 'payment.processed'...")
 	// ==========================
 
+	// --- BUAT PAYLOAD EVENT YANG RATA (FLATTENED) ---
+	// Kita bisa melakukan ini karena Anda sudah me-reload order dengan Preload
+	items := make([]OrderItemEvent, len(order.OrderItems))
+	for i, item := range order.OrderItems {
+		productName := ""
+		costPrice := "0.00"
+		if item.Product != nil {
+			productName = item.Product.ProductName
+			costPrice = item.Product.CostPrice
+		}
+
+		items[i] = OrderItemEvent{
+			ID:                  item.ID,
+			DocumentID:          item.DocumentId,
+			ProductCode:         item.ProductCode,
+			ProductName:         productName,
+			ServingEmployeeID:   item.ServingEmployeeId,
+			Quantity:            item.Quantity,
+			UnitPrice:           item.UnitPrice,
+			PriceBeforeDiscount: item.PriceBeforeDiscount,
+			DiscountID:          item.DiscountId,
+			DiscountAmount:      item.DiscountAmount,
+			LineTotal:           item.LineTotal,
+			CommissionAmount:    item.CommissionAmount,
+			CostPrice:           costPrice,
+		}
+	}
+
+	orderDataPayload := &OrderDataEvent{
+		ID:             order.ID,
+		DocumentNumber: order.DocumentNumber,
+		CashierId:      order.CashierId,
+		OrdersDate:     order.OrdersDate,
+		TaxAmount:      order.TaxAmount,
+		TotalAmount:    order.TotalAmount,
+		OrderItems:     items,
+	}
+	// --- AKHIR BLOK PAYLOAD ---
+
 	s.publishOrderEvent(ctx, OrderEvent{
 		EventType:      EventPaymentProcessed,
 		OrderID:        order.ID,
@@ -221,8 +261,23 @@ func (s *POSHandler) ProcessPayment(ctx context.Context, req *proto.ProcessPayme
 		PaidStatus:     order.PaidStatus,
 		DocumentType:   order.DocumentType,
 		Timestamp:      time.Now(),
-		OrderData:      &order,
+		OrderData:      orderDataPayload,
 	})
+
+	saleItems := s.orderItemsToSaleItems(order.OrderItems)
+	saleCompletedEvent := SaleCompletedEvent{
+		EventID:       uuid.New().String(),
+		Timestamp:     time.Now(),
+		TransactionID: order.DocumentNumber,
+		DocumentID:    order.ID,
+		WarehouseID:   1,
+		Items:         saleItems,
+	}
+
+	err := s.publishStockChanges(ctx, "sale.completed", saleCompletedEvent)
+	if err != nil {
+		log.Printf("Failed to publish sale.completed event: %v", err)
+	}
 
 	return &proto.ProcessPaymentResponse{
 		Success:       true,

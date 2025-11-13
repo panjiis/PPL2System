@@ -14,6 +14,7 @@ import (
 	inventory "syntra-system/proto/protogen/inventory"
 	pos "syntra-system/proto/protogen/pos"
 	user "syntra-system/proto/protogen/user"
+	analytics "syntra-system/proto/protogen/analytics"
 )
 
 type GRPCClients struct {
@@ -21,10 +22,12 @@ type GRPCClients struct {
 	Inventory      inventory.InventoryServiceClient
 	POS            pos.POSServiceClient
 	Commissions    commissions.CommissionServiceClient
+	Analytics 		 analytics.AnalyticsServiceClient
 	userConn       *grpc.ClientConn
 	inventoryConn  *grpc.ClientConn
 	posConn        *grpc.ClientConn
 	commissionConn *grpc.ClientConn
+	analyticsConn 	 *grpc.ClientConn
 }
 
 func NewGRPCClientsWithFallback() (*GRPCClients, error) {
@@ -75,6 +78,16 @@ func NewGRPCClientsWithFallback() (*GRPCClients, error) {
 		connectedServices++
 	}
 
+	log.Printf("Attempting to connect to Analytics service...")
+	if analyticsConn, err := connectToService("localhost:50055"); err != nil { // Port 50055
+		log.Printf("Failed to connect to Analytics service: %v", err)
+	} else {
+		clients.Analytics = analytics.NewAnalyticsServiceClient(analyticsConn)
+		clients.analyticsConn = analyticsConn
+		log.Printf("✅ Successfully connected to Analytics service")
+		connectedServices++
+	}
+
 	if connectedServices == 0 {
 		return nil, fmt.Errorf("all gRPC services are currently unavailable")
 	}
@@ -116,6 +129,10 @@ func (g *GRPCClients) Close() {
 		log.Printf("Closing Commissions service connection")
 		g.commissionConn.Close()
 	}
+	if g.analyticsConn != nil {
+		log.Printf("Closing Analytics service connection")
+		g.analyticsConn.Close()
+	}
 }
 
 func (g *GRPCClients) IsUserServiceHealthy() bool {
@@ -154,6 +171,13 @@ func (g *GRPCClients) IsCommissionsServiceHealthy() bool {
 	return state == connectivity.Ready
 }
 
+func (g *GRPCClients) IsAnalyticsServiceHealthy() bool {
+	if g.analyticsConn == nil {
+		return false
+	}
+	return g.analyticsConn.GetState() == connectivity.Ready
+}
+
 func (g *GRPCClients) GetServiceStatus() map[string]string {
 	status := make(map[string]string)
 
@@ -176,6 +200,11 @@ func (g *GRPCClients) GetServiceStatus() map[string]string {
 		status["commissions"] = "healthy"
 	} else {
 		status["commissions"] = "unhealthy"
+	}
+	if g.IsAnalyticsServiceHealthy() {
+		status["analytics"] = "healthy"
+	} else {
+		status["analytics"] = "unhealthy"
 	}
 
 	return status
@@ -250,6 +279,24 @@ func (g *GRPCClients) ReconnectCommissionsService() error {
 	g.Commissions = commissions.NewCommissionServiceClient(commissionConn)
 	g.commissionConn = commissionConn
 	log.Printf("Successfully reconnected to Commissions service")
+	return nil
+}
+
+func (g *GRPCClients) ReconnectAnalyticsService() error {
+	log.Printf("Attempting to reconnect to Analytics service...")
+	if g.analyticsConn != nil {
+		g.analyticsConn.Close()
+	}
+
+	analyticsConn, err := connectToService("localhost:50055")
+	if err != nil {
+		g.Analytics = nil
+		g.analyticsConn = nil
+		return err
+	}
+	g.Analytics = analytics.NewAnalyticsServiceClient(analyticsConn)
+	g.analyticsConn = analyticsConn
+	log.Printf("Successfully reconnected to Analytics service")
 	return nil
 }
 

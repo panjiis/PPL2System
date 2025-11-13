@@ -7,6 +7,7 @@ import (
 	"log"
 	"sync"
 	proto "syntra-system/proto/protogen/commissions"
+	lib "syntra-system/internal/utils"
 
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc/codes"
@@ -56,6 +57,8 @@ func (c *CommissionHandler) CalculateCommission(ctx context.Context, req *proto.
 	}
 
 	return &proto.CalculateCommissionResponse{
+		Success:               true, 
+		Message:               lib.StrPtr("Calculation successful"),
 		CommissionCalculation: c.commissionCalculationToProto(calculationModel),
 		Breakdown:             result.Breakdown,
 		IsPreview:             !req.GetSaveCalculation(),
@@ -131,6 +134,8 @@ func (c *CommissionHandler) RecalculateCommission(ctx context.Context, req *prot
 
 	// 6. Kirim Respons
 	return &proto.RecalculateCommissionResponse{
+		Success:               true, 
+		Message:               lib.StrPtr("Recalculation successful"),
 		CommissionCalculation: c.commissionCalculationToProto(existingCalc),
 		Breakdown:             result.Breakdown,
 	}, nil
@@ -200,7 +205,14 @@ func (c *CommissionHandler) BulkCalculateCommissions(ctx context.Context, req *p
 		protoCalculations = append(protoCalculations, c.commissionCalculationToProto(calc))
 	}
 
+	msg := fmt.Sprintf("Bulk operation completed. Success: %d, Failed: %d.", len(successfulCalculations), len(errorMessages))
+	if len(errorMessages) > 0 {
+		msg += " Check 'errors' field for details."
+	}
+
 	return &proto.BulkCalculateCommissionsResponse{
+		Success:      true, // <-- Ditambahkan
+		Message:      lib.StrPtr(msg),
 		Calculations: protoCalculations,
 		Errors:       errorMessages,
 		SuccessCount: int32(len(successfulCalculations)),
@@ -209,51 +221,6 @@ func (c *CommissionHandler) BulkCalculateCommissions(ctx context.Context, req *p
 }
 
 func (c *CommissionHandler) CalculateCommissionLogic(ctx context.Context, employeeID int64, periodStart, periodEnd string) (*calculationResult, error) {
-	// 1. Ambil Data Karyawan & Tiers (Sama seperti sebelumnya)
-	// employeeId, err := json.Marshal(map[string]interface{}{
-	// 	"employee_id": employeeID,
-	// })
-
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "Failed to marshal request data: %v", err)
-	// }
-
-	// msg, err := c.nats.RequestWithContext(ctx, "employee.get", employeeId)
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "Failed to request employee data via NATS: %v", err)
-	// }
-
-	// var employee struct {
-	// 	Found bool `json:"found"`
-	// 	// Error          string `json:"error,omitempty"`
-	// 	// EmployeeName   string `json:"employee_name,omitempty"`
-	// 	// Email          string `json:"email,omitempty"`
-	// 	// Position       string `json:"position,omitempty"`
-	// 	CommissionRate string `json:"commission_rate,omitempty"`
-	// 	CommissionType int32  `json:"commission_type,omitempty"`
-	// }
-
-	// // =======================================================
-	// // == DEBUGGING ==
-	// // =======================================================
-	// employeeJSON, err := json.MarshalIndent(employee, "", "  ")
-	// if err != nil {
-	// 	log.Printf("Error marshaling 'employee' for debug: %v", err)
-	// } else {
-	// 	log.Println("--- DEBUG: HASIL DARI NATS (employee.get) ---")
-	// 	log.Println(string(employeeJSON)) // Cetak sebagai string JSON
-	// 	log.Println("--- DEBUG: AKHIR DARI NATS (employee) ---")
-	// }
-	// // =======================================================
-
-	// if err := json.Unmarshal(msg.Data, &employee); err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "Failed to parse employee response: %v", err)
-	// }
-
-	// if !employee.Found {
-	// 	return nil, status.Errorf(codes.NotFound, "Employee with ID %d not found", employeeID)
-	// }
-
 	reqData, err := json.Marshal(map[string]interface{}{
 		"employee_id": employeeID,
 	})
@@ -267,7 +234,7 @@ func (c *CommissionHandler) CalculateCommissionLogic(ctx context.Context, employ
 	}
 
 	var resp struct {
-		Found bool `json:"found"`
+		Found          bool                 `json:"found"`
 		// Error          string               `json:"error,omitempty"`
 		CommissionType int32                `json:"commission_type,omitempty"`
 		CommissionRate string               `json:"commission_rate,omitempty"` // <-- TAMBAHKAN BARIS INI
@@ -395,11 +362,11 @@ func (c *CommissionHandler) CalculateCommissionLogic(ctx context.Context, employ
 		}
 
 		commissionDetails = append(commissionDetails, CommissionDetail{
-			OrderItemID:      item.ID,
-			ProductCode:      item.ProductCode,
-			SalesAmount:      item.SalesAmount,
-			CommissionRate:   employeeRate.StringFixed(4),
-			CommissionAmount: itemCommission.StringFixed(2),
+			OrderItemID: 				 item.ID,
+			ProductCode:         item.ProductCode,
+			SalesAmount:         item.SalesAmount,
+			CommissionRate:      employeeRate.StringFixed(4),
+			CommissionAmount:    itemCommission.StringFixed(2),
 		})
 	}
 

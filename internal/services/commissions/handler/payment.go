@@ -2,6 +2,8 @@ package handler
 
 import (
 	"context"
+	"fmt"
+	lib "syntra-system/internal/utils"
 	proto "syntra-system/proto/protogen/commissions"
 	"time"
 
@@ -22,7 +24,7 @@ func (c *CommissionHandler) PayCommission(ctx context.Context, req *proto.PayCom
 		return nil, status.Errorf(codes.InvalidArgument, "Paid By (user ID) is required")
 	}
 
-	paymentDate := time.Now().Format("2006-01-02")
+	paymentDate := time.Now().In(wib).Format("2006-01-02")
 	if req.GetPaymentDate() != "" {
 		paymentDate = req.GetPaymentDate()
 	}
@@ -56,7 +58,14 @@ func (c *CommissionHandler) PayCommission(ctx context.Context, req *proto.PayCom
 			return status.Errorf(codes.Internal, "Failed to create payment record: %v", err)
 		}
 
+		manager, err := c.GetManagerDetails(ctx, req.GetPaidBy())
+		if err != nil {
+			return nil
+		}
+
 		calculation.Status = int32(proto.CommissionStatus_COMMISSION_STATUS_PAID)
+		note := fmt.Sprintf("Commission paid on %s by %s", paymentDate, manager.ManagerName)
+		calculation.Notes = &note
 		if err := tx.Save(&calculation).Error; err != nil {
 			return status.Errorf(codes.Internal, "Failed to update calculation status: %v", err)
 		}
@@ -73,6 +82,8 @@ func (c *CommissionHandler) PayCommission(ctx context.Context, req *proto.PayCom
 	c.db.WithContext(ctx).Preload("CommissionDetails").First(&calculation, calculation.ID)
 
 	return &proto.PayCommissionResponse{
+		Success:            true,
+		Message:            lib.StrPtr("Commission paid successfully"),
 		CommissionPayment:  c.commissionPaymentToProto(payment),
 		UpdatedCalculation: c.commissionCalculationToProto(calculation),
 	}, nil
@@ -94,6 +105,7 @@ func (c *CommissionHandler) GetCommissionPayment(ctx context.Context, req *proto
 	}
 
 	return &proto.GetCommissionPaymentResponse{
+		Success:           true,
 		CommissionPayment: c.commissionPaymentToProto(payment),
 	}, nil
 }

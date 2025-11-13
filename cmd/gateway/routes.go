@@ -48,6 +48,11 @@ func main() {
 		commissionsHandler = handlers.NewCommissionsHTTPHandler(grpcClients.Commissions)
 	}
 
+	var analyticsHandler *handlers.AnalyticsHTTPHandler
+	if grpcClients.Analytics != nil {
+		analyticsHandler = handlers.NewAnalyticsHTTPHandler(grpcClients.Analytics)
+	}
+
 	// --- Public API Group ---
 	public := r.Group("/api/v1")
 	{
@@ -114,16 +119,16 @@ func main() {
 			}
 		}
 
-		store := protected.Group("/store")
+		stores := protected.Group("/store")
 		{
 			if userHandler != nil {
-				store.POST("", userHandler.CreateStore)
-				store.GET("", userHandler.ListStores)
-				store.PUT("/:id", userHandler.UpdateStore)
-				store.GET("/:id", userHandler.GetStore)
+				stores.POST("", userHandler.CreateStore)
+				stores.GET("", userHandler.ListStores)
+				stores.PUT("/:id", userHandler.UpdateStore)
+				stores.GET("/:id", userHandler.GetStore)
 			} else {
-				store.POST("", serviceUnavailableHandler("User service"))
-				store.GET("", serviceUnavailableHandler("User service"))
+				stores.POST("", serviceUnavailableHandler("User service"))
+				stores.GET("", serviceUnavailableHandler("User service"))
 			}
 		}
 
@@ -287,6 +292,34 @@ func main() {
 				commissionsGroup.GET("", serviceUnavailableHandler("Commissions service"))
 			}
 		}
+
+		analyticsGroup := protected.Group("/analytics")
+		{
+			if analyticsHandler != nil {
+				// sales
+				analyticsGroup.GET("/reports/sales", analyticsHandler.GetSalesReport)
+				analyticsGroup.GET("/reports/daily-summary", analyticsHandler.GetDailySummary)
+				analyticsGroup.POST("/reports/daily-summary/generate", analyticsHandler.GenerateDailySummary)
+				analyticsGroup.GET("/products/sales", analyticsHandler.GetProductSales)
+				analyticsGroup.GET("/products/top-selling", analyticsHandler.GetTopSellingProducts)
+
+				// employees
+				analyticsGroup.GET("/employees/performance", analyticsHandler.GetEmployeePerformance)
+				analyticsGroup.GET("/performance/report", analyticsHandler.GetPerformanceReport)
+
+				// customers
+				analyticsGroup.GET("/customers/analytics", analyticsHandler.GetCustomerAnalytics)
+				analyticsGroup.GET("/customers/peak-hours", analyticsHandler.GetPeakHours)
+
+				// dashboard
+				analyticsGroup.GET("/dashboard", analyticsHandler.GetDashboardData)
+				analyticsGroup.GET("/real-time-metrics", analyticsHandler.GetRealTimeMetrics)
+			} else {
+				// Fallback jika service analytics tidak tersedia
+				analyticsGroup.GET("/*any", serviceUnavailableHandler("Analytics service"))
+				analyticsGroup.POST("/*any", serviceUnavailableHandler("Analytics service"))
+			}
+		}
 	}
 
 	r.GET("/health", healthCheckHandler(grpcClients))
@@ -331,6 +364,11 @@ func serviceHealthMiddleware(clients *clients.GRPCClients) gin.HandlerFunc {
 		} else {
 			c.Header("X-Commissions-Service", "unavailable")
 		}
+		if clients.Analytics != nil {
+			c.Header("X-Analytics-Service", "available")
+		} else {
+			c.Header("X-Analytics-Service", "unavailable")
+		}
 		c.Next()
 	}
 }
@@ -352,6 +390,9 @@ func healthCheckHandler(clients *clients.GRPCClients) gin.HandlerFunc {
 		}
 		if clients.Commissions == nil {
 			unavailableServices = append(unavailableServices, "commissions")
+		}
+		if clients.Analytics == nil {
+			unavailableServices = append(unavailableServices, "analytics")
 		}
 
 		if len(unavailableServices) > 0 {
@@ -378,6 +419,7 @@ func detailedHealthCheckHandler(clients *clients.GRPCClients) gin.HandlerFunc {
 			"inventory":   checkServiceHealth(ctx, clients.IsInventoryServiceHealthy()),
 			"pos":         checkServiceHealth(ctx, clients.IsPOSServiceHealthy()),
 			"commissions": checkServiceHealth(ctx, clients.IsCommissionsServiceHealthy()),
+			"analytics":   checkServiceHealth(ctx, clients.IsAnalyticsServiceHealthy()),
 		}
 
 		overallStatus := "healthy"

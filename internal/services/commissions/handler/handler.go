@@ -88,7 +88,9 @@ func (c *CommissionHandler) commissionCalculationToProto(commissionCalculation C
 		TotalCommission:        commissionCalculation.TotalCommission,
 		Status:                 proto.CommissionStatus(commissionCalculation.Status), // Konversi int32 ke enum proto
 		CalculatedBy:           commissionCalculation.CalculatedBy,
+		CalculatedByName:       commissionCalculation.CalculatedByName,
 		ApprovedBy:             commissionCalculation.ApprovedBy,
+		ApprovedByName:         commissionCalculation.ApprovedByName,
 		Notes:                  commissionCalculation.Notes,
 		CreatedAt:              timestamppb.New(lib.TimeNowOrZero(commissionCalculation.CreatedAt)),
 		UpdatedAt:              timestamppb.New(lib.TimeNowOrZero(commissionCalculation.UpdatedAt)),

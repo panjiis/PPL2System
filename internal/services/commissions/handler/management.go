@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"sync"
 	lib "syntra-system/internal/utils"
@@ -16,6 +17,9 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
+
+// Localization for WIB (UTC+7)
+var wib, _ = time.LoadLocation("Asia/Jakarta")
 
 func (c *CommissionHandler) GetCommissionCalculation(ctx context.Context, req *proto.GetCommissionCalculationRequest) (*proto.GetCommissionCalculationResponse, error) {
 	if req.GetId() <= 0 {
@@ -52,6 +56,7 @@ func (c *CommissionHandler) GetCommissionCalculation(ctx context.Context, req *p
 	}
 
 	return &proto.GetCommissionCalculationResponse{
+		Success:               true,
 		CommissionCalculation: c.commissionCalculationToProto(dbCalc),
 	}, nil
 }
@@ -59,15 +64,11 @@ func (c *CommissionHandler) GetCommissionCalculation(ctx context.Context, req *p
 func (c *CommissionHandler) ListCommissionCalculations(ctx context.Context, req *proto.ListCommissionCalculationsRequest) (*proto.ListCommissionCalculationsResponse, error) {
 	var (
 		page   = 1
-		// 1. Ubah default 'limit' menjadi -1. Ini adalah "no limit" untuk GORM.
-		limit  = -1 
+		limit  = -1
 		offset = 0
 	)
 
-	// 2. Logika ini sekarang hanya berjalan JIKA pagination block ada
 	if p := req.GetPagination(); p != nil {
-		
-        // 3. Hanya hitung limit/offset JIKA PageSize > 0
 		if p.GetPageSize() > 0 {
 			limit = int(p.GetPageSize())
 			if pagenum, err := strconv.Atoi(p.GetPageToken()); err == nil && pagenum > 0 {
@@ -75,58 +76,99 @@ func (c *CommissionHandler) ListCommissionCalculations(ctx context.Context, req 
 			}
 			offset = (page - 1) * limit
 		}
-        // Jika PageSize adalah 0, 'limit' akan tetap -1, yang berarti "ambil semua".
 	}
 
-	query := c.db.WithContext(ctx).Model(&CommissionCalculation{})
+	baseQuery := c.db.WithContext(ctx).Model(&CommissionCalculation{})
 
 	if req.GetEmployeeId() > 0 {
-		query = query.Where("employee_id = ?", req.GetEmployeeId())
+		baseQuery = baseQuery.Where("employee_id = ?", req.GetEmployeeId())
 	}
 	if req.GetStatus() != proto.CommissionStatus_COMMISSION_STATUS_UNSPECIFIED {
-		query = query.Where("status = ?", req.GetStatus())
+		baseQuery = baseQuery.Where("status = ?", req.GetStatus())
 	}
 	if period := req.GetCalculationPeriod(); period != nil && period.GetStartDate() != "" && period.GetEndDate() != "" {
-		query = query.Where("calculation_period_start >= ? AND calculation_period_end <= ?", period.GetStartDate(), period.GetEndDate())
+		baseQuery = baseQuery.Where("calculation_period_start >= ? AND calculation_period_end <= ?", period.GetStartDate(), period.GetEndDate())
 	}
 
 	var totalCount int64
-	if err := query.Count(&totalCount).Error; err != nil {
+	if err := baseQuery.Count(&totalCount).Error; err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to count calculations: %v", err)
 	}
 
-	var calculations []CommissionCalculation
-
-    // 4. Ubah cara Anda membuat kueri
-    // Terapkan Order dan Preload terlebih dahulu
-	query = query.
-		Order("created_at desc").
-		Preload("CommissionPayment")
-
-    // 5. Terapkan Offset dan Limit HANYA JIKA limit BUKAN -1
+	query := baseQuery.Order("created_at DESC").Preload("CommissionPayment")
 	if limit != -1 {
 		query = query.Offset(offset).Limit(limit)
 	}
 
-    // 6. Jalankan Find
-	err := query.Find(&calculations).Error
-
-	if err != nil {
+	var calculations []CommissionCalculation
+	if err := query.Find(&calculations).Error; err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to retrieve calculations: %v", err)
+	}
+
+	employeeIDs := make([]int64, 0, len(calculations))
+	for _, calc := range calculations {
+		employeeIDs = append(employeeIDs, calc.EmployeeID)
+	}
+
+	employeeNameMap, err := c.GetEmployeeNamesBatch(ctx, employeeIDs)
+	if err != nil {
+		employeeNameMap = make(map[int64]string)
+	}
+
+	// --- Manager names ---
+	managerIDsSet := make(map[int64]bool)
+	for _, calc := range calculations {
+		if calc.CalculatedBy > 0 {
+			managerIDsSet[calc.CalculatedBy] = true
+		}
+		if calc.ApprovedBy != nil && *calc.ApprovedBy > 0 {
+			managerIDsSet[*calc.ApprovedBy] = true
+		}
+	}
+	managerIDs := make([]int64, 0, len(managerIDsSet))
+	for id := range managerIDsSet {
+		managerIDs = append(managerIDs, id)
+	}
+
+	managerNameMap := make(map[int64]string)
+	if len(managerIDs) > 0 {
+		var err error
+		managerNameMap, err = c.GetManagerNamesBatch(ctx, managerIDs)
+		if err != nil {
+			log.Printf("Warning: GetManagerNamesBatch failed: %v", err)
+		}
 	}
 
 	var protoCalculations []*proto.CommissionCalculation
 	for _, calc := range calculations {
-		protoCalculations = append(protoCalculations, c.commissionCalculationToProto(calc))
+		protoCalc := c.commissionCalculationToProto(calc)
+		protoCalc.Employee = &proto.EmployeeSummary{
+			Id:           calc.EmployeeID,
+			EmployeeName: employeeNameMap[calc.EmployeeID],
+		}
+
+		if calc.CalculatedBy > 0 {
+			if name, exists := managerNameMap[calc.CalculatedBy]; exists {
+				protoCalc.CalculatedByName = name
+			}
+		}
+
+		if calc.ApprovedBy != nil && *calc.ApprovedBy > 0 {
+			if name, exists := managerNameMap[*calc.ApprovedBy]; exists {
+				protoCalc.ApprovedByName = &name
+			}
+		}
+
+		protoCalculations = append(protoCalculations, protoCalc)
 	}
 
 	nextPageToken := ""
-    // 7. Hanya buat NextPageToken JIKA pagination diterapkan
 	if limit != -1 && int64(offset+limit) < totalCount {
 		nextPageToken = strconv.Itoa(page + 1)
 	}
 
 	return &proto.ListCommissionCalculationsResponse{
+		Success:                true,
 		CommissionCalculations: protoCalculations,
 		Pagination: &proto.PaginationResponse{
 			NextPageToken: nextPageToken,
@@ -182,6 +224,8 @@ func (c *CommissionHandler) ApproveCommission(ctx context.Context, req *proto.Ap
 	}
 
 	return &proto.ApproveCommissionResponse{
+		Success:               true,
+		Message:               lib.StrPtr("Commission approved successfully"),
 		CommissionCalculation: c.commissionCalculationToProto(calculation),
 	}, nil
 }
@@ -219,18 +263,23 @@ func (c *CommissionHandler) RejectCommission(ctx context.Context, req *proto.Rej
 			return status.Errorf(codes.Internal, "Failed to save approval: %v", err)
 		}
 
-		rejectionNote := fmt.Sprintf("\n[REJECTED by User ID %d on %s]: %s",
-			req.GetRejectedBy(),
-			time.Now().Format("2006-01-02 15:04:05"),
+		manager, err := c.GetManagerDetails(ctx, req.GetRejectedBy())
+		if err != nil {
+			return nil
+		}
+
+		rejectionNote := fmt.Sprintf("\n[REJECTED by %s on %s]: %s",
+			manager.ManagerName,
+			time.Now().In(wib).Format("2006-01-02 15:04:05"),
 			req.GetRejectionReason(),
 		)
 
-		currentNotes := ""
-		if calculation.Notes != nil {
-			currentNotes = *calculation.Notes
-		}
-		newNotes := currentNotes + rejectionNote
-		calculation.Notes = &newNotes
+		// currentNotes := ""
+		// if calculation.Notes != nil {
+		// 	currentNotes = *calculation.Notes
+		// }
+		// newNotes := currentNotes + rejectionNote
+		calculation.Notes = &rejectionNote
 
 		if err := tx.Save(&calculation).Error; err != nil {
 			return status.Errorf(codes.Internal, "Failed to save rejection: %v", err)
@@ -250,6 +299,8 @@ func (c *CommissionHandler) RejectCommission(ctx context.Context, req *proto.Rej
 	}
 
 	return &proto.RejectCommissionResponse{
+		Success:               true,
+		Message:               lib.StrPtr("Commission rejected and moved to draft"),
 		CommissionCalculation: c.commissionCalculationToProto(calculation),
 	}, nil
 }
@@ -326,7 +377,14 @@ func (c *CommissionHandler) BulkApproveCommissions(ctx context.Context, req *pro
 		protoCalculations = append(protoCalculations, c.commissionCalculationToProto(calc))
 	}
 
+	msg := fmt.Sprintf("Bulk approval completed. Success: %d, Failed: %d.", len(approvedCalculations), len(errorMessages))
+	if len(errorMessages) > 0 {
+		msg += " Check 'errors' field for details."
+	}
+
 	return &proto.BulkApproveCommissionsResponse{
+		Success:              true,
+		Message:              &msg,
 		ApprovedCalculations: protoCalculations,
 		Errors:               errorMessages,
 		SuccessCount:         int32(len(approvedCalculations)),

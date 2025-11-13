@@ -16,6 +16,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+type EventType string
+
 const (
 	COMMISSION_CALCULATION_CACHE_PREFIX = "commission_calculation:"
 	COMMISSION_REPORT_CACHE_PREFIX      = "commission_report:"
@@ -39,7 +41,9 @@ type CommissionCalculation struct {
 	TotalCommission        string `gorm:"type:decimal(18,2);not null"`
 	Status                 int32  `gorm:"index;not null"`
 	CalculatedBy           int64  `gorm:"not null"`
+	CalculatedByName       string `gorm:"-"`
 	ApprovedBy             *int64
+	ApprovedByName         *string    `gorm:"-"`
 	Notes                  *string    `gorm:"type:text"`
 	CreatedAt              *time.Time `gorm:"autoCreateTime"`
 	UpdatedAt              *time.Time `gorm:"autoUpdateTime"`
@@ -111,7 +115,7 @@ type Discount struct {
 	ProductCode            *string `gorm:"type:varchar(32)"`
 	ProductGroupId         *int32  `gorm:"default:null"`
 	MinQuantity            int32   `gorm:"not null"`
-	MaxUsagePerTransaction *int64
+	MaxUsagePerTransaction *int32
 	ValidFrom              *time.Time
 	ValidUntil             *time.Time
 	IsActive               bool `gorm:"not null"`
@@ -210,20 +214,50 @@ type POSOrderDocument struct {
 	OrderItems []POSOrderItem `json:"OrderItems"`
 }
 
-// PERBAIKI: Ubah tag JSON agar cocok dengan event_type (huruf kecil)
 type OrderEvent struct {
-	EventType      string            `json:"event_type"`           // <-- Ini sudah benar
-	DocumentNumber string            `json:"document_number"`      // <-- Ini sudah benar
-	OrderData      *POSOrderDocument `json:"order_data,omitempty"` // <-- Ini sudah benar
+	EventType      EventType       `json:"event_type"`
+	OrderID        int64           `json:"order_id"`
+	DocumentNumber string          `json:"document_number"`
+	CashierID      int64           `json:"cashier_id"`
+	TotalAmount    string          `json:"total_amount"`
+	PaidStatus     int32           `json:"paid_status"`
+	DocumentType   int32           `json:"document_type"`
+	Timestamp      time.Time       `json:"timestamp"`
+	OrderData      *OrderDataEvent `json:"order_data,omitempty"`
 }
 
-// OrderItemEvent mendefinisikan payload untuk SATU item dari NATS
 type OrderItemEvent struct {
-	ID                int64  `json:"ID"`
-	ProductCode       string `json:"ProductCode"`
-	ProductName       string `json:"ProductName"`
-	ServingEmployeeID *int64 `json:"ServingEmployeeID"`
-	LineTotal         string `json:"LineTotal"`
+	ID                  int64  `json:"id"`
+	DocumentID          int64  `json:"document_id"`
+	ProductCode         string `json:"product_code"`
+	ProductName         string `json:"product_name"`
+	ServingEmployeeID   *int64 `json:"serving_employee_id,omitempty"`
+	Quantity            int32  `json:"quantity"`
+	UnitPrice           string `json:"unit_price"`
+	PriceBeforeDiscount string `json:"price_before_discount"`
+	DiscountID          *int32 `json:"discount_id,omitempty"`
+	DiscountAmount      string `json:"discount_amount"`
+	LineTotal           string `json:"line_total"`
+	CommissionAmount    string `json:"commission_amount"`
+	CostPrice           string `json:"cost_price"`
+}
+
+// Struct payload baru yang diratakan
+type OrderDataEvent struct {
+	ID             int64            `json:"ID"`
+	DocumentNumber string           `json:"DocumentNumber"`
+	CashierId      int64            `json:"CashierId"`
+	OrdersDate     *time.Time       `json:"OrdersDate"`
+	TaxAmount      string           `json:"TaxAmount"`
+	TotalAmount    string           `json:"TotalAmount"` // Tambahkan ini juga
+	OrderItems     []OrderItemEvent `json:"OrderItems"`  // Menggunakan slice event
+}
+
+type Manager struct {
+	Found       bool   `json:"found"`
+	Error       string `json:"error,omitempty"`
+	ManagerName string `json:"manager_name,omitempty"`
+	Email       string `json:"email,omitempty"`
 }
 
 func (c *CommissionHandler) InvalidateCommissionCaches(ctx context.Context, calcIDs ...int64) {
@@ -589,4 +623,59 @@ func (c *CommissionHandler) handleOrderPaidEvent(msg *nats.Msg) {
 	} else {
 		log.Printf("SUCCESS: Saved %d sales data items for Doc: %s", len(itemsToSave), event.DocumentNumber)
 	}
+}
+
+// -- Manager Events Handler --
+func (c *CommissionHandler) GetManagerDetails(ctx context.Context, managerID int64) (*Manager, error) {
+	managerId, err := json.Marshal(map[string]interface{}{
+		"manager_id": managerID,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to marshal request  %v", err)
+	}
+
+	msg, err := c.nats.RequestWithContext(ctx, "employee.manager.get", managerId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to request manager data via NATS: %v", err)
+	}
+
+	var response struct {
+		Found       bool   `json:"found"`
+		Error       string `json:"error,omitempty"`
+		ManagerName string `json:"manager_name,omitempty"`
+		Email       string `json:"email,omitempty"`
+	}
+
+	if err := json.Unmarshal(msg.Data, &response); err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to parse manager response: %v", err)
+	}
+
+	if !response.Found {
+		return nil, status.Errorf(codes.NotFound, "Manager with ID %d not found", managerID)
+	}
+
+	manager := &Manager{
+		Found:       response.Found,
+		Error:       response.Error,
+		ManagerName: response.ManagerName,
+		Email:       response.Email,
+	}
+
+	log.Println(manager.ManagerName)
+
+	return manager, nil
+}
+
+func (c *CommissionHandler) GetManagerNamesBatch(ctx context.Context, managerIDs []int64) (map[int64]string, error) {
+	managerNameMap := make(map[int64]string)
+
+	for _, empID := range managerIDs {
+		employee, err := c.GetManagerDetails(ctx, empID)
+		if err != nil {
+			continue
+		}
+		managerNameMap[empID] = employee.ManagerName
+	}
+
+	return managerNameMap, nil
 }

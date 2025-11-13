@@ -108,7 +108,9 @@ message GetSalesReportRequest {
 }
 
 message GetSalesReportResponse {
-  SalesReport sales_report = 1;
+  bool success = 1;
+  optional string message = 2;
+  SalesReport sales_report = 3;
 }
 
 message GetDailySummaryRequest {
@@ -117,7 +119,9 @@ message GetDailySummaryRequest {
 }
 
 message GetDailySummaryResponse {
-  repeated SalesSummaryDaily daily_summaries = 1;
+  bool success = 1;
+  optional string message = 2;
+  repeated SalesSummaryDaily daily_summaries = 3;
 }
 
 message GenerateDailySummaryRequest {
@@ -126,9 +130,9 @@ message GenerateDailySummaryRequest {
 }
 
 message GenerateDailySummaryResponse {
-  repeated SalesSummaryDaily generated_summaries = 1;
-  bool success = 2;
-  optional string message = 3;
+  bool success = 1;
+  optional string message = 2;
+  repeated SalesSummaryDaily generated_summaries = 3;
 }
 
 // Product Analytics
@@ -140,8 +144,10 @@ message GetProductSalesRequest {
 }
 
 message GetProductSalesResponse {
-  repeated ProductSalesSummary product_sales = 1;
-  PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated ProductSalesSummary product_sales = 3;
+  PaginationResponse pagination = 4;
 }
 
 message GetTopSellingProductsRequest {
@@ -151,19 +157,23 @@ DateRange date_range = 1;
 }
 
 message GetTopSellingProductsResponse {
-  repeated ProductSalesSummary top_products = 1;
+  bool success = 1;
+  optional string message = 2;
+  repeated ProductSalesSummary top_products = 3;
 }
 
 // Employee Performance
 message GetEmployeePerformanceRequest {
-DateRange date_range = 1;
+  DateRange date_range = 1;
   optional int64 employee_id = 2;
-PaginationRequest pagination = 3;
+  PaginationRequest pagination = 3;
 }
 
 message GetEmployeePerformanceResponse {
-  repeated EmployeePerformance performances = 1;
-PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated EmployeePerformance performances = 3;
+PaginationResponse pagination = 4;
 }
 
 message GetPerformanceReportRequest {
@@ -172,33 +182,42 @@ DateRange date_range = 1;
 }
 
 message GetPerformanceReportResponse {
-  PerformanceReport performance_report = 1;
+  bool success = 1;
+  optional string message = 2;
+  PerformanceReport performance_report = 3;
 }
 
 // Customer Analytics
-message GetCustomerAnalyticsRequest {
-DateRange date_range = 1;
+  message GetCustomerAnalyticsRequest {
+  DateRange date_range = 1;
   optional int32 product_group_id = 2;
-PaginationRequest pagination = 3;
+  PaginationRequest pagination = 3;
 }
 
 message GetCustomerAnalyticsResponse {
-  repeated CustomerAnalytics analytics = 1;
-PaginationResponse pagination = 2;
+  bool success = 1;
+  optional string message = 2;
+  repeated CustomerAnalytics analytics = 3;
+  PaginationResponse pagination = 4;
 }
 
 message GetPeakHoursRequest {
-DateRange date_range = 1;
+  
+}
+
+message HourlyData {
+  string hour = 1; 
+  int32 transaction_count = 2;
+  string total_revenue = 3;
+}
+
+message WeeklyPeakData {
+  int32 day_of_week = 1; 
+  repeated HourlyData hourly_data = 2; 
 }
 
 message GetPeakHoursResponse {
-  repeated PeakHourData peak_hours = 1;
-}
-
-message PeakHourData {
-  string hour = 1;
-  int32 transaction_count = 2;
-  string total_revenue = 3;
+  repeated WeeklyPeakData peak_data_by_week = 1;
 }
 
 message GetDashboardDataRequest {
@@ -206,7 +225,9 @@ message GetDashboardDataRequest {
 }
 
 message GetDashboardDataResponse {
-  DashboardData dashboard = 1;
+  bool success = 1;
+  optional string message = 2;
+  DashboardData dashboard = 3;
 }
 
 message DashboardData {
@@ -229,7 +250,9 @@ message GetRealTimeMetricsRequest {
 }
 
 message GetRealTimeMetricsResponse {
-  RealTimeMetrics metrics = 1;
+  bool success = 1;
+  optional string message = 2;
+  RealTimeMetrics metrics = 3;
 }
 
 message RealTimeMetrics {

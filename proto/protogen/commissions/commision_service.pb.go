@@ -297,13 +297,15 @@ type CommissionCalculation struct {
 	TotalCommission        string                 `protobuf:"bytes,8,opt,name=total_commission,json=totalCommission,proto3" json:"total_commission,omitempty"`
 	Status                 CommissionStatus       `protobuf:"varint,9,opt,name=status,proto3,enum=commission.CommissionStatus" json:"status,omitempty"`
 	CalculatedBy           int64                  `protobuf:"varint,10,opt,name=calculated_by,json=calculatedBy,proto3" json:"calculated_by,omitempty"`
-	ApprovedBy             *int64                 `protobuf:"varint,11,opt,name=approved_by,json=approvedBy,proto3,oneof" json:"approved_by,omitempty"`
-	Notes                  *string                `protobuf:"bytes,12,opt,name=notes,proto3,oneof" json:"notes,omitempty"`
-	CreatedAt              *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt              *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	CommissionDetails      []*CommissionDetail    `protobuf:"bytes,15,rep,name=commission_details,json=commissionDetails,proto3" json:"commission_details,omitempty"`
-	CommissionPayment      *CommissionPayment     `protobuf:"bytes,16,opt,name=commission_payment,json=commissionPayment,proto3,oneof" json:"commission_payment,omitempty"`
-	Employee               *EmployeeSummary       `protobuf:"bytes,17,opt,name=employee,proto3,oneof" json:"employee,omitempty"`
+	CalculatedByName       string                 `protobuf:"bytes,11,opt,name=calculated_by_name,json=calculatedByName,proto3" json:"calculated_by_name,omitempty"`
+	ApprovedBy             *int64                 `protobuf:"varint,12,opt,name=approved_by,json=approvedBy,proto3,oneof" json:"approved_by,omitempty"`
+	ApprovedByName         *string                `protobuf:"bytes,13,opt,name=approved_by_name,json=approvedByName,proto3,oneof" json:"approved_by_name,omitempty"`
+	Notes                  *string                `protobuf:"bytes,14,opt,name=notes,proto3,oneof" json:"notes,omitempty"`
+	CreatedAt              *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt              *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CommissionDetails      []*CommissionDetail    `protobuf:"bytes,17,rep,name=commission_details,json=commissionDetails,proto3" json:"commission_details,omitempty"`
+	CommissionPayment      *CommissionPayment     `protobuf:"bytes,18,opt,name=commission_payment,json=commissionPayment,proto3,oneof" json:"commission_payment,omitempty"`
+	Employee               *EmployeeSummary       `protobuf:"bytes,19,opt,name=employee,proto3,oneof" json:"employee,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -408,11 +410,25 @@ func (x *CommissionCalculation) GetCalculatedBy() int64 {
 	return 0
 }
 
+func (x *CommissionCalculation) GetCalculatedByName() string {
+	if x != nil {
+		return x.CalculatedByName
+	}
+	return ""
+}
+
 func (x *CommissionCalculation) GetApprovedBy() int64 {
 	if x != nil && x.ApprovedBy != nil {
 		return *x.ApprovedBy
 	}
 	return 0
+}
+
+func (x *CommissionCalculation) GetApprovedByName() string {
+	if x != nil && x.ApprovedByName != nil {
+		return *x.ApprovedByName
+	}
+	return ""
 }
 
 func (x *CommissionCalculation) GetNotes() string {
@@ -462,7 +478,7 @@ type CommissionDetail struct {
 	Id                      int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	CommissionCalculationId int64                  `protobuf:"varint,2,opt,name=commission_calculation_id,json=commissionCalculationId,proto3" json:"commission_calculation_id,omitempty"`
 	OrderItemId             int64                  `protobuf:"varint,3,opt,name=order_item_id,json=orderItemId,proto3" json:"order_item_id,omitempty"`
-	ProductCode             string                 `protobuf:"bytes,4,opt,name=product_code,json=productCode,proto3" json:"product_code,omitempty"`
+	ProductId               int32                  `protobuf:"varint,4,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
 	SalesAmount             string                 `protobuf:"bytes,5,opt,name=sales_amount,json=salesAmount,proto3" json:"sales_amount,omitempty"`
 	CommissionRate          string                 `protobuf:"bytes,6,opt,name=commission_rate,json=commissionRate,proto3" json:"commission_rate,omitempty"`
 	CommissionAmount        string                 `protobuf:"bytes,7,opt,name=commission_amount,json=commissionAmount,proto3" json:"commission_amount,omitempty"`
@@ -524,11 +540,11 @@ func (x *CommissionDetail) GetOrderItemId() int64 {
 	return 0
 }
 
-func (x *CommissionDetail) GetProductCode() string {
+func (x *CommissionDetail) GetProductId() int32 {
 	if x != nil {
-		return x.ProductCode
+		return x.ProductId
 	}
-	return ""
+	return 0
 }
 
 func (x *CommissionDetail) GetSalesAmount() string {
@@ -1082,9 +1098,11 @@ func (x *CalculateCommissionRequest) GetSaveCalculation() bool {
 
 type CalculateCommissionResponse struct {
 	state                 protoimpl.MessageState `protogen:"open.v1"`
-	CommissionCalculation *CommissionCalculation `protobuf:"bytes,1,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
-	Breakdown             *CommissionBreakdown   `protobuf:"bytes,2,opt,name=breakdown,proto3" json:"breakdown,omitempty"`
-	IsPreview             bool                   `protobuf:"varint,3,opt,name=is_preview,json=isPreview,proto3" json:"is_preview,omitempty"`
+	Success               bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message               *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	CommissionCalculation *CommissionCalculation `protobuf:"bytes,3,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
+	Breakdown             *CommissionBreakdown   `protobuf:"bytes,4,opt,name=breakdown,proto3" json:"breakdown,omitempty"`
+	IsPreview             bool                   `protobuf:"varint,5,opt,name=is_preview,json=isPreview,proto3" json:"is_preview,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -1117,6 +1135,20 @@ func (x *CalculateCommissionResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CalculateCommissionResponse.ProtoReflect.Descriptor instead.
 func (*CalculateCommissionResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *CalculateCommissionResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CalculateCommissionResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *CalculateCommissionResponse) GetCommissionCalculation() *CommissionCalculation {
@@ -1202,8 +1234,10 @@ func (x *RecalculateCommissionRequest) GetNotes() string {
 
 type RecalculateCommissionResponse struct {
 	state                 protoimpl.MessageState `protogen:"open.v1"`
-	CommissionCalculation *CommissionCalculation `protobuf:"bytes,1,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
-	Breakdown             *CommissionBreakdown   `protobuf:"bytes,2,opt,name=breakdown,proto3" json:"breakdown,omitempty"`
+	Success               bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message               *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	CommissionCalculation *CommissionCalculation `protobuf:"bytes,3,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
+	Breakdown             *CommissionBreakdown   `protobuf:"bytes,4,opt,name=breakdown,proto3" json:"breakdown,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -1236,6 +1270,20 @@ func (x *RecalculateCommissionResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RecalculateCommissionResponse.ProtoReflect.Descriptor instead.
 func (*RecalculateCommissionResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *RecalculateCommissionResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *RecalculateCommissionResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *RecalculateCommissionResponse) GetCommissionCalculation() *CommissionCalculation {
@@ -1299,7 +1347,9 @@ func (x *GetCommissionCalculationRequest) GetId() int64 {
 
 type GetCommissionCalculationResponse struct {
 	state                 protoimpl.MessageState `protogen:"open.v1"`
-	CommissionCalculation *CommissionCalculation `protobuf:"bytes,1,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
+	Success               bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message               *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	CommissionCalculation *CommissionCalculation `protobuf:"bytes,3,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -1332,6 +1382,20 @@ func (x *GetCommissionCalculationResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetCommissionCalculationResponse.ProtoReflect.Descriptor instead.
 func (*GetCommissionCalculationResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GetCommissionCalculationResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetCommissionCalculationResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetCommissionCalculationResponse) GetCommissionCalculation() *CommissionCalculation {
@@ -1411,8 +1475,10 @@ func (x *ListCommissionCalculationsRequest) GetCalculationPeriod() *DateRange {
 
 type ListCommissionCalculationsResponse struct {
 	state                  protoimpl.MessageState   `protogen:"open.v1"`
-	CommissionCalculations []*CommissionCalculation `protobuf:"bytes,1,rep,name=commission_calculations,json=commissionCalculations,proto3" json:"commission_calculations,omitempty"`
-	Pagination             *PaginationResponse      `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success                bool                     `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message                *string                  `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	CommissionCalculations []*CommissionCalculation `protobuf:"bytes,3,rep,name=commission_calculations,json=commissionCalculations,proto3" json:"commission_calculations,omitempty"`
+	Pagination             *PaginationResponse      `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -1445,6 +1511,20 @@ func (x *ListCommissionCalculationsResponse) ProtoReflect() protoreflect.Message
 // Deprecated: Use ListCommissionCalculationsResponse.ProtoReflect.Descriptor instead.
 func (*ListCommissionCalculationsResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ListCommissionCalculationsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ListCommissionCalculationsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ListCommissionCalculationsResponse) GetCommissionCalculations() []*CommissionCalculation {
@@ -1523,7 +1603,9 @@ func (x *ApproveCommissionRequest) GetApprovalNotes() string {
 
 type ApproveCommissionResponse struct {
 	state                 protoimpl.MessageState `protogen:"open.v1"`
-	CommissionCalculation *CommissionCalculation `protobuf:"bytes,1,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
+	Success               bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message               *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	CommissionCalculation *CommissionCalculation `protobuf:"bytes,3,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -1556,6 +1638,20 @@ func (x *ApproveCommissionResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ApproveCommissionResponse.ProtoReflect.Descriptor instead.
 func (*ApproveCommissionResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ApproveCommissionResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ApproveCommissionResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *ApproveCommissionResponse) GetCommissionCalculation() *CommissionCalculation {
@@ -1627,7 +1723,9 @@ func (x *RejectCommissionRequest) GetRejectionReason() string {
 
 type RejectCommissionResponse struct {
 	state                 protoimpl.MessageState `protogen:"open.v1"`
-	CommissionCalculation *CommissionCalculation `protobuf:"bytes,1,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
+	Success               bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message               *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	CommissionCalculation *CommissionCalculation `protobuf:"bytes,3,opt,name=commission_calculation,json=commissionCalculation,proto3" json:"commission_calculation,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -1660,6 +1758,20 @@ func (x *RejectCommissionResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RejectCommissionResponse.ProtoReflect.Descriptor instead.
 func (*RejectCommissionResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *RejectCommissionResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *RejectCommissionResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *RejectCommissionResponse) GetCommissionCalculation() *CommissionCalculation {
@@ -1756,8 +1868,10 @@ func (x *PayCommissionRequest) GetPaymentDate() string {
 
 type PayCommissionResponse struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
-	CommissionPayment  *CommissionPayment     `protobuf:"bytes,1,opt,name=commission_payment,json=commissionPayment,proto3" json:"commission_payment,omitempty"`
-	UpdatedCalculation *CommissionCalculation `protobuf:"bytes,2,opt,name=updated_calculation,json=updatedCalculation,proto3" json:"updated_calculation,omitempty"`
+	Success            bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message            *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	CommissionPayment  *CommissionPayment     `protobuf:"bytes,3,opt,name=commission_payment,json=commissionPayment,proto3" json:"commission_payment,omitempty"`
+	UpdatedCalculation *CommissionCalculation `protobuf:"bytes,4,opt,name=updated_calculation,json=updatedCalculation,proto3" json:"updated_calculation,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -1790,6 +1904,20 @@ func (x *PayCommissionResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use PayCommissionResponse.ProtoReflect.Descriptor instead.
 func (*PayCommissionResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *PayCommissionResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *PayCommissionResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *PayCommissionResponse) GetCommissionPayment() *CommissionPayment {
@@ -1852,7 +1980,9 @@ func (x *GetCommissionPaymentRequest) GetCommissionCalculationId() int64 {
 
 type GetCommissionPaymentResponse struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
-	CommissionPayment *CommissionPayment     `protobuf:"bytes,1,opt,name=commission_payment,json=commissionPayment,proto3" json:"commission_payment,omitempty"`
+	Success           bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message           *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	CommissionPayment *CommissionPayment     `protobuf:"bytes,3,opt,name=commission_payment,json=commissionPayment,proto3" json:"commission_payment,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -1885,6 +2015,20 @@ func (x *GetCommissionPaymentResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetCommissionPaymentResponse.ProtoReflect.Descriptor instead.
 func (*GetCommissionPaymentResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *GetCommissionPaymentResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetCommissionPaymentResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetCommissionPaymentResponse) GetCommissionPayment() *CommissionPayment {
@@ -1949,7 +2093,9 @@ func (x *GetCommissionSummaryRequest) GetDateRange() *DateRange {
 
 type GetCommissionSummaryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Summary       *CommissionSummary     `protobuf:"bytes,1,opt,name=summary,proto3" json:"summary,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Summary       *CommissionSummary     `protobuf:"bytes,3,opt,name=summary,proto3" json:"summary,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1982,6 +2128,20 @@ func (x *GetCommissionSummaryResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetCommissionSummaryResponse.ProtoReflect.Descriptor instead.
 func (*GetCommissionSummaryResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *GetCommissionSummaryResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetCommissionSummaryResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetCommissionSummaryResponse) GetSummary() *CommissionSummary {
@@ -2177,11 +2337,13 @@ func (x *GetCommissionReportRequest) GetPagination() *PaginationRequest {
 
 type GetCommissionReportResponse struct {
 	state                      protoimpl.MessageState `protogen:"open.v1"`
-	EmployeeSummaries          []*CommissionSummary   `protobuf:"bytes,1,rep,name=employee_summaries,json=employeeSummaries,proto3" json:"employee_summaries,omitempty"`
-	TotalCommissionsCalculated string                 `protobuf:"bytes,2,opt,name=total_commissions_calculated,json=totalCommissionsCalculated,proto3" json:"total_commissions_calculated,omitempty"`
-	TotalCommissionsPaid       string                 `protobuf:"bytes,3,opt,name=total_commissions_paid,json=totalCommissionsPaid,proto3" json:"total_commissions_paid,omitempty"`
-	TotalCommissionsPending    string                 `protobuf:"bytes,4,opt,name=total_commissions_pending,json=totalCommissionsPending,proto3" json:"total_commissions_pending,omitempty"`
-	Pagination                 *PaginationResponse    `protobuf:"bytes,5,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success                    bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message                    *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	EmployeeSummaries          []*CommissionSummary   `protobuf:"bytes,3,rep,name=employee_summaries,json=employeeSummaries,proto3" json:"employee_summaries,omitempty"`
+	TotalCommissionsCalculated string                 `protobuf:"bytes,4,opt,name=total_commissions_calculated,json=totalCommissionsCalculated,proto3" json:"total_commissions_calculated,omitempty"`
+	TotalCommissionsPaid       string                 `protobuf:"bytes,5,opt,name=total_commissions_paid,json=totalCommissionsPaid,proto3" json:"total_commissions_paid,omitempty"`
+	TotalCommissionsPending    string                 `protobuf:"bytes,6,opt,name=total_commissions_pending,json=totalCommissionsPending,proto3" json:"total_commissions_pending,omitempty"`
+	Pagination                 *PaginationResponse    `protobuf:"bytes,7,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields              protoimpl.UnknownFields
 	sizeCache                  protoimpl.SizeCache
 }
@@ -2214,6 +2376,20 @@ func (x *GetCommissionReportResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetCommissionReportResponse.ProtoReflect.Descriptor instead.
 func (*GetCommissionReportResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *GetCommissionReportResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetCommissionReportResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetCommissionReportResponse) GetEmployeeSummaries() []*CommissionSummary {
@@ -2322,10 +2498,12 @@ func (x *BulkCalculateCommissionsRequest) GetCalculatedBy() int64 {
 
 type BulkCalculateCommissionsResponse struct {
 	state         protoimpl.MessageState   `protogen:"open.v1"`
-	Calculations  []*CommissionCalculation `protobuf:"bytes,1,rep,name=calculations,proto3" json:"calculations,omitempty"`
-	Errors        []string                 `protobuf:"bytes,2,rep,name=errors,proto3" json:"errors,omitempty"`
-	SuccessCount  int32                    `protobuf:"varint,3,opt,name=success_count,json=successCount,proto3" json:"success_count,omitempty"`
-	ErrorCount    int32                    `protobuf:"varint,4,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
+	Success       bool                     `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                  `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Calculations  []*CommissionCalculation `protobuf:"bytes,3,rep,name=calculations,proto3" json:"calculations,omitempty"`
+	Errors        []string                 `protobuf:"bytes,4,rep,name=errors,proto3" json:"errors,omitempty"`
+	SuccessCount  int32                    `protobuf:"varint,5,opt,name=success_count,json=successCount,proto3" json:"success_count,omitempty"`
+	ErrorCount    int32                    `protobuf:"varint,6,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2358,6 +2536,20 @@ func (x *BulkCalculateCommissionsResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use BulkCalculateCommissionsResponse.ProtoReflect.Descriptor instead.
 func (*BulkCalculateCommissionsResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *BulkCalculateCommissionsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *BulkCalculateCommissionsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *BulkCalculateCommissionsResponse) GetCalculations() []*CommissionCalculation {
@@ -2450,10 +2642,12 @@ func (x *BulkApproveCommissionsRequest) GetApprovalNotes() string {
 
 type BulkApproveCommissionsResponse struct {
 	state                protoimpl.MessageState   `protogen:"open.v1"`
-	ApprovedCalculations []*CommissionCalculation `protobuf:"bytes,1,rep,name=approved_calculations,json=approvedCalculations,proto3" json:"approved_calculations,omitempty"`
-	Errors               []string                 `protobuf:"bytes,2,rep,name=errors,proto3" json:"errors,omitempty"`
-	SuccessCount         int32                    `protobuf:"varint,3,opt,name=success_count,json=successCount,proto3" json:"success_count,omitempty"`
-	ErrorCount           int32                    `protobuf:"varint,4,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
+	Success              bool                     `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message              *string                  `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	ApprovedCalculations []*CommissionCalculation `protobuf:"bytes,3,rep,name=approved_calculations,json=approvedCalculations,proto3" json:"approved_calculations,omitempty"`
+	Errors               []string                 `protobuf:"bytes,4,rep,name=errors,proto3" json:"errors,omitempty"`
+	SuccessCount         int32                    `protobuf:"varint,5,opt,name=success_count,json=successCount,proto3" json:"success_count,omitempty"`
+	ErrorCount           int32                    `protobuf:"varint,6,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -2486,6 +2680,20 @@ func (x *BulkApproveCommissionsResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use BulkApproveCommissionsResponse.ProtoReflect.Descriptor instead.
 func (*BulkApproveCommissionsResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *BulkApproveCommissionsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *BulkApproveCommissionsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *BulkApproveCommissionsResponse) GetApprovedCalculations() []*CommissionCalculation {
@@ -2563,8 +2771,10 @@ func (x *GetCommissionSettingsRequest) GetEmployeeId() int64 {
 
 type GetCommissionSettingsResponse struct {
 	state         protoimpl.MessageState   `protogen:"open.v1"`
-	Employee      *EmployeeSummary         `protobuf:"bytes,1,opt,name=employee,proto3" json:"employee,omitempty"`
-	TierSettings  []*CommissionTierSetting `protobuf:"bytes,2,rep,name=tier_settings,json=tierSettings,proto3" json:"tier_settings,omitempty"`
+	Success       bool                     `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                  `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Employee      *EmployeeSummary         `protobuf:"bytes,3,opt,name=employee,proto3" json:"employee,omitempty"`
+	TierSettings  []*CommissionTierSetting `protobuf:"bytes,4,rep,name=tier_settings,json=tierSettings,proto3" json:"tier_settings,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2597,6 +2807,20 @@ func (x *GetCommissionSettingsResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetCommissionSettingsResponse.ProtoReflect.Descriptor instead.
 func (*GetCommissionSettingsResponse) Descriptor() ([]byte, []int) {
 	return file_commissions_commision_service_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *GetCommissionSettingsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetCommissionSettingsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetCommissionSettingsResponse) GetEmployee() *EmployeeSummary {
@@ -2698,7 +2922,7 @@ const file_commissions_commision_service_proto_rawDesc = "" +
 	"\tDateRange\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x01 \x01(\tR\tstartDate\x12\x19\n" +
-	"\bend_date\x18\x02 \x01(\tR\aendDate\"\x86\a\n" +
+	"\bend_date\x18\x02 \x01(\tR\aendDate\"\xf8\a\n" +
 	"\x15CommissionCalculation\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vemployee_id\x18\x02 \x01(\x03R\n" +
@@ -2712,26 +2936,30 @@ const file_commissions_commision_service_proto_rawDesc = "" +
 	"\x10total_commission\x18\b \x01(\tR\x0ftotalCommission\x124\n" +
 	"\x06status\x18\t \x01(\x0e2\x1c.commission.CommissionStatusR\x06status\x12#\n" +
 	"\rcalculated_by\x18\n" +
-	" \x01(\x03R\fcalculatedBy\x12$\n" +
-	"\vapproved_by\x18\v \x01(\x03H\x00R\n" +
-	"approvedBy\x88\x01\x01\x12\x19\n" +
-	"\x05notes\x18\f \x01(\tH\x01R\x05notes\x88\x01\x01\x129\n" +
+	" \x01(\x03R\fcalculatedBy\x12,\n" +
+	"\x12calculated_by_name\x18\v \x01(\tR\x10calculatedByName\x12$\n" +
+	"\vapproved_by\x18\f \x01(\x03H\x00R\n" +
+	"approvedBy\x88\x01\x01\x12-\n" +
+	"\x10approved_by_name\x18\r \x01(\tH\x01R\x0eapprovedByName\x88\x01\x01\x12\x19\n" +
+	"\x05notes\x18\x0e \x01(\tH\x02R\x05notes\x88\x01\x01\x129\n" +
 	"\n" +
-	"created_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12K\n" +
-	"\x12commission_details\x18\x0f \x03(\v2\x1c.commission.CommissionDetailR\x11commissionDetails\x12Q\n" +
-	"\x12commission_payment\x18\x10 \x01(\v2\x1d.commission.CommissionPaymentH\x02R\x11commissionPayment\x88\x01\x01\x12<\n" +
-	"\bemployee\x18\x11 \x01(\v2\x1b.commission.EmployeeSummaryH\x03R\bemployee\x88\x01\x01B\x0e\n" +
-	"\f_approved_byB\b\n" +
+	"updated_at\x18\x10 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12K\n" +
+	"\x12commission_details\x18\x11 \x03(\v2\x1c.commission.CommissionDetailR\x11commissionDetails\x12Q\n" +
+	"\x12commission_payment\x18\x12 \x01(\v2\x1d.commission.CommissionPaymentH\x03R\x11commissionPayment\x88\x01\x01\x12<\n" +
+	"\bemployee\x18\x13 \x01(\v2\x1b.commission.EmployeeSummaryH\x04R\bemployee\x88\x01\x01B\x0e\n" +
+	"\f_approved_byB\x13\n" +
+	"\x11_approved_by_nameB\b\n" +
 	"\x06_notesB\x15\n" +
 	"\x13_commission_paymentB\v\n" +
-	"\t_employee\"\xe5\x03\n" +
+	"\t_employee\"\xe1\x03\n" +
 	"\x10CommissionDetail\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12:\n" +
 	"\x19commission_calculation_id\x18\x02 \x01(\x03R\x17commissionCalculationId\x12\"\n" +
-	"\rorder_item_id\x18\x03 \x01(\x03R\vorderItemId\x12!\n" +
-	"\fproduct_code\x18\x04 \x01(\tR\vproductCode\x12!\n" +
+	"\rorder_item_id\x18\x03 \x01(\x03R\vorderItemId\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x04 \x01(\x05R\tproductId\x12!\n" +
 	"\fsales_amount\x18\x05 \x01(\tR\vsalesAmount\x12'\n" +
 	"\x0fcommission_rate\x18\x06 \x01(\tR\x0ecommissionRate\x12+\n" +
 	"\x11commission_amount\x18\a \x01(\tR\x10commissionAmount\x129\n" +
@@ -2794,24 +3022,36 @@ const file_commissions_commision_service_proto_rawDesc = "" +
 	"period_end\x18\x03 \x01(\tR\tperiodEnd\x12#\n" +
 	"\rcalculated_by\x18\x04 \x01(\x03R\fcalculatedBy\x12.\n" +
 	"\x10save_calculation\x18\x05 \x01(\bH\x00R\x0fsaveCalculation\x88\x01\x01B\x13\n" +
-	"\x11_save_calculation\"\xd5\x01\n" +
-	"\x1bCalculateCommissionResponse\x12X\n" +
-	"\x16commission_calculation\x18\x01 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculation\x12=\n" +
-	"\tbreakdown\x18\x02 \x01(\v2\x1f.commission.CommissionBreakdownR\tbreakdown\x12\x1d\n" +
+	"\x11_save_calculation\"\x9a\x02\n" +
+	"\x1bCalculateCommissionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12X\n" +
+	"\x16commission_calculation\x18\x03 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculation\x12=\n" +
+	"\tbreakdown\x18\x04 \x01(\v2\x1f.commission.CommissionBreakdownR\tbreakdown\x12\x1d\n" +
 	"\n" +
-	"is_preview\x18\x03 \x01(\bR\tisPreview\"\xa8\x01\n" +
+	"is_preview\x18\x05 \x01(\bR\tisPreviewB\n" +
+	"\n" +
+	"\b_message\"\xa8\x01\n" +
 	"\x1cRecalculateCommissionRequest\x12:\n" +
 	"\x19commission_calculation_id\x18\x01 \x01(\x03R\x17commissionCalculationId\x12'\n" +
 	"\x0frecalculated_by\x18\x02 \x01(\x03R\x0erecalculatedBy\x12\x19\n" +
 	"\x05notes\x18\x03 \x01(\tH\x00R\x05notes\x88\x01\x01B\b\n" +
-	"\x06_notes\"\xb8\x01\n" +
-	"\x1dRecalculateCommissionResponse\x12X\n" +
-	"\x16commission_calculation\x18\x01 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculation\x12=\n" +
-	"\tbreakdown\x18\x02 \x01(\v2\x1f.commission.CommissionBreakdownR\tbreakdown\"1\n" +
+	"\x06_notes\"\xfd\x01\n" +
+	"\x1dRecalculateCommissionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12X\n" +
+	"\x16commission_calculation\x18\x03 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculation\x12=\n" +
+	"\tbreakdown\x18\x04 \x01(\v2\x1f.commission.CommissionBreakdownR\tbreakdownB\n" +
+	"\n" +
+	"\b_message\"1\n" +
 	"\x1fGetCommissionCalculationRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"|\n" +
-	" GetCommissionCalculationResponse\x12X\n" +
-	"\x16commission_calculation\x18\x01 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculation\"\xc0\x02\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\xc1\x01\n" +
+	" GetCommissionCalculationResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12X\n" +
+	"\x16commission_calculation\x18\x03 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculationB\n" +
+	"\n" +
+	"\b_message\"\xc0\x02\n" +
 	"!ListCommissionCalculationsRequest\x12=\n" +
 	"\n" +
 	"pagination\x18\x01 \x01(\v2\x1d.commission.PaginationRequestR\n" +
@@ -2822,27 +3062,39 @@ const file_commissions_commision_service_proto_rawDesc = "" +
 	"\x12calculation_period\x18\x04 \x01(\v2\x15.commission.DateRangeH\x02R\x11calculationPeriod\x88\x01\x01B\x0e\n" +
 	"\f_employee_idB\t\n" +
 	"\a_statusB\x15\n" +
-	"\x13_calculation_period\"\xc0\x01\n" +
-	"\"ListCommissionCalculationsResponse\x12Z\n" +
-	"\x17commission_calculations\x18\x01 \x03(\v2!.commission.CommissionCalculationR\x16commissionCalculations\x12>\n" +
+	"\x13_calculation_period\"\x85\x02\n" +
+	"\"ListCommissionCalculationsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12Z\n" +
+	"\x17commission_calculations\x18\x03 \x03(\v2!.commission.CommissionCalculationR\x16commissionCalculations\x12>\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1e.commission.PaginationResponseR\n" +
-	"pagination\"\xb6\x01\n" +
+	"pagination\x18\x04 \x01(\v2\x1e.commission.PaginationResponseR\n" +
+	"paginationB\n" +
+	"\n" +
+	"\b_message\"\xb6\x01\n" +
 	"\x18ApproveCommissionRequest\x12:\n" +
 	"\x19commission_calculation_id\x18\x01 \x01(\x03R\x17commissionCalculationId\x12\x1f\n" +
 	"\vapproved_by\x18\x02 \x01(\x03R\n" +
 	"approvedBy\x12*\n" +
 	"\x0eapproval_notes\x18\x03 \x01(\tH\x00R\rapprovalNotes\x88\x01\x01B\x11\n" +
-	"\x0f_approval_notes\"u\n" +
-	"\x19ApproveCommissionResponse\x12X\n" +
-	"\x16commission_calculation\x18\x01 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculation\"\xa1\x01\n" +
+	"\x0f_approval_notes\"\xba\x01\n" +
+	"\x19ApproveCommissionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12X\n" +
+	"\x16commission_calculation\x18\x03 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculationB\n" +
+	"\n" +
+	"\b_message\"\xa1\x01\n" +
 	"\x17RejectCommissionRequest\x12:\n" +
 	"\x19commission_calculation_id\x18\x01 \x01(\x03R\x17commissionCalculationId\x12\x1f\n" +
 	"\vrejected_by\x18\x02 \x01(\x03R\n" +
 	"rejectedBy\x12)\n" +
-	"\x10rejection_reason\x18\x03 \x01(\tR\x0frejectionReason\"t\n" +
-	"\x18RejectCommissionResponse\x12X\n" +
-	"\x16commission_calculation\x18\x01 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculation\"\xb6\x02\n" +
+	"\x10rejection_reason\x18\x03 \x01(\tR\x0frejectionReason\"\xb9\x01\n" +
+	"\x18RejectCommissionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12X\n" +
+	"\x16commission_calculation\x18\x03 \x01(\v2!.commission.CommissionCalculationR\x15commissionCalculationB\n" +
+	"\n" +
+	"\b_message\"\xb6\x02\n" +
 	"\x14PayCommissionRequest\x12:\n" +
 	"\x19commission_calculation_id\x18\x01 \x01(\x03R\x17commissionCalculationId\x12&\n" +
 	"\x0fpayment_type_id\x18\x02 \x01(\x05R\rpaymentTypeId\x12.\n" +
@@ -2852,21 +3104,33 @@ const file_commissions_commision_service_proto_rawDesc = "" +
 	"\fpayment_date\x18\x06 \x01(\tH\x02R\vpaymentDate\x88\x01\x01B\x13\n" +
 	"\x11_reference_numberB\b\n" +
 	"\x06_notesB\x0f\n" +
-	"\r_payment_date\"\xb9\x01\n" +
-	"\x15PayCommissionResponse\x12L\n" +
-	"\x12commission_payment\x18\x01 \x01(\v2\x1d.commission.CommissionPaymentR\x11commissionPayment\x12R\n" +
-	"\x13updated_calculation\x18\x02 \x01(\v2!.commission.CommissionCalculationR\x12updatedCalculation\"Y\n" +
+	"\r_payment_date\"\xfe\x01\n" +
+	"\x15PayCommissionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12L\n" +
+	"\x12commission_payment\x18\x03 \x01(\v2\x1d.commission.CommissionPaymentR\x11commissionPayment\x12R\n" +
+	"\x13updated_calculation\x18\x04 \x01(\v2!.commission.CommissionCalculationR\x12updatedCalculationB\n" +
+	"\n" +
+	"\b_message\"Y\n" +
 	"\x1bGetCommissionPaymentRequest\x12:\n" +
-	"\x19commission_calculation_id\x18\x01 \x01(\x03R\x17commissionCalculationId\"l\n" +
-	"\x1cGetCommissionPaymentResponse\x12L\n" +
-	"\x12commission_payment\x18\x01 \x01(\v2\x1d.commission.CommissionPaymentR\x11commissionPayment\"t\n" +
+	"\x19commission_calculation_id\x18\x01 \x01(\x03R\x17commissionCalculationId\"\xb1\x01\n" +
+	"\x1cGetCommissionPaymentResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12L\n" +
+	"\x12commission_payment\x18\x03 \x01(\v2\x1d.commission.CommissionPaymentR\x11commissionPaymentB\n" +
+	"\n" +
+	"\b_message\"t\n" +
 	"\x1bGetCommissionSummaryRequest\x12\x1f\n" +
 	"\vemployee_id\x18\x01 \x01(\x03R\n" +
 	"employeeId\x124\n" +
 	"\n" +
-	"date_range\x18\x02 \x01(\v2\x15.commission.DateRangeR\tdateRange\"W\n" +
-	"\x1cGetCommissionSummaryResponse\x127\n" +
-	"\asummary\x18\x01 \x01(\v2\x1d.commission.CommissionSummaryR\asummary\"\xfd\x03\n" +
+	"date_range\x18\x02 \x01(\v2\x15.commission.DateRangeR\tdateRange\"\x9c\x01\n" +
+	"\x1cGetCommissionSummaryResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x127\n" +
+	"\asummary\x18\x03 \x01(\v2\x1d.commission.CommissionSummaryR\asummaryB\n" +
+	"\n" +
+	"\b_message\"\xfd\x03\n" +
 	"\x11CommissionSummary\x12\x1f\n" +
 	"\vemployee_id\x18\x01 \x01(\x03R\n" +
 	"employeeId\x12#\n" +
@@ -2891,45 +3155,61 @@ const file_commissions_commision_service_proto_rawDesc = "" +
 	"pagination\x18\x04 \x01(\v2\x1d.commission.PaginationRequestR\n" +
 	"paginationB\x0e\n" +
 	"\f_employee_idB\t\n" +
-	"\a_status\"\xdf\x02\n" +
-	"\x1bGetCommissionReportResponse\x12L\n" +
-	"\x12employee_summaries\x18\x01 \x03(\v2\x1d.commission.CommissionSummaryR\x11employeeSummaries\x12@\n" +
-	"\x1ctotal_commissions_calculated\x18\x02 \x01(\tR\x1atotalCommissionsCalculated\x124\n" +
-	"\x16total_commissions_paid\x18\x03 \x01(\tR\x14totalCommissionsPaid\x12:\n" +
-	"\x19total_commissions_pending\x18\x04 \x01(\tR\x17totalCommissionsPending\x12>\n" +
+	"\a_status\"\xa4\x03\n" +
+	"\x1bGetCommissionReportResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12L\n" +
+	"\x12employee_summaries\x18\x03 \x03(\v2\x1d.commission.CommissionSummaryR\x11employeeSummaries\x12@\n" +
+	"\x1ctotal_commissions_calculated\x18\x04 \x01(\tR\x1atotalCommissionsCalculated\x124\n" +
+	"\x16total_commissions_paid\x18\x05 \x01(\tR\x14totalCommissionsPaid\x12:\n" +
+	"\x19total_commissions_pending\x18\x06 \x01(\tR\x17totalCommissionsPending\x12>\n" +
 	"\n" +
-	"pagination\x18\x05 \x01(\v2\x1e.commission.PaginationResponseR\n" +
-	"pagination\"\xab\x01\n" +
+	"pagination\x18\a \x01(\v2\x1e.commission.PaginationResponseR\n" +
+	"paginationB\n" +
+	"\n" +
+	"\b_message\"\xab\x01\n" +
 	"\x1fBulkCalculateCommissionsRequest\x12!\n" +
 	"\femployee_ids\x18\x01 \x03(\x03R\vemployeeIds\x12!\n" +
 	"\fperiod_start\x18\x02 \x01(\tR\vperiodStart\x12\x1d\n" +
 	"\n" +
 	"period_end\x18\x03 \x01(\tR\tperiodEnd\x12#\n" +
-	"\rcalculated_by\x18\x04 \x01(\x03R\fcalculatedBy\"\xc7\x01\n" +
-	" BulkCalculateCommissionsResponse\x12E\n" +
-	"\fcalculations\x18\x01 \x03(\v2!.commission.CommissionCalculationR\fcalculations\x12\x16\n" +
-	"\x06errors\x18\x02 \x03(\tR\x06errors\x12#\n" +
-	"\rsuccess_count\x18\x03 \x01(\x05R\fsuccessCount\x12\x1f\n" +
-	"\verror_count\x18\x04 \x01(\x05R\n" +
-	"errorCount\"\xbd\x01\n" +
+	"\rcalculated_by\x18\x04 \x01(\x03R\fcalculatedBy\"\x8c\x02\n" +
+	" BulkCalculateCommissionsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12E\n" +
+	"\fcalculations\x18\x03 \x03(\v2!.commission.CommissionCalculationR\fcalculations\x12\x16\n" +
+	"\x06errors\x18\x04 \x03(\tR\x06errors\x12#\n" +
+	"\rsuccess_count\x18\x05 \x01(\x05R\fsuccessCount\x12\x1f\n" +
+	"\verror_count\x18\x06 \x01(\x05R\n" +
+	"errorCountB\n" +
+	"\n" +
+	"\b_message\"\xbd\x01\n" +
 	"\x1dBulkApproveCommissionsRequest\x12<\n" +
 	"\x1acommission_calculation_ids\x18\x01 \x03(\x03R\x18commissionCalculationIds\x12\x1f\n" +
 	"\vapproved_by\x18\x02 \x01(\x03R\n" +
 	"approvedBy\x12*\n" +
 	"\x0eapproval_notes\x18\x03 \x01(\tH\x00R\rapprovalNotes\x88\x01\x01B\x11\n" +
-	"\x0f_approval_notes\"\xd6\x01\n" +
-	"\x1eBulkApproveCommissionsResponse\x12V\n" +
-	"\x15approved_calculations\x18\x01 \x03(\v2!.commission.CommissionCalculationR\x14approvedCalculations\x12\x16\n" +
-	"\x06errors\x18\x02 \x03(\tR\x06errors\x12#\n" +
-	"\rsuccess_count\x18\x03 \x01(\x05R\fsuccessCount\x12\x1f\n" +
-	"\verror_count\x18\x04 \x01(\x05R\n" +
-	"errorCount\"?\n" +
+	"\x0f_approval_notes\"\x9b\x02\n" +
+	"\x1eBulkApproveCommissionsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12V\n" +
+	"\x15approved_calculations\x18\x03 \x03(\v2!.commission.CommissionCalculationR\x14approvedCalculations\x12\x16\n" +
+	"\x06errors\x18\x04 \x03(\tR\x06errors\x12#\n" +
+	"\rsuccess_count\x18\x05 \x01(\x05R\fsuccessCount\x12\x1f\n" +
+	"\verror_count\x18\x06 \x01(\x05R\n" +
+	"errorCountB\n" +
+	"\n" +
+	"\b_message\"?\n" +
 	"\x1cGetCommissionSettingsRequest\x12\x1f\n" +
 	"\vemployee_id\x18\x01 \x01(\x03R\n" +
-	"employeeId\"\xa0\x01\n" +
-	"\x1dGetCommissionSettingsResponse\x127\n" +
-	"\bemployee\x18\x01 \x01(\v2\x1b.commission.EmployeeSummaryR\bemployee\x12F\n" +
-	"\rtier_settings\x18\x02 \x03(\v2!.commission.CommissionTierSettingR\ftierSettings\"\xbe\x01\n" +
+	"employeeId\"\xe5\x01\n" +
+	"\x1dGetCommissionSettingsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x127\n" +
+	"\bemployee\x18\x03 \x01(\v2\x1b.commission.EmployeeSummaryR\bemployee\x12F\n" +
+	"\rtier_settings\x18\x04 \x03(\v2!.commission.CommissionTierSettingR\ftierSettingsB\n" +
+	"\n" +
+	"\b_message\"\xbe\x01\n" +
 	"\x15CommissionTierSetting\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12(\n" +
 	"\x10min_sales_amount\x18\x02 \x01(\tR\x0eminSalesAmount\x12-\n" +
@@ -3102,12 +3382,25 @@ func file_commissions_commision_service_proto_init() {
 	file_commissions_commision_service_proto_msgTypes[5].OneofWrappers = []any{}
 	file_commissions_commision_service_proto_msgTypes[6].OneofWrappers = []any{}
 	file_commissions_commision_service_proto_msgTypes[10].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[11].OneofWrappers = []any{}
 	file_commissions_commision_service_proto_msgTypes[12].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[13].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[15].OneofWrappers = []any{}
 	file_commissions_commision_service_proto_msgTypes[16].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[17].OneofWrappers = []any{}
 	file_commissions_commision_service_proto_msgTypes[18].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[19].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[21].OneofWrappers = []any{}
 	file_commissions_commision_service_proto_msgTypes[22].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[23].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[25].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[27].OneofWrappers = []any{}
 	file_commissions_commision_service_proto_msgTypes[29].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[30].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[32].OneofWrappers = []any{}
 	file_commissions_commision_service_proto_msgTypes[33].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[34].OneofWrappers = []any{}
+	file_commissions_commision_service_proto_msgTypes[36].OneofWrappers = []any{}
 	file_commissions_commision_service_proto_msgTypes[37].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

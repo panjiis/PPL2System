@@ -9,6 +9,7 @@ import (
 	proto "syntra-system/proto/protogen/pos"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -55,7 +56,8 @@ func (s *POSHandler) CreateOrder(ctx context.Context, req *proto.CreateOrderRequ
 		}
 	}()
 
-	now := time.Now()
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	now := time.Now().In(loc)
 	var subtotal, totalDiscount, totalTax float64
 
 	order := OrderDocument{
@@ -208,13 +210,30 @@ func (s *POSHandler) CreateOrder(ctx context.Context, req *proto.CreateOrderRequ
 		}, err
 	}
 
-	// event := s.createOrderEvent(&order, EventOrderCreated)
-	// s.publishOrderEvent(ctx, event)
+	// --- TAMBAHKAN BLOK INI ---
+	// Muat ulang order dengan OrderItems yang sudah terisi
+	// Kita butuh preloads ini untuk createOrderEvent dan orderDocumentToProto
+	var reloadedOrder OrderDocument
+	if err := s.db.Where("id = ?", order.ID).
+		Preload("OrderItems.Product.ProductGroup").
+		Preload("OrderItems.Discount").
+		Preload("PaymentType").
+		First(&reloadedOrder).Error; err != nil {
+
+		log.Printf("Gagal memuat ulang order %d untuk event: %v", order.ID, err)
+		// Jika gagal, kirim data seadanya (event & proto akan tidak lengkap)
+		reloadedOrder = order
+	}
+	// --- AKHIR BLOK TAMBAHAN ---
+
+	// Gunakan 'reloadedOrder' yang sudah lengkap, BUKAN 'order'
+	event := s.createOrderEvent(&reloadedOrder, EventOrderCreated)
+	s.publishOrderEvent(ctx, event)
 
 	return &proto.CreateOrderResponse{
 		Success:       true,
 		Message:       lib.StrPtr("Order created successfully"),
-		OrderDocument: s.orderDocumentToProto(order),
+		OrderDocument: s.orderDocumentToProto(reloadedOrder),
 	}, nil
 }
 
@@ -286,7 +305,8 @@ func (s *POSHandler) CreateOrderFromCart(ctx context.Context, req *proto.CreateO
 		}
 	}()
 
-	now := time.Now()
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	now := time.Now().In(loc)
 	order := OrderDocument{
 		DocumentNumber: req.GetDocumentNumber(),
 		CashierId:      cart.CashierId,
@@ -364,13 +384,30 @@ func (s *POSHandler) CreateOrderFromCart(ctx context.Context, req *proto.CreateO
 		}, err
 	}
 
-	// event := s.createOrderEvent(&order, EventOrderCreated)
-	// s.publishOrderEvent(ctx, event)
+	// --- TAMBAHKAN BLOK INI ---
+	// Muat ulang order dengan OrderItems yang sudah terisi
+	// Kita butuh preloads ini untuk createOrderEvent dan orderDocumentToProto
+	var reloadedOrder OrderDocument
+	if err := s.db.Where("id = ?", order.ID).
+		Preload("OrderItems.Product.ProductGroup").
+		Preload("OrderItems.Discount").
+		Preload("PaymentType").
+		First(&reloadedOrder).Error; err != nil {
+
+		log.Printf("Gagal memuat ulang order %d untuk event: %v", order.ID, err)
+		// Jika gagal, kirim data seadanya (event & proto akan tidak lengkap)
+		reloadedOrder = order
+	}
+	// --- AKHIR BLOK TAMBAHAN ---
+
+	// Gunakan 'reloadedOrder' yang sudah lengkap, BUKAN 'order'
+	event := s.createOrderEvent(&reloadedOrder, EventOrderCreated)
+	s.publishOrderEvent(ctx, event)
 
 	return &proto.CreateOrderFromCartResponse{
 		Success:       true,
 		Message:       lib.StrPtr("Order created successfully from cart"),
-		OrderDocument: s.orderDocumentToProto(order),
+		OrderDocument: s.orderDocumentToProto(reloadedOrder),
 	}, nil
 }
 
@@ -755,6 +792,21 @@ func (s *POSHandler) ReturnOrder(ctx context.Context, req *proto.ReturnOrderRequ
 
 	event := s.createOrderEvent(&returnDoc, EventOrderReturned)
 	s.publishOrderEvent(ctx, event)
+
+	saleItems := s.orderItemsToSaleItems(originalOrder.OrderItems)
+	saleRefundedEvent := SaleRefundedEvent{
+		EventID:       uuid.New().String(),
+		Timestamp:     time.Now(),
+		TransactionID: originalOrder.DocumentNumber,
+		DocumentID:    originalOrder.ID,
+		WarehouseID:   1,
+		Items:         saleItems,
+	}
+
+	err := s.publishStockChanges(ctx, "sale.refunded", saleRefundedEvent)
+	if err != nil {
+		log.Printf("Failed to publish sale.refunded event: %v", err)
+	}
 
 	return &proto.ReturnOrderResponse{
 		Success:        true,

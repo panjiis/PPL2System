@@ -946,7 +946,9 @@ func (x *GetSalesReportRequest) GetIncludeProductBreakdown() bool {
 
 type GetSalesReportResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SalesReport   *SalesReport           `protobuf:"bytes,1,opt,name=sales_report,json=salesReport,proto3" json:"sales_report,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	SalesReport   *SalesReport           `protobuf:"bytes,3,opt,name=sales_report,json=salesReport,proto3" json:"sales_report,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -979,6 +981,20 @@ func (x *GetSalesReportResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetSalesReportResponse.ProtoReflect.Descriptor instead.
 func (*GetSalesReportResponse) Descriptor() ([]byte, []int) {
 	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetSalesReportResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetSalesReportResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetSalesReportResponse) GetSalesReport() *SalesReport {
@@ -1042,7 +1058,9 @@ func (x *GetDailySummaryRequest) GetCashierId() int64 {
 
 type GetDailySummaryResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	DailySummaries []*SalesSummaryDaily   `protobuf:"bytes,1,rep,name=daily_summaries,json=dailySummaries,proto3" json:"daily_summaries,omitempty"`
+	Success        bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message        *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	DailySummaries []*SalesSummaryDaily   `protobuf:"bytes,3,rep,name=daily_summaries,json=dailySummaries,proto3" json:"daily_summaries,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1075,6 +1093,20 @@ func (x *GetDailySummaryResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetDailySummaryResponse.ProtoReflect.Descriptor instead.
 func (*GetDailySummaryResponse) Descriptor() ([]byte, []int) {
 	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetDailySummaryResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetDailySummaryResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetDailySummaryResponse) GetDailySummaries() []*SalesSummaryDaily {
@@ -1138,9 +1170,9 @@ func (x *GenerateDailySummaryRequest) GetCashierId() int64 {
 
 type GenerateDailySummaryResponse struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
-	GeneratedSummaries []*SalesSummaryDaily   `protobuf:"bytes,1,rep,name=generated_summaries,json=generatedSummaries,proto3" json:"generated_summaries,omitempty"`
-	Success            bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
-	Message            *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Success            bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message            *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	GeneratedSummaries []*SalesSummaryDaily   `protobuf:"bytes,3,rep,name=generated_summaries,json=generatedSummaries,proto3" json:"generated_summaries,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -1175,13 +1207,6 @@ func (*GenerateDailySummaryResponse) Descriptor() ([]byte, []int) {
 	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *GenerateDailySummaryResponse) GetGeneratedSummaries() []*SalesSummaryDaily {
-	if x != nil {
-		return x.GeneratedSummaries
-	}
-	return nil
-}
-
 func (x *GenerateDailySummaryResponse) GetSuccess() bool {
 	if x != nil {
 		return x.Success
@@ -1194,6 +1219,13 @@ func (x *GenerateDailySummaryResponse) GetMessage() string {
 		return *x.Message
 	}
 	return ""
+}
+
+func (x *GenerateDailySummaryResponse) GetGeneratedSummaries() []*SalesSummaryDaily {
+	if x != nil {
+		return x.GeneratedSummaries
+	}
+	return nil
 }
 
 // Product Analytics
@@ -1267,8 +1299,10 @@ func (x *GetProductSalesRequest) GetPagination() *PaginationRequest {
 
 type GetProductSalesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ProductSales  []*ProductSalesSummary `protobuf:"bytes,1,rep,name=product_sales,json=productSales,proto3" json:"product_sales,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	ProductSales  []*ProductSalesSummary `protobuf:"bytes,3,rep,name=product_sales,json=productSales,proto3" json:"product_sales,omitempty"`
+	Pagination    *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1301,6 +1335,20 @@ func (x *GetProductSalesResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetProductSalesResponse.ProtoReflect.Descriptor instead.
 func (*GetProductSalesResponse) Descriptor() ([]byte, []int) {
 	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetProductSalesResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetProductSalesResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetProductSalesResponse) GetProductSales() []*ProductSalesSummary {
@@ -1379,7 +1427,9 @@ func (x *GetTopSellingProductsRequest) GetProductGroupId() int32 {
 
 type GetTopSellingProductsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TopProducts   []*ProductSalesSummary `protobuf:"bytes,1,rep,name=top_products,json=topProducts,proto3" json:"top_products,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	TopProducts   []*ProductSalesSummary `protobuf:"bytes,3,rep,name=top_products,json=topProducts,proto3" json:"top_products,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1412,6 +1462,20 @@ func (x *GetTopSellingProductsResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetTopSellingProductsResponse.ProtoReflect.Descriptor instead.
 func (*GetTopSellingProductsResponse) Descriptor() ([]byte, []int) {
 	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GetTopSellingProductsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetTopSellingProductsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetTopSellingProductsResponse) GetTopProducts() []*ProductSalesSummary {
@@ -1484,8 +1548,10 @@ func (x *GetEmployeePerformanceRequest) GetPagination() *PaginationRequest {
 
 type GetEmployeePerformanceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Performances  []*EmployeePerformance `protobuf:"bytes,1,rep,name=performances,proto3" json:"performances,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Performances  []*EmployeePerformance `protobuf:"bytes,3,rep,name=performances,proto3" json:"performances,omitempty"`
+	Pagination    *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1518,6 +1584,20 @@ func (x *GetEmployeePerformanceResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetEmployeePerformanceResponse.ProtoReflect.Descriptor instead.
 func (*GetEmployeePerformanceResponse) Descriptor() ([]byte, []int) {
 	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetEmployeePerformanceResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetEmployeePerformanceResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetEmployeePerformanceResponse) GetPerformances() []*EmployeePerformance {
@@ -1588,7 +1668,9 @@ func (x *GetPerformanceReportRequest) GetEmployeeId() int64 {
 
 type GetPerformanceReportResponse struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
-	PerformanceReport *PerformanceReport     `protobuf:"bytes,1,opt,name=performance_report,json=performanceReport,proto3" json:"performance_report,omitempty"`
+	Success           bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message           *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	PerformanceReport *PerformanceReport     `protobuf:"bytes,3,opt,name=performance_report,json=performanceReport,proto3" json:"performance_report,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -1621,6 +1703,20 @@ func (x *GetPerformanceReportResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetPerformanceReportResponse.ProtoReflect.Descriptor instead.
 func (*GetPerformanceReportResponse) Descriptor() ([]byte, []int) {
 	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GetPerformanceReportResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetPerformanceReportResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetPerformanceReportResponse) GetPerformanceReport() *PerformanceReport {
@@ -1693,8 +1789,10 @@ func (x *GetCustomerAnalyticsRequest) GetPagination() *PaginationRequest {
 
 type GetCustomerAnalyticsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Analytics     []*CustomerAnalytics   `protobuf:"bytes,1,rep,name=analytics,proto3" json:"analytics,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Analytics     []*CustomerAnalytics   `protobuf:"bytes,3,rep,name=analytics,proto3" json:"analytics,omitempty"`
+	Pagination    *PaginationResponse    `protobuf:"bytes,4,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1729,6 +1827,20 @@ func (*GetCustomerAnalyticsResponse) Descriptor() ([]byte, []int) {
 	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{24}
 }
 
+func (x *GetCustomerAnalyticsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetCustomerAnalyticsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
+}
+
 func (x *GetCustomerAnalyticsResponse) GetAnalytics() []*CustomerAnalytics {
 	if x != nil {
 		return x.Analytics
@@ -1745,7 +1857,6 @@ func (x *GetCustomerAnalyticsResponse) GetPagination() *PaginationResponse {
 
 type GetPeakHoursRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DateRange     *DateRange             `protobuf:"bytes,1,opt,name=date_range,json=dateRange,proto3" json:"date_range,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1780,23 +1891,128 @@ func (*GetPeakHoursRequest) Descriptor() ([]byte, []int) {
 	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{25}
 }
 
-func (x *GetPeakHoursRequest) GetDateRange() *DateRange {
+type HourlyData struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Hour             string                 `protobuf:"bytes,1,opt,name=hour,proto3" json:"hour,omitempty"`
+	TransactionCount int32                  `protobuf:"varint,2,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count,omitempty"`
+	TotalRevenue     string                 `protobuf:"bytes,3,opt,name=total_revenue,json=totalRevenue,proto3" json:"total_revenue,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *HourlyData) Reset() {
+	*x = HourlyData{}
+	mi := &file_analytics_analytics_service_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HourlyData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HourlyData) ProtoMessage() {}
+
+func (x *HourlyData) ProtoReflect() protoreflect.Message {
+	mi := &file_analytics_analytics_service_proto_msgTypes[26]
 	if x != nil {
-		return x.DateRange
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HourlyData.ProtoReflect.Descriptor instead.
+func (*HourlyData) Descriptor() ([]byte, []int) {
+	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *HourlyData) GetHour() string {
+	if x != nil {
+		return x.Hour
+	}
+	return ""
+}
+
+func (x *HourlyData) GetTransactionCount() int32 {
+	if x != nil {
+		return x.TransactionCount
+	}
+	return 0
+}
+
+func (x *HourlyData) GetTotalRevenue() string {
+	if x != nil {
+		return x.TotalRevenue
+	}
+	return ""
+}
+
+type WeeklyPeakData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DayOfWeek     int32                  `protobuf:"varint,1,opt,name=day_of_week,json=dayOfWeek,proto3" json:"day_of_week,omitempty"`
+	HourlyData    []*HourlyData          `protobuf:"bytes,2,rep,name=hourly_data,json=hourlyData,proto3" json:"hourly_data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WeeklyPeakData) Reset() {
+	*x = WeeklyPeakData{}
+	mi := &file_analytics_analytics_service_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WeeklyPeakData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WeeklyPeakData) ProtoMessage() {}
+
+func (x *WeeklyPeakData) ProtoReflect() protoreflect.Message {
+	mi := &file_analytics_analytics_service_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WeeklyPeakData.ProtoReflect.Descriptor instead.
+func (*WeeklyPeakData) Descriptor() ([]byte, []int) {
+	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *WeeklyPeakData) GetDayOfWeek() int32 {
+	if x != nil {
+		return x.DayOfWeek
+	}
+	return 0
+}
+
+func (x *WeeklyPeakData) GetHourlyData() []*HourlyData {
+	if x != nil {
+		return x.HourlyData
 	}
 	return nil
 }
 
 type GetPeakHoursResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PeakHours     []*PeakHourData        `protobuf:"bytes,1,rep,name=peak_hours,json=peakHours,proto3" json:"peak_hours,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	PeakDataByWeek []*WeeklyPeakData      `protobuf:"bytes,1,rep,name=peak_data_by_week,json=peakDataByWeek,proto3" json:"peak_data_by_week,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *GetPeakHoursResponse) Reset() {
 	*x = GetPeakHoursResponse{}
-	mi := &file_analytics_analytics_service_proto_msgTypes[26]
+	mi := &file_analytics_analytics_service_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1808,7 +2024,7 @@ func (x *GetPeakHoursResponse) String() string {
 func (*GetPeakHoursResponse) ProtoMessage() {}
 
 func (x *GetPeakHoursResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_analytics_analytics_service_proto_msgTypes[26]
+	mi := &file_analytics_analytics_service_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1821,74 +2037,14 @@ func (x *GetPeakHoursResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPeakHoursResponse.ProtoReflect.Descriptor instead.
 func (*GetPeakHoursResponse) Descriptor() ([]byte, []int) {
-	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{26}
+	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{28}
 }
 
-func (x *GetPeakHoursResponse) GetPeakHours() []*PeakHourData {
+func (x *GetPeakHoursResponse) GetPeakDataByWeek() []*WeeklyPeakData {
 	if x != nil {
-		return x.PeakHours
+		return x.PeakDataByWeek
 	}
 	return nil
-}
-
-type PeakHourData struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Hour             string                 `protobuf:"bytes,1,opt,name=hour,proto3" json:"hour,omitempty"`
-	TransactionCount int32                  `protobuf:"varint,2,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count,omitempty"`
-	TotalRevenue     string                 `protobuf:"bytes,3,opt,name=total_revenue,json=totalRevenue,proto3" json:"total_revenue,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *PeakHourData) Reset() {
-	*x = PeakHourData{}
-	mi := &file_analytics_analytics_service_proto_msgTypes[27]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PeakHourData) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PeakHourData) ProtoMessage() {}
-
-func (x *PeakHourData) ProtoReflect() protoreflect.Message {
-	mi := &file_analytics_analytics_service_proto_msgTypes[27]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PeakHourData.ProtoReflect.Descriptor instead.
-func (*PeakHourData) Descriptor() ([]byte, []int) {
-	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{27}
-}
-
-func (x *PeakHourData) GetHour() string {
-	if x != nil {
-		return x.Hour
-	}
-	return ""
-}
-
-func (x *PeakHourData) GetTransactionCount() int32 {
-	if x != nil {
-		return x.TransactionCount
-	}
-	return 0
-}
-
-func (x *PeakHourData) GetTotalRevenue() string {
-	if x != nil {
-		return x.TotalRevenue
-	}
-	return ""
 }
 
 type GetDashboardDataRequest struct {
@@ -1900,7 +2056,7 @@ type GetDashboardDataRequest struct {
 
 func (x *GetDashboardDataRequest) Reset() {
 	*x = GetDashboardDataRequest{}
-	mi := &file_analytics_analytics_service_proto_msgTypes[28]
+	mi := &file_analytics_analytics_service_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1912,7 +2068,7 @@ func (x *GetDashboardDataRequest) String() string {
 func (*GetDashboardDataRequest) ProtoMessage() {}
 
 func (x *GetDashboardDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_analytics_analytics_service_proto_msgTypes[28]
+	mi := &file_analytics_analytics_service_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1925,7 +2081,7 @@ func (x *GetDashboardDataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDashboardDataRequest.ProtoReflect.Descriptor instead.
 func (*GetDashboardDataRequest) Descriptor() ([]byte, []int) {
-	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{28}
+	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *GetDashboardDataRequest) GetDate() string {
@@ -1937,14 +2093,16 @@ func (x *GetDashboardDataRequest) GetDate() string {
 
 type GetDashboardDataResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Dashboard     *DashboardData         `protobuf:"bytes,1,opt,name=dashboard,proto3" json:"dashboard,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Dashboard     *DashboardData         `protobuf:"bytes,3,opt,name=dashboard,proto3" json:"dashboard,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetDashboardDataResponse) Reset() {
 	*x = GetDashboardDataResponse{}
-	mi := &file_analytics_analytics_service_proto_msgTypes[29]
+	mi := &file_analytics_analytics_service_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1956,7 +2114,7 @@ func (x *GetDashboardDataResponse) String() string {
 func (*GetDashboardDataResponse) ProtoMessage() {}
 
 func (x *GetDashboardDataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_analytics_analytics_service_proto_msgTypes[29]
+	mi := &file_analytics_analytics_service_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1969,7 +2127,21 @@ func (x *GetDashboardDataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDashboardDataResponse.ProtoReflect.Descriptor instead.
 func (*GetDashboardDataResponse) Descriptor() ([]byte, []int) {
-	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{29}
+	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *GetDashboardDataResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetDashboardDataResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetDashboardDataResponse) GetDashboard() *DashboardData {
@@ -1997,7 +2169,7 @@ type DashboardData struct {
 
 func (x *DashboardData) Reset() {
 	*x = DashboardData{}
-	mi := &file_analytics_analytics_service_proto_msgTypes[30]
+	mi := &file_analytics_analytics_service_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2009,7 +2181,7 @@ func (x *DashboardData) String() string {
 func (*DashboardData) ProtoMessage() {}
 
 func (x *DashboardData) ProtoReflect() protoreflect.Message {
-	mi := &file_analytics_analytics_service_proto_msgTypes[30]
+	mi := &file_analytics_analytics_service_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2022,7 +2194,7 @@ func (x *DashboardData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DashboardData.ProtoReflect.Descriptor instead.
 func (*DashboardData) Descriptor() ([]byte, []int) {
-	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{30}
+	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *DashboardData) GetTodayRevenue() string {
@@ -2103,7 +2275,7 @@ type GetRealTimeMetricsRequest struct {
 
 func (x *GetRealTimeMetricsRequest) Reset() {
 	*x = GetRealTimeMetricsRequest{}
-	mi := &file_analytics_analytics_service_proto_msgTypes[31]
+	mi := &file_analytics_analytics_service_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2115,7 +2287,7 @@ func (x *GetRealTimeMetricsRequest) String() string {
 func (*GetRealTimeMetricsRequest) ProtoMessage() {}
 
 func (x *GetRealTimeMetricsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_analytics_analytics_service_proto_msgTypes[31]
+	mi := &file_analytics_analytics_service_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2128,19 +2300,21 @@ func (x *GetRealTimeMetricsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRealTimeMetricsRequest.ProtoReflect.Descriptor instead.
 func (*GetRealTimeMetricsRequest) Descriptor() ([]byte, []int) {
-	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{31}
+	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{32}
 }
 
 type GetRealTimeMetricsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Metrics       *RealTimeMetrics       `protobuf:"bytes,1,opt,name=metrics,proto3" json:"metrics,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       *string                `protobuf:"bytes,2,opt,name=message,proto3,oneof" json:"message,omitempty"`
+	Metrics       *RealTimeMetrics       `protobuf:"bytes,3,opt,name=metrics,proto3" json:"metrics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetRealTimeMetricsResponse) Reset() {
 	*x = GetRealTimeMetricsResponse{}
-	mi := &file_analytics_analytics_service_proto_msgTypes[32]
+	mi := &file_analytics_analytics_service_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2152,7 +2326,7 @@ func (x *GetRealTimeMetricsResponse) String() string {
 func (*GetRealTimeMetricsResponse) ProtoMessage() {}
 
 func (x *GetRealTimeMetricsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_analytics_analytics_service_proto_msgTypes[32]
+	mi := &file_analytics_analytics_service_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2165,7 +2339,21 @@ func (x *GetRealTimeMetricsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRealTimeMetricsResponse.ProtoReflect.Descriptor instead.
 func (*GetRealTimeMetricsResponse) Descriptor() ([]byte, []int) {
-	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{32}
+	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *GetRealTimeMetricsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *GetRealTimeMetricsResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
 }
 
 func (x *GetRealTimeMetricsResponse) GetMetrics() *RealTimeMetrics {
@@ -2189,7 +2377,7 @@ type RealTimeMetrics struct {
 
 func (x *RealTimeMetrics) Reset() {
 	*x = RealTimeMetrics{}
-	mi := &file_analytics_analytics_service_proto_msgTypes[33]
+	mi := &file_analytics_analytics_service_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2201,7 +2389,7 @@ func (x *RealTimeMetrics) String() string {
 func (*RealTimeMetrics) ProtoMessage() {}
 
 func (x *RealTimeMetrics) ProtoReflect() protoreflect.Message {
-	mi := &file_analytics_analytics_service_proto_msgTypes[33]
+	mi := &file_analytics_analytics_service_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2214,7 +2402,7 @@ func (x *RealTimeMetrics) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RealTimeMetrics.ProtoReflect.Descriptor instead.
 func (*RealTimeMetrics) Descriptor() ([]byte, []int) {
-	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{33}
+	return file_analytics_analytics_service_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *RealTimeMetrics) GetLastUpdated() *timestamppb.Timestamp {
@@ -2377,25 +2565,33 @@ const file_analytics_analytics_service_proto_rawDesc = "" +
 	"\v_cashier_idB\x13\n" +
 	"\x11_product_group_idB\x1a\n" +
 	"\x18_include_daily_breakdownB\x1c\n" +
-	"\x1a_include_product_breakdown\"S\n" +
-	"\x16GetSalesReportResponse\x129\n" +
-	"\fsales_report\x18\x01 \x01(\v2\x16.analytics.SalesReportR\vsalesReport\"_\n" +
+	"\x1a_include_product_breakdown\"\x98\x01\n" +
+	"\x16GetSalesReportResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x129\n" +
+	"\fsales_report\x18\x03 \x01(\v2\x16.analytics.SalesReportR\vsalesReportB\n" +
+	"\n" +
+	"\b_message\"_\n" +
 	"\x16GetDailySummaryRequest\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12\"\n" +
 	"\n" +
 	"cashier_id\x18\x02 \x01(\x03H\x00R\tcashierId\x88\x01\x01B\r\n" +
-	"\v_cashier_id\"`\n" +
-	"\x17GetDailySummaryResponse\x12E\n" +
-	"\x0fdaily_summaries\x18\x01 \x03(\v2\x1c.analytics.SalesSummaryDailyR\x0edailySummaries\"d\n" +
+	"\v_cashier_id\"\xa5\x01\n" +
+	"\x17GetDailySummaryResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12E\n" +
+	"\x0fdaily_summaries\x18\x03 \x03(\v2\x1c.analytics.SalesSummaryDailyR\x0edailySummariesB\n" +
+	"\n" +
+	"\b_message\"d\n" +
 	"\x1bGenerateDailySummaryRequest\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12\"\n" +
 	"\n" +
 	"cashier_id\x18\x02 \x01(\x03H\x00R\tcashierId\x88\x01\x01B\r\n" +
 	"\v_cashier_id\"\xb2\x01\n" +
-	"\x1cGenerateDailySummaryResponse\x12M\n" +
-	"\x13generated_summaries\x18\x01 \x03(\v2\x1c.analytics.SalesSummaryDailyR\x12generatedSummaries\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x1d\n" +
-	"\amessage\x18\x03 \x01(\tH\x00R\amessage\x88\x01\x01B\n" +
+	"\x1cGenerateDailySummaryResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12M\n" +
+	"\x13generated_summaries\x18\x03 \x03(\v2\x1c.analytics.SalesSummaryDailyR\x12generatedSummariesB\n" +
 	"\n" +
 	"\b_message\"\x82\x02\n" +
 	"\x16GetProductSalesRequest\x123\n" +
@@ -2408,20 +2604,28 @@ const file_analytics_analytics_service_proto_rawDesc = "" +
 	"pagination\x18\x04 \x01(\v2\x1c.analytics.PaginationRequestR\n" +
 	"paginationB\r\n" +
 	"\v_product_idB\x13\n" +
-	"\x11_product_group_id\"\x9d\x01\n" +
-	"\x17GetProductSalesResponse\x12C\n" +
-	"\rproduct_sales\x18\x01 \x03(\v2\x1e.analytics.ProductSalesSummaryR\fproductSales\x12=\n" +
+	"\x11_product_group_id\"\xe2\x01\n" +
+	"\x17GetProductSalesResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12C\n" +
+	"\rproduct_sales\x18\x03 \x03(\v2\x1e.analytics.ProductSalesSummaryR\fproductSales\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1d.analytics.PaginationResponseR\n" +
-	"pagination\"\xad\x01\n" +
+	"pagination\x18\x04 \x01(\v2\x1d.analytics.PaginationResponseR\n" +
+	"paginationB\n" +
+	"\n" +
+	"\b_message\"\xad\x01\n" +
 	"\x1cGetTopSellingProductsRequest\x123\n" +
 	"\n" +
 	"date_range\x18\x01 \x01(\v2\x14.analytics.DateRangeR\tdateRange\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12-\n" +
 	"\x10product_group_id\x18\x03 \x01(\x05H\x00R\x0eproductGroupId\x88\x01\x01B\x13\n" +
-	"\x11_product_group_id\"b\n" +
-	"\x1dGetTopSellingProductsResponse\x12A\n" +
-	"\ftop_products\x18\x01 \x03(\v2\x1e.analytics.ProductSalesSummaryR\vtopProducts\"\xc8\x01\n" +
+	"\x11_product_group_id\"\xa7\x01\n" +
+	"\x1dGetTopSellingProductsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12A\n" +
+	"\ftop_products\x18\x03 \x03(\v2\x1e.analytics.ProductSalesSummaryR\vtopProductsB\n" +
+	"\n" +
+	"\b_message\"\xc8\x01\n" +
 	"\x1dGetEmployeePerformanceRequest\x123\n" +
 	"\n" +
 	"date_range\x18\x01 \x01(\v2\x14.analytics.DateRangeR\tdateRange\x12$\n" +
@@ -2430,20 +2634,28 @@ const file_analytics_analytics_service_proto_rawDesc = "" +
 	"\n" +
 	"pagination\x18\x03 \x01(\v2\x1c.analytics.PaginationRequestR\n" +
 	"paginationB\x0e\n" +
-	"\f_employee_id\"\xa3\x01\n" +
-	"\x1eGetEmployeePerformanceResponse\x12B\n" +
-	"\fperformances\x18\x01 \x03(\v2\x1e.analytics.EmployeePerformanceR\fperformances\x12=\n" +
+	"\f_employee_id\"\xe8\x01\n" +
+	"\x1eGetEmployeePerformanceResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12B\n" +
+	"\fperformances\x18\x03 \x03(\v2\x1e.analytics.EmployeePerformanceR\fperformances\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1d.analytics.PaginationResponseR\n" +
-	"pagination\"\x88\x01\n" +
+	"pagination\x18\x04 \x01(\v2\x1d.analytics.PaginationResponseR\n" +
+	"paginationB\n" +
+	"\n" +
+	"\b_message\"\x88\x01\n" +
 	"\x1bGetPerformanceReportRequest\x123\n" +
 	"\n" +
 	"date_range\x18\x01 \x01(\v2\x14.analytics.DateRangeR\tdateRange\x12$\n" +
 	"\vemployee_id\x18\x02 \x01(\x03H\x00R\n" +
 	"employeeId\x88\x01\x01B\x0e\n" +
-	"\f_employee_id\"k\n" +
-	"\x1cGetPerformanceReportResponse\x12K\n" +
-	"\x12performance_report\x18\x01 \x01(\v2\x1c.analytics.PerformanceReportR\x11performanceReport\"\xd4\x01\n" +
+	"\f_employee_id\"\xb0\x01\n" +
+	"\x1cGetPerformanceReportResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12K\n" +
+	"\x12performance_report\x18\x03 \x01(\v2\x1c.analytics.PerformanceReportR\x11performanceReportB\n" +
+	"\n" +
+	"\b_message\"\xd4\x01\n" +
 	"\x1bGetCustomerAnalyticsRequest\x123\n" +
 	"\n" +
 	"date_range\x18\x01 \x01(\v2\x14.analytics.DateRangeR\tdateRange\x12-\n" +
@@ -2451,26 +2663,36 @@ const file_analytics_analytics_service_proto_rawDesc = "" +
 	"\n" +
 	"pagination\x18\x03 \x01(\v2\x1c.analytics.PaginationRequestR\n" +
 	"paginationB\x13\n" +
-	"\x11_product_group_id\"\x99\x01\n" +
-	"\x1cGetCustomerAnalyticsResponse\x12:\n" +
-	"\tanalytics\x18\x01 \x03(\v2\x1c.analytics.CustomerAnalyticsR\tanalytics\x12=\n" +
+	"\x11_product_group_id\"\xde\x01\n" +
+	"\x1cGetCustomerAnalyticsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x12:\n" +
+	"\tanalytics\x18\x03 \x03(\v2\x1c.analytics.CustomerAnalyticsR\tanalytics\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1d.analytics.PaginationResponseR\n" +
-	"pagination\"J\n" +
-	"\x13GetPeakHoursRequest\x123\n" +
+	"pagination\x18\x04 \x01(\v2\x1d.analytics.PaginationResponseR\n" +
+	"paginationB\n" +
 	"\n" +
-	"date_range\x18\x01 \x01(\v2\x14.analytics.DateRangeR\tdateRange\"N\n" +
-	"\x14GetPeakHoursResponse\x126\n" +
+	"\b_message\"\x15\n" +
+	"\x13GetPeakHoursRequest\"r\n" +
 	"\n" +
-	"peak_hours\x18\x01 \x03(\v2\x17.analytics.PeakHourDataR\tpeakHours\"t\n" +
-	"\fPeakHourData\x12\x12\n" +
+	"HourlyData\x12\x12\n" +
 	"\x04hour\x18\x01 \x01(\tR\x04hour\x12+\n" +
 	"\x11transaction_count\x18\x02 \x01(\x05R\x10transactionCount\x12#\n" +
-	"\rtotal_revenue\x18\x03 \x01(\tR\ftotalRevenue\"-\n" +
+	"\rtotal_revenue\x18\x03 \x01(\tR\ftotalRevenue\"h\n" +
+	"\x0eWeeklyPeakData\x12\x1e\n" +
+	"\vday_of_week\x18\x01 \x01(\x05R\tdayOfWeek\x126\n" +
+	"\vhourly_data\x18\x02 \x03(\v2\x15.analytics.HourlyDataR\n" +
+	"hourlyData\"\\\n" +
+	"\x14GetPeakHoursResponse\x12D\n" +
+	"\x11peak_data_by_week\x18\x01 \x03(\v2\x19.analytics.WeeklyPeakDataR\x0epeakDataByWeek\"-\n" +
 	"\x17GetDashboardDataRequest\x12\x12\n" +
-	"\x04date\x18\x01 \x01(\tR\x04date\"R\n" +
-	"\x18GetDashboardDataResponse\x126\n" +
-	"\tdashboard\x18\x01 \x01(\v2\x18.analytics.DashboardDataR\tdashboard\"\xb6\x04\n" +
+	"\x04date\x18\x01 \x01(\tR\x04date\"\x97\x01\n" +
+	"\x18GetDashboardDataResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x126\n" +
+	"\tdashboard\x18\x03 \x01(\v2\x18.analytics.DashboardDataR\tdashboardB\n" +
+	"\n" +
+	"\b_message\"\xb6\x04\n" +
 	"\rDashboardData\x12#\n" +
 	"\rtoday_revenue\x18\x01 \x01(\tR\ftodayRevenue\x12-\n" +
 	"\x12today_transactions\x18\x02 \x01(\x05R\x11todayTransactions\x12(\n" +
@@ -2483,9 +2705,13 @@ const file_analytics_analytics_service_proto_rawDesc = "" +
 	"\x10low_stock_alerts\x18\t \x03(\tR\x0elowStockAlerts\x12:\n" +
 	"\x19pending_commissions_count\x18\n" +
 	" \x01(\x05R\x17pendingCommissionsCount\"\x1b\n" +
-	"\x19GetRealTimeMetricsRequest\"R\n" +
-	"\x1aGetRealTimeMetricsResponse\x124\n" +
-	"\ametrics\x18\x01 \x01(\v2\x1a.analytics.RealTimeMetricsR\ametrics\"\xda\x02\n" +
+	"\x19GetRealTimeMetricsRequest\"\x97\x01\n" +
+	"\x1aGetRealTimeMetricsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
+	"\amessage\x18\x02 \x01(\tH\x00R\amessage\x88\x01\x01\x124\n" +
+	"\ametrics\x18\x03 \x01(\v2\x1a.analytics.RealTimeMetricsR\ametricsB\n" +
+	"\n" +
+	"\b_message\"\xda\x02\n" +
 	"\x0fRealTimeMetrics\x12=\n" +
 	"\flast_updated\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\vlastUpdated\x12/\n" +
 	"\x13active_transactions\x18\x02 \x01(\x05R\x12activeTransactions\x12%\n" +
@@ -2518,7 +2744,7 @@ func file_analytics_analytics_service_proto_rawDescGZIP() []byte {
 	return file_analytics_analytics_service_proto_rawDescData
 }
 
-var file_analytics_analytics_service_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
+var file_analytics_analytics_service_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
 var file_analytics_analytics_service_proto_goTypes = []any{
 	(*PaginationRequest)(nil),              // 0: analytics.PaginationRequest
 	(*PaginationResponse)(nil),             // 1: analytics.PaginationResponse
@@ -2546,25 +2772,26 @@ var file_analytics_analytics_service_proto_goTypes = []any{
 	(*GetCustomerAnalyticsRequest)(nil),    // 23: analytics.GetCustomerAnalyticsRequest
 	(*GetCustomerAnalyticsResponse)(nil),   // 24: analytics.GetCustomerAnalyticsResponse
 	(*GetPeakHoursRequest)(nil),            // 25: analytics.GetPeakHoursRequest
-	(*GetPeakHoursResponse)(nil),           // 26: analytics.GetPeakHoursResponse
-	(*PeakHourData)(nil),                   // 27: analytics.PeakHourData
-	(*GetDashboardDataRequest)(nil),        // 28: analytics.GetDashboardDataRequest
-	(*GetDashboardDataResponse)(nil),       // 29: analytics.GetDashboardDataResponse
-	(*DashboardData)(nil),                  // 30: analytics.DashboardData
-	(*GetRealTimeMetricsRequest)(nil),      // 31: analytics.GetRealTimeMetricsRequest
-	(*GetRealTimeMetricsResponse)(nil),     // 32: analytics.GetRealTimeMetricsResponse
-	(*RealTimeMetrics)(nil),                // 33: analytics.RealTimeMetrics
-	(*timestamppb.Timestamp)(nil),          // 34: google.protobuf.Timestamp
+	(*HourlyData)(nil),                     // 26: analytics.HourlyData
+	(*WeeklyPeakData)(nil),                 // 27: analytics.WeeklyPeakData
+	(*GetPeakHoursResponse)(nil),           // 28: analytics.GetPeakHoursResponse
+	(*GetDashboardDataRequest)(nil),        // 29: analytics.GetDashboardDataRequest
+	(*GetDashboardDataResponse)(nil),       // 30: analytics.GetDashboardDataResponse
+	(*DashboardData)(nil),                  // 31: analytics.DashboardData
+	(*GetRealTimeMetricsRequest)(nil),      // 32: analytics.GetRealTimeMetricsRequest
+	(*GetRealTimeMetricsResponse)(nil),     // 33: analytics.GetRealTimeMetricsResponse
+	(*RealTimeMetrics)(nil),                // 34: analytics.RealTimeMetrics
+	(*timestamppb.Timestamp)(nil),          // 35: google.protobuf.Timestamp
 }
 var file_analytics_analytics_service_proto_depIdxs = []int32{
-	34, // 0: analytics.SalesSummaryDaily.created_at:type_name -> google.protobuf.Timestamp
-	34, // 1: analytics.SalesSummaryDaily.updated_at:type_name -> google.protobuf.Timestamp
-	34, // 2: analytics.ProductSalesSummary.created_at:type_name -> google.protobuf.Timestamp
-	34, // 3: analytics.ProductSalesSummary.updated_at:type_name -> google.protobuf.Timestamp
-	34, // 4: analytics.EmployeePerformance.created_at:type_name -> google.protobuf.Timestamp
-	34, // 5: analytics.EmployeePerformance.updated_at:type_name -> google.protobuf.Timestamp
-	34, // 6: analytics.CustomerAnalytics.created_at:type_name -> google.protobuf.Timestamp
-	34, // 7: analytics.CustomerAnalytics.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 0: analytics.SalesSummaryDaily.created_at:type_name -> google.protobuf.Timestamp
+	35, // 1: analytics.SalesSummaryDaily.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 2: analytics.ProductSalesSummary.created_at:type_name -> google.protobuf.Timestamp
+	35, // 3: analytics.ProductSalesSummary.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 4: analytics.EmployeePerformance.created_at:type_name -> google.protobuf.Timestamp
+	35, // 5: analytics.EmployeePerformance.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 6: analytics.CustomerAnalytics.created_at:type_name -> google.protobuf.Timestamp
+	35, // 7: analytics.CustomerAnalytics.updated_at:type_name -> google.protobuf.Timestamp
 	2,  // 8: analytics.SalesReport.period:type_name -> analytics.DateRange
 	3,  // 9: analytics.SalesReport.daily_breakdowns:type_name -> analytics.SalesSummaryDaily
 	4,  // 10: analytics.SalesReport.top_products:type_name -> analytics.ProductSalesSummary
@@ -2590,13 +2817,13 @@ var file_analytics_analytics_service_proto_depIdxs = []int32{
 	0,  // 30: analytics.GetCustomerAnalyticsRequest.pagination:type_name -> analytics.PaginationRequest
 	6,  // 31: analytics.GetCustomerAnalyticsResponse.analytics:type_name -> analytics.CustomerAnalytics
 	1,  // 32: analytics.GetCustomerAnalyticsResponse.pagination:type_name -> analytics.PaginationResponse
-	2,  // 33: analytics.GetPeakHoursRequest.date_range:type_name -> analytics.DateRange
-	27, // 34: analytics.GetPeakHoursResponse.peak_hours:type_name -> analytics.PeakHourData
-	30, // 35: analytics.GetDashboardDataResponse.dashboard:type_name -> analytics.DashboardData
+	26, // 33: analytics.WeeklyPeakData.hourly_data:type_name -> analytics.HourlyData
+	27, // 34: analytics.GetPeakHoursResponse.peak_data_by_week:type_name -> analytics.WeeklyPeakData
+	31, // 35: analytics.GetDashboardDataResponse.dashboard:type_name -> analytics.DashboardData
 	4,  // 36: analytics.DashboardData.top_products_today:type_name -> analytics.ProductSalesSummary
 	5,  // 37: analytics.DashboardData.top_performers_today:type_name -> analytics.EmployeePerformance
-	33, // 38: analytics.GetRealTimeMetricsResponse.metrics:type_name -> analytics.RealTimeMetrics
-	34, // 39: analytics.RealTimeMetrics.last_updated:type_name -> google.protobuf.Timestamp
+	34, // 38: analytics.GetRealTimeMetricsResponse.metrics:type_name -> analytics.RealTimeMetrics
+	35, // 39: analytics.RealTimeMetrics.last_updated:type_name -> google.protobuf.Timestamp
 	9,  // 40: analytics.AnalyticsService.GetSalesReport:input_type -> analytics.GetSalesReportRequest
 	11, // 41: analytics.AnalyticsService.GetDailySummary:input_type -> analytics.GetDailySummaryRequest
 	13, // 42: analytics.AnalyticsService.GenerateDailySummary:input_type -> analytics.GenerateDailySummaryRequest
@@ -2606,8 +2833,8 @@ var file_analytics_analytics_service_proto_depIdxs = []int32{
 	21, // 46: analytics.AnalyticsService.GetPerformanceReport:input_type -> analytics.GetPerformanceReportRequest
 	23, // 47: analytics.AnalyticsService.GetCustomerAnalytics:input_type -> analytics.GetCustomerAnalyticsRequest
 	25, // 48: analytics.AnalyticsService.GetPeakHours:input_type -> analytics.GetPeakHoursRequest
-	28, // 49: analytics.AnalyticsService.GetDashboardData:input_type -> analytics.GetDashboardDataRequest
-	31, // 50: analytics.AnalyticsService.GetRealTimeMetrics:input_type -> analytics.GetRealTimeMetricsRequest
+	29, // 49: analytics.AnalyticsService.GetDashboardData:input_type -> analytics.GetDashboardDataRequest
+	32, // 50: analytics.AnalyticsService.GetRealTimeMetrics:input_type -> analytics.GetRealTimeMetricsRequest
 	10, // 51: analytics.AnalyticsService.GetSalesReport:output_type -> analytics.GetSalesReportResponse
 	12, // 52: analytics.AnalyticsService.GetDailySummary:output_type -> analytics.GetDailySummaryResponse
 	14, // 53: analytics.AnalyticsService.GenerateDailySummary:output_type -> analytics.GenerateDailySummaryResponse
@@ -2616,9 +2843,9 @@ var file_analytics_analytics_service_proto_depIdxs = []int32{
 	20, // 56: analytics.AnalyticsService.GetEmployeePerformance:output_type -> analytics.GetEmployeePerformanceResponse
 	22, // 57: analytics.AnalyticsService.GetPerformanceReport:output_type -> analytics.GetPerformanceReportResponse
 	24, // 58: analytics.AnalyticsService.GetCustomerAnalytics:output_type -> analytics.GetCustomerAnalyticsResponse
-	26, // 59: analytics.AnalyticsService.GetPeakHours:output_type -> analytics.GetPeakHoursResponse
-	29, // 60: analytics.AnalyticsService.GetDashboardData:output_type -> analytics.GetDashboardDataResponse
-	32, // 61: analytics.AnalyticsService.GetRealTimeMetrics:output_type -> analytics.GetRealTimeMetricsResponse
+	28, // 59: analytics.AnalyticsService.GetPeakHours:output_type -> analytics.GetPeakHoursResponse
+	30, // 60: analytics.AnalyticsService.GetDashboardData:output_type -> analytics.GetDashboardDataResponse
+	33, // 61: analytics.AnalyticsService.GetRealTimeMetrics:output_type -> analytics.GetRealTimeMetricsResponse
 	51, // [51:62] is the sub-list for method output_type
 	40, // [40:51] is the sub-list for method input_type
 	40, // [40:40] is the sub-list for extension type_name
@@ -2634,21 +2861,30 @@ func file_analytics_analytics_service_proto_init() {
 	file_analytics_analytics_service_proto_msgTypes[4].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[6].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[9].OneofWrappers = []any{}
+	file_analytics_analytics_service_proto_msgTypes[10].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[11].OneofWrappers = []any{}
+	file_analytics_analytics_service_proto_msgTypes[12].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[13].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[14].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[15].OneofWrappers = []any{}
+	file_analytics_analytics_service_proto_msgTypes[16].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[17].OneofWrappers = []any{}
+	file_analytics_analytics_service_proto_msgTypes[18].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[19].OneofWrappers = []any{}
+	file_analytics_analytics_service_proto_msgTypes[20].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[21].OneofWrappers = []any{}
+	file_analytics_analytics_service_proto_msgTypes[22].OneofWrappers = []any{}
 	file_analytics_analytics_service_proto_msgTypes[23].OneofWrappers = []any{}
+	file_analytics_analytics_service_proto_msgTypes[24].OneofWrappers = []any{}
+	file_analytics_analytics_service_proto_msgTypes[30].OneofWrappers = []any{}
+	file_analytics_analytics_service_proto_msgTypes[33].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_analytics_analytics_service_proto_rawDesc), len(file_analytics_analytics_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   34,
+			NumMessages:   35,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

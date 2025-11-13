@@ -82,6 +82,7 @@ func (c *CommissionHandler) GetCommissionSettings(ctx context.Context, req *prot
 	}
 
 	return &proto.GetCommissionSettingsResponse{
+		Success:      true,
 		Employee:     employeeSummaryProto,
 		TierSettings: tierSettingsProto,
 	}, nil
