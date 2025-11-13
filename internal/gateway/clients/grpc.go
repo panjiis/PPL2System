@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 
+	analytics "syntra-system/proto/protogen/analytics"
 	commissions "syntra-system/proto/protogen/commissions"
 	inventory "syntra-system/proto/protogen/inventory"
 	pos "syntra-system/proto/protogen/pos"
 	user "syntra-system/proto/protogen/user"
-	analytics "syntra-system/proto/protogen/analytics"
 )
 
 type GRPCClients struct {
@@ -22,21 +23,27 @@ type GRPCClients struct {
 	Inventory      inventory.InventoryServiceClient
 	POS            pos.POSServiceClient
 	Commissions    commissions.CommissionServiceClient
-	Analytics 		 analytics.AnalyticsServiceClient
+	Analytics      analytics.AnalyticsServiceClient
 	userConn       *grpc.ClientConn
 	inventoryConn  *grpc.ClientConn
 	posConn        *grpc.ClientConn
 	commissionConn *grpc.ClientConn
-	analyticsConn 	 *grpc.ClientConn
+	analyticsConn  *grpc.ClientConn
 }
 
 func NewGRPCClientsWithFallback() (*GRPCClients, error) {
 	clients := &GRPCClients{}
 	connectedServices := 0
 
+	userGrpc := os.Getenv("USER_GRPC_ADDR")               //51
+	inventoryGrpc := os.Getenv("INVENTORY_GRPC_ADDR")     //52
+	posGrpc := os.Getenv("POS_GRPC_ADDR")                 //53
+	commissionsGrpc := os.Getenv("COMMISSIONS_GRPC_ADDR") //54
+	analyticsGrpc := os.Getenv("ANALYTICS_GRPC_ADDR")     //55
+
 	log.Printf("Attempting to connect to User service...")
 
-	if userConn, err := connectToService("localhost:50051"); err != nil {
+	if userConn, err := connectToService(userGrpc); err != nil {
 		log.Printf("Failed to connect to User service: %v", err)
 	} else {
 		clients.User = user.NewUserServiceClient(userConn)
@@ -47,7 +54,7 @@ func NewGRPCClientsWithFallback() (*GRPCClients, error) {
 
 	log.Printf("Attempting to connect to Inventory service...")
 
-	if inventoryConn, err := connectToService("localhost:50052"); err != nil {
+	if inventoryConn, err := connectToService(inventoryGrpc); err != nil {
 		log.Printf("Failed to connect to Inventory service: %v", err)
 	} else {
 		clients.Inventory = inventory.NewInventoryServiceClient(inventoryConn)
@@ -58,7 +65,7 @@ func NewGRPCClientsWithFallback() (*GRPCClients, error) {
 
 	log.Printf("Attempting to connect to POS service...")
 
-	if posConn, err := connectToService("localhost:50053"); err != nil {
+	if posConn, err := connectToService(posGrpc); err != nil {
 		log.Printf("Failed to connect to POS service: %v", err)
 	} else {
 		clients.POS = pos.NewPOSServiceClient(posConn)
@@ -69,7 +76,7 @@ func NewGRPCClientsWithFallback() (*GRPCClients, error) {
 
 	log.Printf("Attempting to connect to Commissions service...")
 
-	if commissionConn, err := connectToService("localhost:50054"); err != nil {
+	if commissionConn, err := connectToService(commissionsGrpc); err != nil {
 		log.Printf("Failed to connect to Commissions service: %v", err)
 	} else {
 		clients.Commissions = commissions.NewCommissionServiceClient(commissionConn)
@@ -79,7 +86,7 @@ func NewGRPCClientsWithFallback() (*GRPCClients, error) {
 	}
 
 	log.Printf("Attempting to connect to Analytics service...")
-	if analyticsConn, err := connectToService("localhost:50055"); err != nil { // Port 50055
+	if analyticsConn, err := connectToService(analyticsGrpc); err != nil { // Port 50055
 		log.Printf("Failed to connect to Analytics service: %v", err)
 	} else {
 		clients.Analytics = analytics.NewAnalyticsServiceClient(analyticsConn)
