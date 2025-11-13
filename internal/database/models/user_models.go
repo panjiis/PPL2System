@@ -53,19 +53,3 @@ type CommissionTier struct {
 	CreatedAt      *time.Time `gorm:"autoCreateTime"`
 	UpdatedAt      *time.Time `gorm:"autoUpdateTime"`
 }
-
-type Store struct {
-	ID                    int64  `gorm:"primaryKey;autoIncrement:true" json:"id"`
-	Name                  string `gorm:"not null" json:"name"`
-	ImageURL              *string
-	StorePreferences      *string
-	ManagementPreferences *string
-	Address               *string
-	Phone                 *string
-	City                  *string
-	Country               *string
-	PostalCode            *string
-	IsActive              bool       `gorm:"default:true" json:"is_active"`
-	CreatedAt             *time.Time `gorm:"autoCreateTime"`
-	UpdatedAt             *time.Time `gorm:"autoUpdateTime"`
-}

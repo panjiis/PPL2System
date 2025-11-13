@@ -119,7 +119,11 @@ func (s *InventoryHTTPHandler) CreateProduct(c *gin.Context) {
 }
 
 func (s *InventoryHTTPHandler) UpdateProduct(c *gin.Context) {
-	productCode := c.Param("code")
+	id, err := parseIntParam(c, "id")
+	if err != nil {
+		s.error(c, http.StatusBadRequest, "Invalid product ID")
+		return
+	}
 
 	var req proto.UpdateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -127,7 +131,7 @@ func (s *InventoryHTTPHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	req.ProductCode = productCode
+	req.Id = id
 
 	resp, err := s.inventoryClient.UpdateProduct(c.Request.Context(), &req)
 	if err != nil {
@@ -171,13 +175,13 @@ func (s *InventoryHTTPHandler) ListProducts(c *gin.Context) {
 }
 
 func (s *InventoryHTTPHandler) GetProduct(c *gin.Context) {
-	code := c.Param("code")
-	if code == "" {
-		s.error(c, http.StatusBadRequest, "Product code is required")
+	id, err := parseIntParam(c, "id")
+	if err != nil {
+		s.error(c, http.StatusBadRequest, "Invalid product ID")
 		return
 	}
 
-	req := &proto.GetProductByCodeRequest{ProductCode: code}
+	req := &proto.GetProductRequest{Id: id}
 	resp, err := s.inventoryClient.GetProduct(c.Request.Context(), req)
 	if err != nil {
 		s.error(c, http.StatusInternalServerError, "Failed to get product: "+err.Error())
@@ -192,60 +196,51 @@ func (s *InventoryHTTPHandler) GetProduct(c *gin.Context) {
 	s.success(c, resp.Product)
 }
 
-// Stock endpoints
-func (s *InventoryHTTPHandler) ListStocks(c *gin.Context) {
-	productCode := c.Param("productCode")
-	warehouseCode := c.Param("warehouseId")
-
-	var warehouseId *int32
-	var productCodePtr *string
-
-	if warehouseCode != "" {
-		id, err := strconv.ParseInt(warehouseCode, 10, 32)
-		if err != nil {
-			s.error(c, http.StatusBadRequest, "Invalid warehouse ID format")
-			return
-		}
-		wid := int32(id)
-		warehouseId = &wid
+func (s *InventoryHTTPHandler) GetProductByCode(c *gin.Context) {
+	code := c.Param("code")
+	if code == "" {
+		s.error(c, http.StatusBadRequest, "Product code is required")
+		return
 	}
 
-	if productCode != "" {
-		productCodePtr = &productCode
-	}
-
-	req := &proto.ListStockRequest{
-		Pagination: buildPaginationRequest(c),
-		SearchTerm: parseStringQuery(c, "search"),
-	}
-
-	switch {
-	case productCode != "" && warehouseCode != "":
-		req.ProductCode = productCodePtr
-		req.WarehouseId = warehouseId
-	case productCode != "" && warehouseCode == "":
-		req.ProductCode = productCodePtr
-	case productCode == "" && warehouseCode != "":
-		req.WarehouseId = warehouseId
-	default:
-
-	}
-
-	resp, err := s.inventoryClient.ListStocks(c.Request.Context(), req)
+	req := &proto.GetProductByCodeRequest{ProductCode: code}
+	resp, err := s.inventoryClient.GetProductByCode(c.Request.Context(), req)
 	if err != nil {
-		s.error(c, http.StatusInternalServerError, "Failed to list products: "+err.Error())
+		s.error(c, http.StatusInternalServerError, "Failed to get product: "+err.Error())
 		return
 	}
 
 	if !resp.Success {
-		s.error(c, http.StatusInternalServerError, *resp.Message)
+		s.error(c, http.StatusNotFound, *resp.Message)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success":    true,
-		"data":       resp.Stock,
-		"pagination": resp.Pagination,
+	s.success(c, resp.Product)
+}
+
+// Stock endpoints
+func (s *InventoryHTTPHandler) CheckStock(c *gin.Context) {
+	var req proto.CheckStockRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		s.error(c, http.StatusBadRequest, "Invalid request body: "+err.Error())
+		return
+	}
+
+	resp, err := s.inventoryClient.CheckStock(c.Request.Context(), &req)
+	if err != nil {
+		s.error(c, http.StatusInternalServerError, "Failed to check stock: "+err.Error())
+		return
+	}
+
+	if !resp.Success {
+		s.error(c, http.StatusBadRequest, *resp.Message)
+		return
+	}
+
+	s.success(c, gin.H{
+		"is_available":             resp.IsAvailable,
+		"total_available_quantity": resp.TotalAvailableQuantity,
+		"stock_details":            resp.StockDetails,
 	})
 }
 
@@ -340,6 +335,32 @@ func (s *InventoryHTTPHandler) TransferStock(c *gin.Context) {
 	})
 }
 
+func (s *InventoryHTTPHandler) GetStock(c *gin.Context) {
+	productId := parseIntQuery(c, "product_id")
+	if productId == nil {
+		s.error(c, http.StatusBadRequest, "product_id is required")
+		return
+	}
+
+	req := &proto.GetStockRequest{
+		ProductId:   *productId,
+		WarehouseId: parseIntQuery(c, "warehouse_id"),
+	}
+
+	resp, err := s.inventoryClient.GetStock(c.Request.Context(), req)
+	if err != nil {
+		s.error(c, http.StatusInternalServerError, "Failed to get stock: "+err.Error())
+		return
+	}
+
+	if !resp.Success {
+		s.error(c, http.StatusBadRequest, *resp.Message)
+		return
+	}
+
+	s.success(c, resp.Stocks)
+}
+
 func (s *InventoryHTTPHandler) ListLowStock(c *gin.Context) {
 	req := &proto.ListLowStockRequest{
 		WarehouseId: parseIntQuery(c, "warehouse_id"),
@@ -384,7 +405,7 @@ func (s *InventoryHTTPHandler) ListStockMovements(c *gin.Context) {
 
 	req := &proto.ListStockMovementsRequest{
 		Pagination:   buildPaginationRequest(c),
-		ProductCode:  parseStringQuery(c, "product_code"),
+		ProductId:    parseIntQuery(c, "product_id"),
 		WarehouseId:  parseIntQuery(c, "warehouse_id"),
 		MovementType: movementType,
 		DateRange:    dateRange,
@@ -428,66 +449,6 @@ func (s *InventoryHTTPHandler) CreateWarehouse(c *gin.Context) {
 	}
 
 	s.success(c, resp.Warehouse)
-}
-
-func (s *InventoryHTTPHandler) UpdateWarehouse(c *gin.Context) {
-	var req proto.UpdateWarehouseRequest
-
-	warehouseCode := c.Param("code")
-	if warehouseCode == "" {
-		s.error(c, http.StatusBadRequest, "Invalid warehouse code")
-		return
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		s.error(c, http.StatusBadRequest, "Invalid request body: "+err.Error())
-		return
-	}
-
-	req.WarehouseCode = warehouseCode
-
-	resp, err := s.inventoryClient.UpdateWarehouse(c.Request.Context(), &req)
-	if err != nil {
-		s.error(c, http.StatusInternalServerError, "Failed to update warehouse: "+err.Error())
-		return
-	}
-	if !resp.Success {
-		s.error(c, http.StatusBadRequest, *resp.Message)
-		return
-	}
-	s.success(c, gin.H{
-		"warehouse": resp.Warehouse,
-	})
-}
-
-func (s *InventoryHTTPHandler) UpdateWarehouseStatus(c *gin.Context) {
-	var req proto.UpdateWarehouseStatusRequest
-
-	warehouseCode := c.Param("code")
-	if warehouseCode == "" {
-		s.error(c, http.StatusBadRequest, "Invalid warehouse code")
-		return
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		s.error(c, http.StatusBadRequest, "Invalid request body: "+err.Error())
-		return
-	}
-
-	req.WarehouseCode = warehouseCode
-
-	resp, err := s.inventoryClient.UpdateWarehouseStatus(c.Request.Context(), &req)
-	if err != nil {
-		s.error(c, http.StatusInternalServerError, "Failed to update warehouse: "+err.Error())
-		return
-	}
-	if !resp.Success {
-		s.error(c, http.StatusBadRequest, *resp.Message)
-		return
-	}
-	s.success(c, gin.H{
-		"warehouse": resp.Warehouse,
-	})
 }
 
 func (s *InventoryHTTPHandler) ListWarehouses(c *gin.Context) {
@@ -558,68 +519,6 @@ func (s *InventoryHTTPHandler) CreateSupplier(c *gin.Context) {
 	s.success(c, resp.Supplier)
 }
 
-func (s *InventoryHTTPHandler) UpdateSupplier(c *gin.Context) {
-	var req proto.UpdateSupplierRequest
-
-	supplierCode := c.Param("code")
-	if supplierCode == "" {
-		s.error(c, http.StatusBadRequest, "Invalid supplier code")
-		return
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		s.error(c, http.StatusBadRequest, "Invalid request body: "+err.Error())
-		return
-	}
-
-	req.SupplierCode = supplierCode
-
-	resp, err := s.inventoryClient.UpdateSupplier(c.Request.Context(), &req)
-	if err != nil {
-		s.error(c, http.StatusInternalServerError, "Failed to update warehouse: "+err.Error())
-		return
-	}
-
-	if !resp.Success {
-		s.error(c, http.StatusBadRequest, *resp.Message)
-		return
-	}
-
-	s.success(c, gin.H{
-		"supplier": resp.Supplier,
-	})
-}
-
-func (s *InventoryHTTPHandler) UpdateSupplierStatus(c *gin.Context) {
-	var req proto.UpdateSupplierStatusRequest
-
-	supplierCode := c.Param("code")
-	if supplierCode == "" {
-		s.error(c, http.StatusBadRequest, "Invalid supplier code")
-		return
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		s.error(c, http.StatusBadRequest, "Invalid request body: "+err.Error())
-		return
-	}
-
-	req.SupplierCode = supplierCode
-
-	resp, err := s.inventoryClient.UpdateSupplierStatus(c.Request.Context(), &req)
-	if err != nil {
-		s.error(c, http.StatusInternalServerError, "Failed to update warehouse: "+err.Error())
-		return
-	}
-	if !resp.Success {
-		s.error(c, http.StatusBadRequest, *resp.Message)
-		return
-	}
-	s.success(c, gin.H{
-		"supplier": resp.Supplier,
-	})
-}
-
 func (s *InventoryHTTPHandler) ListSuppliers(c *gin.Context) {
 	req := &proto.ListSuppliersRequest{
 		Pagination: buildPaginationRequest(c),
@@ -688,35 +587,6 @@ func (s *InventoryHTTPHandler) CreateProductType(c *gin.Context) {
 	s.success(c, resp.ProductType)
 }
 
-func (s *InventoryHTTPHandler) UpdateProductType(c *gin.Context) {
-	var req proto.UpdateProductTypeRequest
-	productTypeId, err := parseIntParam(c, "id")
-	if err != nil {
-		s.error(c, http.StatusBadRequest, "Invalid product type ID")
-		return
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		s.error(c, http.StatusBadRequest, "Invalid request body: "+err.Error())
-		return
-	}
-
-	req.Id = productTypeId
-
-	resp, err := s.inventoryClient.UpdateProductType(c.Request.Context(), &req)
-	if err != nil {
-		s.error(c, http.StatusInternalServerError, "Failed to update warehouse: "+err.Error())
-		return
-	}
-	if !resp.Success {
-		s.error(c, http.StatusBadRequest, *resp.Message)
-		return
-	}
-	s.success(c, gin.H{
-		"product_type": resp.ProductType,
-	})
-}
-
 func (s *InventoryHTTPHandler) ListProductTypes(c *gin.Context) {
 	req := &proto.ListProductTypesRequest{
 		Pagination: buildPaginationRequest(c),
@@ -738,62 +608,4 @@ func (s *InventoryHTTPHandler) ListProductTypes(c *gin.Context) {
 		"data":       resp.ProductTypes,
 		"pagination": resp.Pagination,
 	})
-}
-
-func (s *InventoryHTTPHandler) ListProductByProductType(c *gin.Context) {
-	productTypeIdStr := c.Param("id")
-	if productTypeIdStr == "" {
-		s.error(c, http.StatusBadRequest, "product_type_id is required")
-		return
-	}
-
-	productTypeId, err := strconv.Atoi(productTypeIdStr)
-	if err != nil {
-		s.error(c, http.StatusBadRequest, "invalid product_type_id")
-		return
-	}
-
-	req := &proto.ListProductsByProductTypeRequest{
-		ProductTypeId: int32(productTypeId),
-		Pagination:    buildPaginationRequest(c),
-	}
-
-	resp, err := s.inventoryClient.ListProductsByProductType(c.Request.Context(), req)
-	if err != nil {
-		s.error(c, http.StatusInternalServerError, "Failed to list products: "+err.Error())
-		return
-	}
-
-	if !resp.Success {
-		s.error(c, http.StatusInternalServerError, *resp.Message)
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success":    true,
-		"data":       resp.Products,
-		"pagination": resp.Pagination,
-	})
-}
-
-func (s *InventoryHTTPHandler) GetProductType(c *gin.Context) {
-	id, err := parseIntParam(c, "id")
-	if err != nil {
-		s.error(c, http.StatusBadRequest, "Invalid product type ID")
-		return
-	}
-
-	req := &proto.GetProductTypeRequest{Id: id}
-	resp, err := s.inventoryClient.GetProductType(c.Request.Context(), req)
-	if err != nil {
-		s.error(c, http.StatusInternalServerError, "Failed to get product type: "+err.Error())
-		return
-	}
-
-	if resp.Id == 0 {
-		s.error(c, http.StatusNotFound, err.Error())
-		return
-	}
-
-	s.success(c, resp)
 }

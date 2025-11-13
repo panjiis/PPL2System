@@ -6,11 +6,8 @@ proto:
 	protoc --proto_path=proto \
 		--go_out=proto/protogen --go_opt=paths=source_relative \
 		--go-grpc_out=proto/protogen --go-grpc_opt=paths=source_relative \
-		proto/analytics/*.proto \
-		proto/commissions/*.proto \
-		proto/inventory/*.proto \
-		proto/pos/*.proto \
-		proto/user/*.proto
+		proto/**/*.proto
+
 # Build all services
 build:
 	@echo "🔨 Building services..."

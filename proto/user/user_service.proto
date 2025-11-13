@@ -81,22 +81,6 @@ message CommissionTier {
   google.protobuf.Timestamp updated_at = 7;
 }
 
-message Store {
-  int64 id = 1;
-  string name = 2;
-  optional string image_url = 3;
-  optional string store_preferences = 4; 
-  optional string management_preferences = 5;
-  optional string address = 6;
-  optional string phone = 7;
-  optional string city = 8;
-  optional string country = 9;
-  optional string postal_code = 10;
-  bool is_active = 11;
-  google.protobuf.Timestamp created_at = 12;
-  google.protobuf.Timestamp updated_at = 13;
-}
-
 // Authentication
 
 message AuthenticateRequest {
@@ -243,13 +227,6 @@ message CreateRoleResponse {
   Role role = 3;
 }
 
-message UpdateRoleRequest{
-  int32 id = 1;
-  optional string role_name = 2;
-  optional int32 access_level = 3;
-  optional string permissions = 4;
-}
-
 message ListRolesRequest {
   PaginationRequest pagination = 1;
 }
@@ -258,72 +235,6 @@ message ListRolesResponse {
   bool success = 1;
   string message = 2;
   repeated Role roles = 3;
-  PaginationResponse pagination = 4;
-}
-
-message GetRoleRequest {
-  int32 id =1;
-}
-
-// Store
-
-message CreateStoreRequest {
-  string name = 1;
-  optional string image_url = 2;
-  optional string store_preferences = 3; 
-  optional string management_preferences = 4;
-  optional string address = 5;
-  optional string phone = 6;
-  optional string city = 7;
-  optional string country = 8;
-  optional string postal_code = 9;
-  bool is_active = 10;
-}
-
-message CreateStoreResponse {
-  bool success = 1;
-  string message = 2;
-  Store store = 3;
-}
-
-message UpdateStoreRequest {
-  int64 id = 1;
-  optional string name = 2;
-  optional string image_url = 3;
-  optional string store_preferences = 4; 
-  optional string management_preferences = 5;
-  optional string address = 6;
-  optional string phone = 7;
-  optional string city = 8;
-  optional string country = 9;
-  optional string postal_code = 10;
-  optional bool is_active = 11;
-}
-
-message UpdateStoreResponse {
-  bool success = 1;
-  string message = 2;
-  Store store = 3;
-}
-
-message GetStoreRequest {
-  int64 id =1;
-}
-
-message GetStoreResponse {
-  bool success = 1;
-  string message = 2;
-  Store store = 3;
-}
-
-message ListStoreRequest {
-  PaginationRequest pagination = 1;
-}
-
-message ListStoreResponse {
-  bool success = 1;
-  string message = 2;
-  repeated Store stores = 3;
   PaginationResponse pagination = 4;
 }
 
@@ -345,13 +256,5 @@ service UserService {
   
   // Role Management
   rpc CreateRole(CreateRoleRequest) returns (CreateRoleResponse);
-  rpc UpdateRole(UpdateRoleRequest) returns (CreateRoleResponse);
   rpc ListRoles(ListRolesRequest) returns (ListRolesResponse);
-  rpc GetRole(GetRoleRequest) returns (Role);
-
-  // Store Management
-  rpc CreateStore(CreateStoreRequest) returns (CreateStoreResponse);
-  rpc UpdateStore(UpdateStoreRequest) returns (UpdateStoreResponse);
-  rpc GetStore(GetStoreRequest) returns (GetStoreResponse);
-  rpc ListStores(ListStoreRequest) returns (ListStoreResponse);
 }

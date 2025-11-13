@@ -3,110 +3,86 @@ package models
 import "time"
 
 type InventoryProduct struct {
-	ProductCode   string `gorm:"type:varchar(100);primaryKey"`
-	ProductName   string `gorm:"type:varchar(255);not null"`
-	ProductTypeID int32  `gorm:"not null"`
-	SupplierID    int32  `gorm:"not null"`
-	UnitOfMeasure string `gorm:"type:varchar(50)"`
-	ReorderLevel  int32  `gorm:"default:0"`
-	MaxStockLevel int32  `gorm:"default:0"`
+	ID            int32  `gorm:"primaryKey"`
+	ProductCode   string `gorm:"size:100;uniqueIndex"`
+	ProductName   string `gorm:"size:255"`
+	ProductTypeID int32
+	SupplierID    int32
+	UnitOfMeasure string `gorm:"size:50"`
+	ReorderLevel  int32
+	MaxStockLevel int32
+	IsActive      bool
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 
-	ProductType *ProductType `gorm:"foreignKey:ProductTypeID;references:ID"`
-	Supplier    *Supplier    `gorm:"foreignKey:SupplierID;references:ID"`
-	Stocks      []Stock      `gorm:"foreignKey:ProductCode;references:ProductCode"`
-}
-
-func (InventoryProduct) TableName() string {
-	return "inventory_products"
+	ProductType *ProductType `gorm:"foreignKey:ProductTypeID"`
+	Supplier    *Supplier    `gorm:"foreignKey:SupplierID"`
+	Stocks      []Stock      `gorm:"foreignKey:ProductID"`
 }
 
 type Warehouse struct {
-	ID            int32   `gorm:"primaryKey;autoIncrement"`
-	WarehouseCode string  `gorm:"type:varchar(100);uniqueIndex;not null"`
-	WarehouseName string  `gorm:"type:varchar(255);not null"`
-	Location      *string `gorm:"type:varchar(255)"`
+	ID            int32   `gorm:"primaryKey"`
+	WarehouseCode string  `gorm:"size:100;uniqueIndex"`
+	WarehouseName string  `gorm:"size:255"`
+	Location      *string `gorm:"size:255"`
 	ManagerID     *int64
-	IsActive      bool `gorm:"default:true"`
+	IsActive      bool
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 
-	Stocks []Stock `gorm:"foreignKey:WarehouseID;references:ID"`
-}
-
-func (Warehouse) TableName() string {
-	return "warehouses"
+	Stocks []Stock `gorm:"foreignKey:WarehouseID"`
 }
 
 type ProductType struct {
-	ID              int32   `gorm:"primaryKey;autoIncrement"`
-	ProductTypeName string  `gorm:"type:varchar(100);not null"`
-	ProductTypeCode string  `gorm:"type:varchar(100);uniqueIndex;not null"`
-	LastProductId   int32   `gorm:"default:0"`
-	Description     *string `gorm:"type:varchar(255)"`
+	ID              int32   `gorm:"primaryKey"`
+	ProductTypeName string  `gorm:"size:100"`
+	Description     *string `gorm:"size:255"`
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 
-	Products []InventoryProduct `gorm:"foreignKey:ProductTypeID;references:ID"`
-}
-
-func (ProductType) TableName() string {
-	return "product_types"
+	Products []InventoryProduct `gorm:"foreignKey:ProductTypeID"`
 }
 
 type Supplier struct {
-	ID            int32   `gorm:"primaryKey;autoIncrement"`
-	SupplierCode  string  `gorm:"type:varchar(100);uniqueIndex;not null"`
-	SupplierName  string  `gorm:"type:varchar(255);not null"`
-	ContactPerson *string `gorm:"type:varchar(100)"`
-	Phone         *string `gorm:"type:varchar(50)"`
-	Email         *string `gorm:"type:varchar(100)"`
-	Address       *string `gorm:"type:varchar(255)"`
-	IsActive      bool    `gorm:"default:true"`
+	ID            int32   `gorm:"primaryKey"`
+	SupplierCode  string  `gorm:"size:100;uniqueIndex"`
+	SupplierName  string  `gorm:"size:255"`
+	ContactPerson *string `gorm:"size:100"`
+	Phone         *string `gorm:"size:50"`
+	Email         *string `gorm:"size:100"`
+	Address       *string `gorm:"size:255"`
+	IsActive      bool
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 
-	Products []InventoryProduct `gorm:"foreignKey:SupplierID;references:ID"`
-}
-
-func (Supplier) TableName() string {
-	return "suppliers"
+	Products []InventoryProduct `gorm:"foreignKey:SupplierID"`
 }
 
 type Stock struct {
-	ID                int64   `gorm:"primaryKey;autoIncrement"`
-	ProductCode       string  `gorm:"type:varchar(100);not null;index"`
-	WarehouseID       int32   `gorm:"index"`
-	AvailableQuantity int32   `gorm:"default:0"`
-	ReservedQuantity  int32   `gorm:"default:0"`
-	UnitCost          string  `gorm:"type:varchar(50)"`
-	LastRestockDate   *string `gorm:"type:varchar(50)"`
+	ID                int64 `gorm:"primaryKey"`
+	ProductID         int32
+	WarehouseID       int32
+	AvailableQuantity int32
+	ReservedQuantity  int32
+	UnitCost          string  `gorm:"size:50"`
+	LastRestockDate   *string `gorm:"size:50"`
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 
-	Product   *InventoryProduct `gorm:"foreignKey:ProductCode;references:ProductCode"`
-	Warehouse *Warehouse        `gorm:"foreignKey:WarehouseID;references:ID"`
-}
-
-func (Stock) TableName() string {
-	return "stocks"
+	Product   *InventoryProduct `gorm:"foreignKey:ProductID"`
+	Warehouse *Warehouse        `gorm:"foreignKey:WarehouseID"`
 }
 
 type StockMovement struct {
-	ID            int64   `gorm:"primaryKey;autoIncrement"`
-	ProductCode   string  `gorm:"type:varchar(100);not null;index"`
-	WarehouseID   int32   `gorm:"not null;index"`
-	MovementType  int32   `gorm:"not null"` // 1=IN, 2=OUT, 3=TRANSFER, 4=ADJUSTMENT
-	Quantity      int32   `gorm:"not null"`
-	UnitCost      *string `gorm:"type:varchar(50)"`
-	ReferenceType int32   // 1=PO, 2=SO, 3=TRANSFER, etc.
-	ReferenceID   *string `gorm:"type:varchar(100)"`
-	Notes         *string `gorm:"type:varchar(255)"`
-	CreatedBy     int64   `gorm:"not null"`
+	ID            int64 `gorm:"primaryKey"`
+	ProductID     int32
+	WarehouseID   int32
+	MovementType  int32
+	Quantity      int32
+	UnitCost      *string `gorm:"size:50"`
+	ReferenceType int32
+	ReferenceID   *string `gorm:"size:100"`
+	Notes         *string `gorm:"size:255"`
+	CreatedBy     int64
 	CreatedAt     time.Time
-}
-
-func (StockMovement) TableName() string {
-	return "stock_movements"
 }

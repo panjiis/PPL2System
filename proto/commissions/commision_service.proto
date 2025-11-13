@@ -129,11 +129,9 @@ message CalculateCommissionRequest {
 }
 
 message CalculateCommissionResponse {
-  bool success = 1;
-  optional string message = 2;
-  CommissionCalculation commission_calculation = 3;
-  CommissionBreakdown breakdown = 4;
-  bool is_preview = 5;
+  CommissionCalculation commission_calculation = 1;
+  CommissionBreakdown breakdown = 2;
+  bool is_preview = 3;
 }
 
 message RecalculateCommissionRequest {
@@ -143,10 +141,8 @@ message RecalculateCommissionRequest {
 }
 
 message RecalculateCommissionResponse {
-  bool success = 1;
-  optional string message = 2;
-  CommissionCalculation commission_calculation = 3;
-  CommissionBreakdown breakdown = 4;
+  CommissionCalculation commission_calculation = 1;
+  CommissionBreakdown breakdown = 2;
 }
 
 // Commission Management
@@ -155,9 +151,7 @@ message GetCommissionCalculationRequest {
 }
 
 message GetCommissionCalculationResponse {
-  bool success = 1;
-  optional string message = 2;
-  CommissionCalculation commission_calculation = 3;
+  CommissionCalculation commission_calculation = 1;
 }
 
 message ListCommissionCalculationsRequest {
@@ -168,10 +162,8 @@ message ListCommissionCalculationsRequest {
 }
 
 message ListCommissionCalculationsResponse {
-  bool success = 1;
-  optional string message = 2;
-  repeated CommissionCalculation commission_calculations = 3;
-  PaginationResponse pagination = 4;
+  repeated CommissionCalculation commission_calculations = 1;
+  PaginationResponse pagination = 2;
 }
 
 message ApproveCommissionRequest {
@@ -181,9 +173,7 @@ message ApproveCommissionRequest {
 }
 
 message ApproveCommissionResponse {
-  bool success = 1;
-  optional string message = 2;
-  CommissionCalculation commission_calculation = 3;
+  CommissionCalculation commission_calculation = 1;
 }
 
 message RejectCommissionRequest {
@@ -193,9 +183,7 @@ message RejectCommissionRequest {
 }
 
 message RejectCommissionResponse {
-  bool success = 1;
-  optional string message = 2;
-  CommissionCalculation commission_calculation = 3;
+  CommissionCalculation commission_calculation = 1;
 }
 
 // Commission Payment
@@ -209,10 +197,8 @@ message PayCommissionRequest {
 }
 
 message PayCommissionResponse {
-  bool success = 1;
-  optional string message = 2;
-  CommissionPayment commission_payment = 3;
-  CommissionCalculation updated_calculation = 4;
+  CommissionPayment commission_payment = 1;
+  CommissionCalculation updated_calculation = 2;
 }
 
 message GetCommissionPaymentRequest {
@@ -220,9 +206,7 @@ message GetCommissionPaymentRequest {
 }
 
 message GetCommissionPaymentResponse {
-  bool success = 1;
-  optional string message = 2;
-  CommissionPayment commission_payment = 3;
+  CommissionPayment commission_payment = 1;
 }
 
 // Commission Reports
@@ -232,9 +216,7 @@ message GetCommissionSummaryRequest {
 }
 
 message GetCommissionSummaryResponse {
-  bool success = 1;
-  optional string message = 2;
-  CommissionSummary summary = 3;
+  CommissionSummary summary = 1;
 }
 
 message CommissionSummary {
@@ -258,13 +240,11 @@ message GetCommissionReportRequest {
 }
 
 message GetCommissionReportResponse {
-  bool success = 1;
-  optional string message = 2;
-  repeated CommissionSummary employee_summaries = 3;
-  string total_commissions_calculated = 4;
-  string total_commissions_paid = 5;
-  string total_commissions_pending = 6;
-  PaginationResponse pagination = 7;
+  repeated CommissionSummary employee_summaries = 1;
+  string total_commissions_calculated = 2;
+  string total_commissions_paid = 3;
+  string total_commissions_pending = 4;
+  PaginationResponse pagination = 5;
 }
 
 // Bulk Operations
@@ -276,12 +256,10 @@ message BulkCalculateCommissionsRequest {
 }
 
 message BulkCalculateCommissionsResponse {
-  bool success = 1;
-  optional string message = 2;
-  repeated CommissionCalculation calculations = 3;
-  repeated string errors = 4;
-  int32 success_count = 5;
-  int32 error_count = 6;
+  repeated CommissionCalculation calculations = 1;
+  repeated string errors = 2;
+  int32 success_count = 3;
+  int32 error_count = 4;
 }
 
 message BulkApproveCommissionsRequest {
@@ -291,12 +269,10 @@ message BulkApproveCommissionsRequest {
 }
 
 message BulkApproveCommissionsResponse {
-  bool success = 1;
-  optional string message = 2;
-  repeated CommissionCalculation approved_calculations = 3;
-  repeated string errors = 4;
-  int32 success_count = 5;
-  int32 error_count = 6;
+  repeated CommissionCalculation approved_calculations = 1;
+  repeated string errors = 2;
+  int32 success_count = 3;
+  int32 error_count = 4;
 }
 
 // Commission Settings/Configuration
@@ -305,10 +281,8 @@ message GetCommissionSettingsRequest {
 }
 
 message GetCommissionSettingsResponse {
-  bool success = 1;
-  optional string message = 2;
-  EmployeeSummary employee = 3;
-  repeated CommissionTierSetting tier_settings = 4;
+  EmployeeSummary employee = 1;
+  repeated CommissionTierSetting tier_settings = 2;
 }
 
 message CommissionTierSetting {

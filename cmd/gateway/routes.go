@@ -43,10 +43,10 @@ func main() {
 		posHandler = handlers.NewPOSHTTPHandler(grpcClients.POS)
 	}
 
-	var commissionsHandler *handlers.CommissionsHTTPHandler
-	if grpcClients.Commissions != nil {
-		commissionsHandler = handlers.NewCommissionsHTTPHandler(grpcClients.Commissions)
-	}
+	// var commissionsHandler *handlers.CommissionsHTTPHandler
+	// if grpcClients.Commissions != nil {
+	// 	commissionsHandler = handlers.NewCommissionsHTTPHandler(grpcClients.Commissions)
+	// }
 
 	// --- Public API Group ---
 	public := r.Group("/api/v1")
@@ -87,17 +87,11 @@ func main() {
 				employees.GET("", userHandler.ListEmployees)
 				employees.GET("/:id", userHandler.GetEmployee)
 				employees.PUT("/:id", userHandler.UpdateEmployee)
-
-				employees.GET("/:id/commission-summary", commissionsHandler.GetCommissionSummary)
-				employees.GET("/:id/commission-settings", commissionsHandler.GetCommissionSettings)
 			} else {
 				employees.POST("", serviceUnavailableHandler("User service"))
 				employees.GET("", serviceUnavailableHandler("User service"))
 				employees.GET("/:id", serviceUnavailableHandler("User service"))
 				employees.PUT("/:id", serviceUnavailableHandler("User service"))
-
-				employees.GET("/:id/commission-summary", serviceUnavailableHandler("Commission service"))
-				employees.PUT("/:id/commission-settings", serviceUnavailableHandler("Commission service"))
 			}
 		}
 
@@ -106,24 +100,9 @@ func main() {
 			if userHandler != nil {
 				roles.POST("", userHandler.CreateRole)
 				roles.GET("", userHandler.ListRoles)
-				roles.PUT("/:id", userHandler.UpdateRole)
-				roles.GET("/:id", userHandler.GetRole)
 			} else {
 				roles.POST("", serviceUnavailableHandler("User service"))
 				roles.GET("", serviceUnavailableHandler("User service"))
-			}
-		}
-
-		store := protected.Group("/store")
-		{
-			if userHandler != nil {
-				store.POST("", userHandler.CreateStore)
-				store.GET("", userHandler.ListStores)
-				store.PUT("/:id", userHandler.UpdateStore)
-				store.GET("/:id", userHandler.GetStore)
-			} else {
-				store.POST("", serviceUnavailableHandler("User service"))
-				store.GET("", serviceUnavailableHandler("User service"))
 			}
 		}
 
@@ -133,17 +112,17 @@ func main() {
 				// Product routes
 				inventoryGroup.POST("/products", inventoryHandler.CreateProduct)
 				inventoryGroup.GET("/products", inventoryHandler.ListProducts)
-				inventoryGroup.GET("/products/:code", inventoryHandler.GetProduct)
-				inventoryGroup.PUT("/products/:code", inventoryHandler.UpdateProduct)
+				inventoryGroup.GET("/products/:id", inventoryHandler.GetProduct)
+				inventoryGroup.GET("/products/code/:code", inventoryHandler.GetProductByCode)
+				inventoryGroup.PUT("/products/:id", inventoryHandler.UpdateProduct)
 
 				// Stock routes
-				inventoryGroup.GET("/stocks", inventoryHandler.ListStocks)
-				inventoryGroup.POST("/stocks/:productCode", inventoryHandler.ListStocks)
-				inventoryGroup.POST("/stocks/:productCode/:warehouseId", inventoryHandler.ListStocks)
+				inventoryGroup.POST("/stocks/check", inventoryHandler.CheckStock)
 				inventoryGroup.POST("/stocks/reserve", inventoryHandler.ReserveStock)
 				inventoryGroup.POST("/stocks/release", inventoryHandler.ReleaseStock)
 				inventoryGroup.POST("/stocks/update", inventoryHandler.UpdateStock)
 				inventoryGroup.POST("/stocks/transfer", inventoryHandler.TransferStock)
+				inventoryGroup.GET("/stocks", inventoryHandler.GetStock)
 				inventoryGroup.GET("/stocks/low", inventoryHandler.ListLowStock)
 
 				// Stock movement routes
@@ -151,35 +130,29 @@ func main() {
 
 				// Warehouse routes
 				inventoryGroup.POST("/warehouses", inventoryHandler.CreateWarehouse)
-				inventoryGroup.PUT("/warehouses/:code", inventoryHandler.UpdateWarehouse)
-				inventoryGroup.PUT("/warehouses/status/:code", inventoryHandler.UpdateWarehouseStatus)
 				inventoryGroup.GET("/warehouses", inventoryHandler.ListWarehouses)
 				inventoryGroup.GET("/warehouses/:code", inventoryHandler.GetWarehouse)
 
 				// Supplier routes
 				inventoryGroup.POST("/suppliers", inventoryHandler.CreateSupplier)
-				inventoryGroup.PUT("/suppliers/:code", inventoryHandler.UpdateSupplier)
-				inventoryGroup.PUT("/suppliers/status/:code", inventoryHandler.UpdateSupplierStatus)
 				inventoryGroup.GET("/suppliers", inventoryHandler.ListSuppliers)
 				inventoryGroup.GET("/suppliers/:id", inventoryHandler.GetSupplier)
 
 				// Product Type routes
 				inventoryGroup.POST("/product-types", inventoryHandler.CreateProductType)
-				inventoryGroup.PUT("/product-types/:id", inventoryHandler.UpdateProductType)
-				inventoryGroup.GET("/product-types/:id", inventoryHandler.GetProductType)
 				inventoryGroup.GET("/product-types", inventoryHandler.ListProductTypes)
-				inventoryGroup.GET("/product-types/:id/products", inventoryHandler.ListProductByProductType)
 
 			} else {
 				// Product routes
 				inventoryGroup.POST("/products", serviceUnavailableHandler("Inventory service"))
 				inventoryGroup.GET("/products", serviceUnavailableHandler("Inventory service"))
-				inventoryGroup.GET("/products/:code", serviceUnavailableHandler("Inventory service"))
-				inventoryGroup.PUT("/products/:code", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/products/:id", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.GET("/products/code/:code", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.PUT("/products/:id", serviceUnavailableHandler("Inventory service"))
 				inventoryGroup.DELETE("/products/:id", serviceUnavailableHandler("Inventory service"))
 
 				// Stock routes
-				inventoryGroup.GET("/stocks", serviceUnavailableHandler("Inventory service"))
+				inventoryGroup.POST("/stocks/check", serviceUnavailableHandler("Inventory service"))
 				inventoryGroup.POST("/stocks/reserve", serviceUnavailableHandler("Inventory service"))
 				inventoryGroup.POST("/stocks/release", serviceUnavailableHandler("Inventory service"))
 				inventoryGroup.POST("/stocks/update", serviceUnavailableHandler("Inventory service"))
@@ -213,30 +186,21 @@ func main() {
 		{
 			if posHandler != nil {
 				// Products
-				posGroup.POST("/products", posHandler.CreateProduct)
-				posGroup.PUT("/products/:code", posHandler.UpdateProduct)
 				posGroup.GET("/products", posHandler.ListProducts)
-				posGroup.GET("/products/:code", posHandler.GetProduct)
+				posGroup.GET("/products/:id", posHandler.GetProduct)
+				posGroup.GET("/products/code/:code", posHandler.GetProductByCode)
+
 				// Product Groups
-				posGroup.POST("/product-groups", posHandler.CreateProductGroupHandler)
-				posGroup.PUT("/product-groups/:id", posHandler.UpdateProductGroupHandler)
-				posGroup.GET("/product-groups/:id", posHandler.GetProductGroupHandler)
 				posGroup.GET("/product-groups", posHandler.ListProductGroups)
 
 				// Payment Types
-				posGroup.POST("/payment-types", posHandler.CreatePaymentTypes)
-				posGroup.PUT("/payment-types/:id", posHandler.UpdatePaymentType)
 				posGroup.GET("/payment-types", posHandler.ListPaymentTypes)
 
 				// Payment Processing
 				posGroup.POST("/payments/process", posHandler.ProcessPayment)
 
 				// Discounts
-				posGroup.POST("/discounts", posHandler.CreateDiscount)
 				posGroup.GET("/discounts", posHandler.ListDiscounts)
-				posGroup.GET("/discounts/:id", posHandler.GetDiscount)
-				posGroup.PUT("/discounts/:id", posHandler.UpdateDiscount)
-				posGroup.DELETE("/discounts/:id", posHandler.DeleteDiscount)
 				posGroup.POST("/discounts/validate", posHandler.ValidateDiscount)
 
 				// Carts
@@ -261,32 +225,16 @@ func main() {
 			}
 		}
 
-		commissionsGroup := protected.Group("/commissions")
-		{
-			if commissionsHandler != nil {
-				// --- Calculation ---
-				commissionsGroup.POST("", commissionsHandler.CalculateCommission)
-				commissionsGroup.POST("/:id/recalculate", commissionsHandler.RecalculateCommission)
-				commissionsGroup.POST("/bulk-calculate", commissionsHandler.BulkCalculateCommissions)
-
-				// --- Management ---
-				commissionsGroup.GET("", commissionsHandler.ListCommissionCalculations)
-				commissionsGroup.GET("/:id", commissionsHandler.GetCommissionCalculation)
-				commissionsGroup.POST("/:id/approve", commissionsHandler.ApproveCommission)
-				commissionsGroup.POST("/:id/reject", commissionsHandler.RejectCommission)
-				commissionsGroup.POST("/bulk-approve", commissionsHandler.BulkApproveCommissions)
-
-				// --- Payment ---
-				commissionsGroup.POST("/:id/pay", commissionsHandler.PayCommission)
-				commissionsGroup.GET("/:id/payment", commissionsHandler.GetCommissionPayment)
-
-				// --- Reporting ---
-				commissionsGroup.GET("/report", commissionsHandler.GetCommissionReport)
-			} else {
-				commissionsGroup.POST("", serviceUnavailableHandler("Commissions service"))
-				commissionsGroup.GET("", serviceUnavailableHandler("Commissions service"))
-			}
-		}
+		// commissionsGroup := protected.Group("/commissions")
+		// {
+		// 	if commissionsHandler != nil {
+		// 		commissionsGroup.POST("", commissionsHandler.CalculateCommission)
+		// 		commissionsGroup.GET("", commissionsHandler.ListCommissions)
+		// 	} else {
+		// 		commissionsGroup.POST("", serviceUnavailableHandler("Commissions service"))
+		// 		commissionsGroup.GET("", serviceUnavailableHandler("Commissions service"))
+		// 	}
+		// }
 	}
 
 	r.GET("/health", healthCheckHandler(grpcClients))

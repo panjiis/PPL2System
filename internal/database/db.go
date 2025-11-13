@@ -41,9 +41,7 @@ func NewConnection(dsn string) (*gorm.DB, error) {
 		log.Fatal("DSN is required")
 	}
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		DisableForeignKeyConstraintWhenMigrating: true,
-	})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
@@ -69,37 +67,23 @@ func MigrateUserDB(db *gorm.DB) error {
 	db.AutoMigrate(&models.Role{})
 	db.AutoMigrate(&models.Employee{})
 	db.AutoMigrate(&models.CommissionTier{})
-	db.AutoMigrate(&models.Store{})
 	return nil
 }
 
 func MigrateInventoryDB(db *gorm.DB) error {
-	db.AutoMigrate(&models.ProductType{})
-	db.AutoMigrate(&models.Warehouse{})
-	db.AutoMigrate(&models.Supplier{})
 	db.AutoMigrate(&models.InventoryProduct{})
+	db.AutoMigrate(&models.ProductType{})
 	db.AutoMigrate(&models.Stock{})
 	db.AutoMigrate(&models.StockMovement{})
-	return nil
-}
-
-func MigrateCommissionDB(db *gorm.DB) error {
-	if err := db.AutoMigrate(&models.CommissionCalculation{}); err != nil {
-		return err
-	}
-	if err := db.AutoMigrate(&models.CommissionDetail{}); err != nil {
-		return err
-	}
-	if err := db.AutoMigrate(&models.CommissionPayment{}); err != nil {
-		return err
-	}
+	db.AutoMigrate(&models.Warehouse{})
+	db.AutoMigrate(&models.Supplier{})
 	return nil
 }
 
 func MigratePOSDB(db *gorm.DB) error {
 	return db.AutoMigrate(
-		&models.ProductGroup{},
 		&models.Product{},
+		&models.ProductGroup{},
 		&models.Discount{},
 		&models.PaymentType{},
 		&models.Cart{},
