@@ -1,30 +1,47 @@
+# ---------- BUILD STAGE ----------
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
+# Copy and download dependencies first (for better caching)
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Copy source
 COPY . .
 
-# Build all binaries
+# Build all microservices
 RUN CGO_ENABLED=0 go build -o /app/bin/gateway ./cmd/gateway && \
     CGO_ENABLED=0 go build -o /app/bin/user ./cmd/services/user && \
     CGO_ENABLED=0 go build -o /app/bin/commissions ./cmd/services/commissions && \
     CGO_ENABLED=0 go build -o /app/bin/pos ./cmd/services/pos && \
     CGO_ENABLED=0 go build -o /app/bin/inventory ./cmd/services/inventory
 
-# Runtime image
+# ---------- RUNTIME STAGE ----------
 FROM alpine:latest
 
+# Use tini for proper signal handling
 RUN apk add --no-cache tini
 
 WORKDIR /app
 
+# Copy configuration files and built binaries
 COPY --from=builder /app/config/ ./config/
 COPY --from=builder /app/bin/ ./bin/
 
-EXPOSE 8080
+# Expose all ports (gRPC + Gateway)
+EXPOSE 8080 50051 50052 50053 50054
+
+# Environment variables (can be overridden in docker-compose)
+ENV APP_ENV=production \
+    APP_PORT=8080
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["sh", "-c", "./bin/user & ./bin/commissions & ./bin/pos & ./bin/inventory & ./bin/gateway"]
+
+# Start all microservices in background, gateway last
+CMD ["sh", "-c", "\
+  ./bin/user & \
+  ./bin/commissions & \
+  ./bin/pos & \
+  ./bin/inventory & \
+  ./bin/gateway"]
