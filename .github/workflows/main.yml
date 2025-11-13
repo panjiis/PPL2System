@@ -40,8 +40,8 @@ jobs:
           file: ./dockerfile.go
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/Staging-ppl2system-go:latest
-            ghcr.io/${{ github.repository_owner }}/Staging-ppl2system-go:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/staging-ppl2system-go:latest
+            ghcr.io/${{ github.repository_owner }}/staging-ppl2system-go:${{ github.sha }}
 
       - name: 5. Build and push PYTHON Service
         uses: docker/build-push-action@v5
@@ -50,5 +50,5 @@ jobs:
           file: ./analytics_service/dockerfile.py
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/Staging-ppl2system-python:latest
-            ghcr.io/${{ github.repository_owner }}/Staging-ppl2system-python:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/staging-ppl2system-python:latest
+            ghcr.io/${{ github.repository_owner }}/staging-ppl2system-python:${{ github.sha }}
