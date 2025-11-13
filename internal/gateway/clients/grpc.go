@@ -35,11 +35,11 @@ func NewGRPCClientsWithFallback() (*GRPCClients, error) {
 	clients := &GRPCClients{}
 	connectedServices := 0
 
-	userGrpc := os.Getenv("USER_GRPC_ADDR")               //51
-	inventoryGrpc := os.Getenv("INVENTORY_GRPC_ADDR")     //52
-	posGrpc := os.Getenv("POS_GRPC_ADDR")                 //53
-	commissionsGrpc := os.Getenv("COMMISSIONS_GRPC_ADDR") //54
-	analyticsGrpc := os.Getenv("ANALYTICS_GRPC_ADDR")     //55
+	userGrpc := os.Getenv("USER_GRPC_ADDR")               //50051
+	inventoryGrpc := os.Getenv("INVENTORY_GRPC_ADDR")     //50052
+	posGrpc := os.Getenv("POS_GRPC_ADDR")                 //50053
+	commissionsGrpc := os.Getenv("COMMISSIONS_GRPC_ADDR") //50054
+	analyticsGrpc := os.Getenv("ANALYTICS_GRPC_ADDR")     //50055
 
 	log.Printf("Attempting to connect to User service...")
 
