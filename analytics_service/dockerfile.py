@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY analytics_service/ .
 
-EXPOSE 5000
+EXPOSE 50055
 
 CMD ["python", "main.py"]
