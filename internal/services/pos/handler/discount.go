@@ -740,8 +740,8 @@ func (s *POSHandler) TriggerSchedulerRecalculation() {
 }
 
 func (s *POSHandler) updateDiscountActiveStatus(ctx context.Context, wib *time.Location) {
-	nowWIB := time.Now().In(wib)
-	nowStr := nowWIB.Format("2006-01-02 15:04:05")
+	nowWib := time.Now().In(wib)
+	nowStr := nowWib.Format("2006-01-02 15:04:05")
 
 	query := `
 		UPDATE discounts
@@ -763,17 +763,17 @@ func (s *POSHandler) updateDiscountActiveStatus(ctx context.Context, wib *time.L
 	}
 
 	rowsAffected := result.RowsAffected
-	log.Printf("Updated %d discount records at %s", rowsAffected, nowWIB.Format("2006-01-02 15:04:05 MST"))
+	log.Printf("Updated %d discount records at %s", rowsAffected, nowWib.Format("2006-01-02 15:04:05 MST"))
 }
 
 func (s *POSHandler) calculateNextUpdateTime(ctx context.Context, wib *time.Location) (time.Time, bool) {
-	nowWIB := time.Now().In(wib)
+	nowWib := time.Now().In(wib)
 
 	var nextActivation sql.NullTime
 	err := s.db.WithContext(ctx).
 		Model(&Discount{}).
 		Select("MIN(valid_from)").
-		Where("is_active = ? AND valid_from IS NOT NULL AND valid_from > ?", false, nowWIB).
+		Where("is_active = ? AND valid_from IS NOT NULL AND valid_from > ?", false, nowWib).
 		Scan(&nextActivation).Error
 
 	if err != nil {
@@ -785,7 +785,7 @@ func (s *POSHandler) calculateNextUpdateTime(ctx context.Context, wib *time.Loca
 	err = s.db.WithContext(ctx).
 		Model(&Discount{}).
 		Select("MIN(valid_until)").
-		Where("is_active = ? AND valid_until IS NOT NULL AND valid_until > ?", true, nowWIB).
+		Where("is_active = ? AND valid_until IS NOT NULL AND valid_until > ?", true, nowWib).
 		Scan(&nextDeactivation).Error
 
 	if err != nil {
