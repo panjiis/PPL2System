@@ -41,11 +41,11 @@ ENTRYPOINT ["/sbin/tini", "--"]
 # Start all microservices in background, wait 10s, then start gateway
 CMD ["sh", "-c", "\
   echo '🚀 Starting backend microservices...' && \
+  ./bin/pos & \
   ./bin/user & \
   ./bin/commissions & \
-  ./bin/pos & \
   ./bin/inventory & \
   echo '🕒 Waiting 10 seconds for all services to initialize...' && \
-  sleep 10 && \
+  sleep 30 && \
   echo '🌐 Starting Gateway service...' && \
   ./bin/gateway"]
