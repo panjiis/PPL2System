@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"strconv"
@@ -14,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var wibLoc *time.Location
+var wibLoc, _ = time.LoadLocation("Asia/Jakarta")
 
 func (s *POSHandler) CreateDiscount(ctx context.Context, req *proto.CreateDiscountRequest) (*proto.CreateDiscountResponse, error) {
 	loc, _ := time.LoadLocation("Asia/Jakarta")
@@ -726,7 +727,7 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 
 	select {
 	case <-timer.C:
-		s.updateDiscountsAndScheduleNext(ctx, wibLoc)
+		s.updateDiscountsAndScheduleNext(ctx, wib)
 	case <-ctx.Done():
 		log.Println("Stopping discount scheduler due to context cancellation")
 		return
@@ -768,7 +769,7 @@ func (s *POSHandler) updateDiscountActiveStatus(ctx context.Context, wib *time.L
 func (s *POSHandler) calculateNextUpdateTime(ctx context.Context, wib *time.Location) (time.Time, bool) {
 	nowWIB := time.Now().In(wib)
 
-	var nextActivation *time.Time
+	var nextActivation sql.NullTime
 	err := s.db.WithContext(ctx).
 		Model(&Discount{}).
 		Select("MIN(valid_from)").
@@ -780,7 +781,7 @@ func (s *POSHandler) calculateNextUpdateTime(ctx context.Context, wib *time.Loca
 		return time.Time{}, false
 	}
 
-	var nextDeactivation *time.Time
+	var nextDeactivation sql.NullTime
 	err = s.db.WithContext(ctx).
 		Model(&Discount{}).
 		Select("MIN(valid_until)").
@@ -792,22 +793,27 @@ func (s *POSHandler) calculateNextUpdateTime(ctx context.Context, wib *time.Loca
 		return time.Time{}, false
 	}
 
-	var earliestTime *time.Time = nil
-	if nextActivation != nil && nextDeactivation != nil {
-		if nextActivation.Before(*nextDeactivation) {
-			earliestTime = nextActivation
+	var earliest time.Time
+	hasValue := false
+
+	if nextActivation.Valid && nextDeactivation.Valid {
+		if nextActivation.Time.Before(nextDeactivation.Time) {
+			earliest = nextActivation.Time
 		} else {
-			earliestTime = nextDeactivation
+			earliest = nextDeactivation.Time
 		}
-	} else if nextActivation != nil {
-		earliestTime = nextActivation
-	} else if nextDeactivation != nil {
-		earliestTime = nextDeactivation
+		hasValue = true
+	} else if nextActivation.Valid {
+		earliest = nextActivation.Time
+		hasValue = true
+	} else if nextDeactivation.Valid {
+		earliest = nextDeactivation.Time
+		hasValue = true
 	}
 
-	if earliestTime == nil {
+	if !hasValue {
 		return time.Time{}, false
 	}
 
-	return *earliestTime, true
+	return earliest, true
 }
