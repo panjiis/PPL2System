@@ -91,7 +91,7 @@ func (s *POSHandler) CreateOrder(ctx context.Context, req *proto.CreateOrderRequ
 			if err == gorm.ErrRecordNotFound {
 				return &proto.CreateOrderResponse{
 					Success: false,
-					Message: lib.StrPtr(fmt.Sprintf("Product %d not found or inactive", itemReq.GetProductCode())),
+					Message: lib.StrPtr(fmt.Sprintf("Product %s not found or inactive", itemReq.GetProductCode())),
 				}, nil
 			}
 			return &proto.CreateOrderResponse{
@@ -123,7 +123,7 @@ func (s *POSHandler) CreateOrder(ctx context.Context, req *proto.CreateOrderRequ
 					tx.Rollback()
 					return &proto.CreateOrderResponse{
 						Success: false,
-						Message: lib.StrPtr(fmt.Sprintf("Discount %d does not apply to product %d", *itemReq.DiscountId, itemReq.GetProductCode())),
+						Message: lib.StrPtr(fmt.Sprintf("Discount %d does not apply to product %s", *itemReq.DiscountId, itemReq.GetProductCode())),
 					}, nil
 				}
 

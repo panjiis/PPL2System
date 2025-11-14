@@ -11,14 +11,28 @@ import (
 	"syntra-system/internal/gateway/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Printf("Warning: Error loading .env file: %v", err)
+		// Continue with defaults or environment variables from system
+	}
+
 	grpcClients, err := clients.NewGRPCClientsWithFallback()
 	if err != nil {
 		log.Printf("Warning: Some gRPC services may be unavailable: %v", err)
+		if grpcClients == nil {
+			log.Fatal("All gRPC services are unavailable. Cannot start server.")
+		}
 	}
-	defer grpcClients.Close()
+	defer func() {
+		if grpcClients != nil {
+			grpcClients.Close()
+		}
+	}()
 
 	r := gin.Default()
 

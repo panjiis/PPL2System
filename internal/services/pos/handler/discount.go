@@ -689,7 +689,13 @@ func (s *POSHandler) stringToDiscountType(sType int32) proto.DiscountType {
 
 func (s *POSHandler) StartDiscountScheduler(parentCtx context.Context) {
 	var wibLoc *time.Location
-	wibLoc, _ = time.LoadLocation("Asia/Jakarta")
+	var err error
+	wibLoc, err = time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		log.Printf("Failed to load Asia/Jakarta timezone: %v, using UTC", err)
+		wibLoc = time.UTC
+	}
+
 	s.schedulerMu.Lock()
 	defer s.schedulerMu.Unlock()
 

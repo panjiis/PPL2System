@@ -115,7 +115,7 @@ func (s *POSHandler) UpdateProduct(ctx context.Context, req *proto.UpdateProduct
 		return nil, status.Errorf(codes.Internal, "failed to update product: %v", err)
 	}
 
-	log.Printf("Successfully updated product with ID: %d", existingProduct.ProductCode)
+	log.Printf("Successfully updated product with ID: %s", existingProduct.ProductCode)
 
 	return &proto.GetProductResponse{
 		Success: true,
