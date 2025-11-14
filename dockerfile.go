@@ -21,7 +21,7 @@ RUN CGO_ENABLED=0 go build -o /app/bin/gateway ./cmd/gateway && \
 FROM alpine:latest
 
 # Use tini for proper signal handling
-RUN apk add --no-cache tini
+RUN apk add --no-cache tini tzdata
 
 WORKDIR /app
 
