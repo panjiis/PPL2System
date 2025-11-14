@@ -710,32 +710,42 @@ func (s *POSHandler) StartDiscountScheduler(parentCtx context.Context) {
 }
 
 func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *time.Location) {
-	s.updateDiscountActiveStatus(ctx, wib)
+	for {
+		s.updateDiscountActiveStatus(ctx, wib)
 
-	nextUpdateTime, ok := s.calculateNextUpdateTime(ctx, wib)
-	if !ok {
-		log.Println("No future discounts found, stopping scheduler goroutine.")
-		return
-	}
+		nextUpdateTime, ok := s.calculateNextUpdateTime(ctx, wib)
+		if !ok {
+			log.Println("No future discounts found, stopping scheduler goroutine.")
+			return
+		}
 
-	log.Printf("Next discount status change scheduled for %s", nextUpdateTime.Format("2006-01-02 15:04:05 MST"))
+		log.Printf("Next discount status change scheduled for %s",
+			nextUpdateTime.In(wib).Format("2006-01-02 15:04:05 MST"),
+		)
 
-	durationUntilNext := time.Until(nextUpdateTime)
+		durationUntilNext := time.Until(nextUpdateTime)
 
-	timer := time.NewTimer(durationUntilNext)
-	defer timer.Stop()
+		if durationUntilNext <= 0 {
+			continue
+		}
 
-	select {
-	case <-timer.C:
-		s.updateDiscountsAndScheduleNext(ctx, wib)
-	case <-ctx.Done():
-		log.Println("Stopping discount scheduler due to context cancellation")
-		return
+		timer := time.NewTimer(durationUntilNext)
+		select {
+		case <-timer.C:
+			timer.Stop()
+		case <-ctx.Done():
+			timer.Stop()
+			log.Println("Stopping discount scheduler due to context cancellation")
+			return
+		}
 	}
 }
 
 func (s *POSHandler) TriggerSchedulerRecalculation() {
-	log.Println("New discount added, triggering scheduler recalculation...")
+	if s.cancelFunc != nil {
+		s.cancelFunc()
+	}
+
 	s.StartDiscountScheduler(s.parentCtx)
 }
 
