@@ -706,5 +706,5 @@ func (h *UserHTTPHandler) GetStore(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, successResponse("Store retrieved successfully", resp.Store))
+	c.JSON(http.StatusOK, successResponse(resp.Message, resp.Store))
 }
