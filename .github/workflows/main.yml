@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./dockerfile.go
+          file: ./dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/staging-ppl2system-go:latest
@@ -47,7 +47,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./analytics_service/dockerfile.py
+          file: ./analytics_service/dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/staging-ppl2system-python:latest
