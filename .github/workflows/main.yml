@@ -26,7 +26,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: '1.24.5'
 
       - name: Run Go Vet (Report Only)
         run: go vet ./... || true
@@ -34,7 +34,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12.6'
 
       - name: Install Python Dependencies
         run: |
