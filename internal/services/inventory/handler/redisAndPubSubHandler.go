@@ -181,6 +181,16 @@ type StockMovement struct {
 	ManagerName string `gorm:"-"`
 }
 
+type StockLevelUpdatedEvent struct {
+	EventType      string    `json:"event_type"` // "inventory.stock.updated"
+	Timestamp      time.Time `json:"timestamp"`
+	ProductCode    string    `json:"product_code"`
+	ProductName    string    `json:"product_name"` // Analytics perlu nama untuk ditampilkan
+	WarehouseID    int32     `json:"warehouse_id"`
+	NewQuantity    int32     `json:"new_quantity"`
+	ReorderLevel   int32     `json:"reorder_level"` // <-- Diperlukan untuk Opsi B
+}
+
 func (c *InventoryHandler) SubscribeToEmployeeEvents(ctx context.Context) error {
 	log.Println(("test"))
 	_, err := c.nats.Subscribe("employee.>", func(msg *nats.Msg) {
@@ -441,4 +451,19 @@ func (h *InventoryHandler) handleSaleRefunded(ctx context.Context, event *SaleRe
 	}
 
 	return nil
+}
+
+func (s *InventoryHandler) publishStockEvent(event StockLevelUpdatedEvent) {
+	subject := "inventory.stock.updated" // Analytics akan mendengarkan ini
+	payload, err := json.Marshal(event)
+	if err != nil {
+		log.Printf("ERROR: Gagal marshal event inventory.stock.updated: %v", err)
+		return
+	}
+
+	if err := s.nats.Publish(subject, payload); err != nil {
+		log.Printf("ERROR: Gagal publish event ke NATS (subjek: %s): %v", subject, err)
+	} else {
+		log.Printf("SUCCESS: Berhasil publish event NATS: %s (Stok: %d)", event.EventType, event.NewQuantity)
+	}
 }

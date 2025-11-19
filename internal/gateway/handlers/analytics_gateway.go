@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"time"
 
@@ -46,12 +47,12 @@ type GenerateSummaryBody struct {
 
 // Untuk: GET /api/v1/products/sales
 type GetProductSalesQuery struct {
-	StartDate      string `form:"start_date" binding:"required"`
-	EndDate        string `form:"end_date" binding:"required"`
-	ProductID      *int32 `form:"product_id"`
-	ProductGroupID *int32 `form:"product_group_id"`
-	PageSize       int    `form:"page_size,default=20"`
-	PageToken      string `form:"page_token"` // Page token biasanya string
+	StartDate      string  `form:"start_date" binding:"required"`
+	EndDate        string  `form:"end_date" binding:"required"`
+	ProductCode    *string `form:"product_code"`
+	ProductGroupID *int32  `form:"product_group_id"`
+	PageSize       int     `form:"page_size,default=20"`
+	PageToken      string  `form:"page_token"` // Page token biasanya string
 }
 
 // Untuk: GET /api/v1/reports/daily-summary
@@ -97,6 +98,22 @@ type GetCustomerAnalyticsQuery struct {
 type GetPeakHoursQuery struct {
 	StartDate string `form:"start_date" binding:"required"`
 	EndDate   string `form:"end_date" binding:"required"`
+}
+
+// Untuk: POST /api/v1/products/sales/generate
+type GenerateProductSalesSummaryBody struct {
+	Date           string  `json:"date" binding:"required"`
+	ProductCode    *string `json:"product_code"`     // Pointer untuk opsional
+	ProductGroupID *int32  `json:"product_group_id"` // Pointer untuk opsional
+}
+
+type GenerateCustomerAnalyticsBody struct {
+	Date           string `json:"date" binding:"required"`
+	ProductGroupID *int32 `json:"product_group_id"` // Pointer untuk opsional
+}
+
+type GenerateEmployeePerformanceBody struct {
+	CalculationID int64 `json:"calculation_id" binding:"required"`
 }
 
 // Menggantikan: http_get_dashboard_data
@@ -236,7 +253,7 @@ func (h *AnalyticsHTTPHandler) GetProductSales(c *gin.Context) {
 			StartDate: query.StartDate,
 			EndDate:   query.EndDate,
 		},
-		ProductId:      query.ProductID,
+		ProductCode:    query.ProductCode,
 		ProductGroupId: query.ProductGroupID,
 		Pagination: &proto.PaginationRequest{
 			PageSize:  int32(query.PageSize),
@@ -247,11 +264,13 @@ func (h *AnalyticsHTTPHandler) GetProductSales(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
+	log.Printf("before")
 	resp, err := h.analyticsClient.GetProductSales(ctx, req)
 	if err != nil {
 		handleGRPCError(c, err)
 		return
 	}
+	log.Printf("after")
 
 	// di api_server.py: return {"product_sales": ..., "pagination": ...}
 	c.JSON(http.StatusOK, successWithMetaResponse("Product sales retrieved", resp.ProductSales, resp.Pagination))
@@ -389,6 +408,12 @@ func (h *AnalyticsHTTPHandler) GetCustomerAnalytics(c *gin.Context) {
 // Menggantikan: http_get_peak_hours
 // Endpoint: GET /api/v1/customers/peak-hours
 func (h *AnalyticsHTTPHandler) GetPeakHours(c *gin.Context) {
+	// var query GetPeakHoursQuery
+	// if err := c.ShouldBindQuery(&query); err != nil {
+	// 	c.JSON(http.StatusBadRequest, errorResponse("Parameter query tidak valid: "+err.Error()))
+	// 	return
+	// }
+
 	req := &proto.GetPeakHoursRequest{}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -400,31 +425,8 @@ func (h *AnalyticsHTTPHandler) GetPeakHours(c *gin.Context) {
 		return
 	}
 
-	dayNames := map[int32]string{
-		1: "Monday",
-		2: "Tuesday",
-		3: "Wednesday",
-		4: "Thursday",
-		5: "Friday",
-		6: "Saturday",
-		7: "Sunday",
-	}
-
-	var readableData []map[string]interface{}
-	for _, dayData := range resp.PeakDataByWeek {
-		dayName, exists := dayNames[dayData.DayOfWeek]
-		if !exists {
-			dayName = "Unknown"
-		}
-
-		readableDay := map[string]interface{}{
-			"day_of_week": dayName,
-			"hourly_data": dayData.HourlyData,
-		}
-		readableData = append(readableData, readableDay)
-	}
-
-	c.JSON(http.StatusOK, successResponse("Peak hours retrieved", readableData))
+	// di api_server.py: return {"peak_hours": results}
+	c.JSON(http.StatusOK, successResponse("Peak hours retrieved", resp.PeakDataByWeek))
 }
 
 // Menggantikan: http_get_real_time_metrics
@@ -444,4 +446,90 @@ func (h *AnalyticsHTTPHandler) GetRealTimeMetrics(c *gin.Context) {
 
 	// di api_server.py: return {"metrics": ...}
 	c.JSON(http.StatusOK, successResponse("Real-time metrics retrieved", resp.Metrics))
+}
+
+// Endpoint: POST /api/v1/products/sales/generate
+func (h *AnalyticsHTTPHandler) GenerateProductSalesSummary(c *gin.Context) {
+	var body GenerateProductSalesSummaryBody
+	// Validasi JSON body
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse("Body request tidak valid: "+err.Error()))
+		return
+	}
+
+	// Siapkan request gRPC sesuai proto
+	req := &proto.GenerateProductSalesSummaryRequest{
+		Date:           body.Date,
+		ProductCode:    body.ProductCode,
+		ProductGroupId: body.ProductGroupID,
+	}
+
+	log.Printf("")
+
+	// Set timeout yang lebih lama untuk proses ETL/Generate
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	// Panggil gRPC ke server Python
+	resp, err := h.analyticsClient.GenerateProductSalesSummary(ctx, req)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
+
+	// Kembalikan respons sukses
+	c.JSON(http.StatusOK, successResponse(*resp.Message, resp.GeneratedSummaries))
+}
+
+func (h *AnalyticsHTTPHandler) GenerateCustomerAnalytics(c *gin.Context) {
+	var body GenerateCustomerAnalyticsBody
+	// Validasi JSON body
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse("Body request tidak valid: "+err.Error()))
+		return
+	}
+
+	// Siapkan request gRPC sesuai proto
+	req := &proto.GenerateCustomerAnalyticsRequest{
+		Date:           body.Date,
+		ProductGroupId: body.ProductGroupID,
+	}
+
+	// Set timeout yang lebih lama untuk proses ETL/Generate
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	// Panggil gRPC ke server Python
+	resp, err := h.analyticsClient.GenerateCustomerAnalytics(ctx, req)
+	if err != nil {
+		handleGRPCError(c, err) // Fungsi error handling Anda yang sudah ada
+		return
+	}
+
+	// Kembalikan respons sukses
+	// (Menggunakan GeneratedAnalytics sesuai definisi proto kita)
+	c.JSON(http.StatusOK, successResponse(*resp.Message, resp.GeneratedAnalytics))
+}
+
+func (h *AnalyticsHTTPHandler) GenerateEmployeePerformance(c *gin.Context) {
+	var body GenerateEmployeePerformanceBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse("Body request tidak valid: "+err.Error()))
+		return
+	}
+
+	req := &proto.GenerateEmployeePerformanceRequest{
+		CalculationId: body.CalculationID,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second) // Timeout ETL
+	defer cancel()
+
+	resp, err := h.analyticsClient.GenerateEmployeePerformance(ctx, req)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, successResponse(*resp.Message, resp.GeneratedPerformance))
 }

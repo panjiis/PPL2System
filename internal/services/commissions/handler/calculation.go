@@ -56,6 +56,12 @@ func (c *CommissionHandler) CalculateCommission(ctx context.Context, req *proto.
 		}
 	}
 
+	c.publishCommissionStatusEvent(
+		"commission.calculated", 
+		calculationModel.ID, 
+		calculationModel.Status,
+	)
+
 	return &proto.CalculateCommissionResponse{
 		Success:               true, 
 		Message:               lib.StrPtr("Calculation successful"),
@@ -191,6 +197,12 @@ func (c *CommissionHandler) BulkCalculateCommissions(ctx context.Context, req *p
 				mu.Unlock()
 				return
 			}
+
+			c.publishCommissionStatusEvent(
+				"commission.calculated", 
+				calculationModel.ID, 
+				calculationModel.Status,
+			)
 
 			mu.Lock()
 			successfulCalculations = append(successfulCalculations, calculationModel)

@@ -1,10 +1,8 @@
 import datetime
-from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from decimal import Decimal
 
-
-from repositories import customer_repo
+from repositories import customer_repo, etl_repo
 
 from core_logic.utils import to_string
 from core_logic.cache_manager import get_cache, set_cache, delete_cache
@@ -18,8 +16,8 @@ def get_customer_analytics_logic(
   pagination: object
 ) -> dict:
   try:
-    start_date = datetime.strptime(date_range.start_date, "%Y-%m-%d").date()
-    end_date = datetime.strptime(date_range.end_date, "%Y-%m-%d").date()
+    start_date = datetime.date.fromisoformat(date_range.start_date)
+    end_date = datetime.date.fromisoformat(date_range.end_date)
   except ValueError:
     raise ValueError("Invalid date format. Use YYYY-MM-DD.")
   
@@ -67,7 +65,7 @@ def get_customer_analytics_logic(
       "total_transactions": item['total_transactions'],
       "total_revenue": to_string(item['total_revenue']),
       "average_transaction_value": to_string(item['average_transaction_value']),
-      "peak_hour": item['peak_hour'],
+      # "peak_hour": item['peak_hour'],
       "created_at": item['created_at'],
       "updated_at": item['updated_at']
     })
@@ -83,135 +81,122 @@ def get_customer_analytics_logic(
     "next_page_token": next_page_token,
   }
 
-# def _get_peak_hours_logic_from_db(
-#   db: Session,
-#   date_range: object,
-# ) -> list[dict]:
-#   try:
-#     start_date = datetime.date.fromisoformat(date_range.start_date)
-#     end_date = datetime.date.fromisoformat(date_range.end_date)
-#   except ValueError:
-#     raise ValueError("Invalid date format. Use YYYY-MM-DD.")
-  
-#   # raw_data = customer_repo.get_peak_hour_data_from_pos(
-#   #   db, start_date, end_date
-#   # )
-
-#   raw_data = customer_repo.get_peak_hour_data(
-#     db, start_date, end_date
-#   )
-
-#   hourly_map = {
-#     hour: {
-#       "transaction_count": 0,
-#       "total_revenue": Decimal(0)
-#     } for hour in range(24)
-#   }
-
-#   for item in raw_data:
-#     hour = int(item['hour_of_day'])
-#     if hour in hourly_map:
-#       hourly_map[hour] = {
-#         "transaction_count": item['transaction_count'],
-#         "total_revenue": item['total_revenue']
-#       }
-  
-#   formatted_data = []
-#   for hour, data in hourly_map.items():
-#     formatted_data.append({
-#       "hour": f"{hour:02d}:00",
-#       "transaction_count": data['transaction_count'],
-#       "total_revenue": to_string(data['total_revenue'])
-#     })
-  
-#   return formatted_data
-
-# def get_peak_hours_logic(
-#   db: Session,
-#   date_range: object,
-# ) -> list[dict]:  
-#   cache_key = (
-#     f"reports:peak-hours:" # Key prefix baru
-#     f"start={date_range.start_date}:end={date_range.end_date}"
-#   )
-
-#   cached_data = get_cache(cache_key)
-
-#   if cached_data:
-#     print("CACHE HIT")
-#     return cached_data
-  
-#   try:
-#     db_data = _get_peak_hours_logic_from_db(
-#       db, date_range
-#     )
-#   except Exception as e:
-#     print(f"Error querying database: {e}")
-#     raise e
-
-#   if db_data:
-#     set_cache(
-#       cache_key, db_data, CACHE_KEY
-#     )
-  
-#   return db_data
-
 def get_weekly_peak_hours_logic(db: Session) -> list[dict]:
     """
     Mengambil data pola jam sibuk mingguan, diformat untuk respons gRPC baru.
-    Menampilkan waktu dalam format ISO 8601 (hanya jam, UTC+7).
     """
-    cache_key = "reports:weekly-peak-hours:v1"
+    cache_key = "reports:weekly-peak-hours:v1" # Kunci cache statis baru
 
     cached_data = get_cache(cache_key)
-    if isinstance(cached_data, list):
+    if cached_data:
         print("CACHE HIT")
         return cached_data
-
-
-    weekly_map = {
-        day: {
+    
+    # 1. Inisialisasi struktur data lengkap
+    # Ini memastikan Anda mengembalikan 24 jam untuk setiap hari,
+    # bahkan jika tidak ada penjualan (transaction_count: 0)
+    weekly_map = {}
+    for day in range(1, 8): 
+        weekly_map[day] = {
             hour: {"transaction_count": 0, "total_revenue": Decimal(0)}
-            for hour in range(24)
+            for hour in range(24) # 0 (00:00) sampai 23 (23:00)
         }
-        for day in range(1, 8)
-    }
 
+    # 2. Ambil data mentah dari database
     try:
         raw_data = customer_repo.get_weekly_peak_hour_data(db)
     except Exception as e:
         print(f"Error querying database: {e}")
         raise e
 
+    # 3. Isi struktur data dengan data dari DB
     for row in raw_data:
         day = int(row['day_of_week'])
         hour = int(row['hour_of_day'])
+        
+        # Pastikan data ada di dalam rentang yang diharapkan
         if day in weekly_map and hour in weekly_map[day]:
             weekly_map[day][hour] = {
                 "transaction_count": int(row['transaction_count']),
                 "total_revenue": row['total_revenue'] or Decimal(0)
             }
 
-    tz_offset = "+07:00"
+    # 4. Ubah format map menjadi daftar yang diminta oleh .proto
     response_list = []
     for day_of_week, hourly_map in weekly_map.items():
         day_data = {
             "day_of_week": day_of_week,
             "hourly_data": []
         }
-
+        
+        # Urutkan berdasarkan jam
         for hour in sorted(hourly_map.keys()):
             data = hourly_map[hour]
-
-            iso_hour = f"{hour:02d}:00{tz_offset}"
-
             day_data["hourly_data"].append({
-                "hour": iso_hour,
+                "hour": f"{hour:02d}:00", # Format jam: "09:00"
                 "transaction_count": data['transaction_count'],
                 "total_revenue": to_string(data['total_revenue'])
             })
-
+            
         response_list.append(day_data)
 
-    set_cache(cache_key, response_list, CACHE_KEY)
+    # 5. Simpan ke cache
+    set_cache(cache_key, response_list, CACHE_KEY) # Menggunakan TTL 900 detik
+  
     return response_list
+
+def generate_customer_analytics_logic(
+    analytics_db: Session,
+    date_str: str,
+    product_group_id: int | None
+) -> list[dict]:
+    try:
+        date = datetime.date.fromisoformat(date_str)
+    except ValueError:
+        raise ValueError("Format tanggal salah. Gunakan YYYY-MM-DD.")
+        
+    # 1. EXTRACT & TRANSFORM
+    raw_customer_data = etl_repo.get_raw_customer_analytics_data(
+        analytics_db, date, product_group_id
+    )
+    
+    if not raw_customer_data:
+        print(f"[Logic] Tidak ada data customer analytics untuk tanggal {date_str}.")
+        return []
+        
+    processed_data = []
+    try:
+        # 2. TRANSFORM (Hitung Rata-rata)
+        for row in raw_customer_data:
+            total_revenue = Decimal(row['total_revenue'])
+            total_transactions = int(row['total_transactions'])
+            
+            avg_value = Decimal(0)
+            if total_transactions > 0:
+                avg_value = total_revenue / Decimal(total_transactions)
+            
+            row_to_upsert = {
+                "date": row['date'],
+                "product_group_id": row['product_group_id'],
+                "total_transactions": total_transactions,
+                "total_revenue": total_revenue,
+                "average_transaction_value": avg_value
+            }
+            
+            # 3. LOAD (Upsert ke DB)
+            etl_repo.upsert_customer_analytics(analytics_db, row_to_upsert)
+            processed_data.append(row_to_upsert) # Simpan untuk respons
+        
+        analytics_db.commit() # Commit semua perubahan sekaligus
+        
+    except Exception as e:
+        analytics_db.rollback()
+        print(f"Error saat upsert data customer analytics: {e}")
+        raise e
+
+    # 4. HAPUS CACHE (PENTING)
+    cache_pattern = f"reports:customer-analytics:count:start={date_str}*"
+    delete_cache(cache_pattern)
+    
+    # 5. Kembalikan data yang baru saja diproses
+    return processed_data

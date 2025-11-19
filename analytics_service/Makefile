@@ -1,4 +1,4 @@
-PROTO_ROOT_DIR = "I:\coding\golang\PPL2System\proto"
+PROTO_ROOT_DIR = "D:\Developments\Go\SYNTRA\PPL2System staging\proto"
 ANALYTICS_PROTO_FILE = $(PROTO_ROOT_DIR)/analytics/analytics_service.proto
 PY_OUT_DIR = .
 

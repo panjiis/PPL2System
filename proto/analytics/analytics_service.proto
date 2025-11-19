@@ -39,29 +39,32 @@ message SalesSummaryDaily {
 message ProductSalesSummary {
   int64 id = 1;
   string date = 2;
-  int32 product_id = 3;
-  optional int32 product_group_id = 4;
-  int32 quantity_sold = 5;
-  string gross_sales = 6;
-  string total_discounts = 7;
-  string net_sales = 8;
-  string total_cost = 9;
-  string gross_profit = 10;
-  google.protobuf.Timestamp created_at = 11;
-  google.protobuf.Timestamp updated_at = 12;
+  string product_code = 3; 
+  string product_name = 4;
+  optional int32 product_group_id = 5;
+  int32 quantity_sold = 6;
+  string gross_sales = 7;
+  string total_discounts = 8;
+  string net_sales = 9;
+  string total_cost = 10;
+  string gross_profit = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
 }
 
 message EmployeePerformance {
   int64 id = 1;
-  string date = 2;
+  int64 calculation_id = 2;
   int64 employee_id = 3;
-  string total_sales = 4;
-  int32 total_transactions = 5;
-  int32 total_items_sold = 6;
-  string commission_earned = 7;
-  string performance_score = 8;
-  google.protobuf.Timestamp created_at = 9;
-  google.protobuf.Timestamp updated_at = 10;
+  string period_start = 4; 
+  string period_end = 5;
+  string total_sales = 6;
+  int32 total_transactions = 7;
+  int32 total_items_sold = 8;
+  string commission_earned = 9;
+  string performance_score = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
 }
 
 message CustomerAnalytics {
@@ -138,7 +141,7 @@ message GenerateDailySummaryResponse {
 // Product Analytics
 message GetProductSalesRequest {
   DateRange date_range = 1;
-  optional int32 product_id = 2;
+  optional string product_code = 2;
   optional int32 product_group_id = 3;
   PaginationRequest pagination = 4;
 }
@@ -220,6 +223,17 @@ message GetPeakHoursResponse {
   repeated WeeklyPeakData peak_data_by_week = 1;
 }
 
+message GenerateCustomerAnalyticsRequest {
+  string date = 1; 
+  optional int32 product_group_id = 2; 
+}
+
+message GenerateCustomerAnalyticsResponse {
+  bool success = 1;
+  optional string message = 2;
+  repeated CustomerAnalytics generated_analytics = 3; 
+}
+
 message GetDashboardDataRequest {
   string date = 1;
 }
@@ -242,8 +256,13 @@ message DashboardData {
   repeated ProductSalesSummary top_products_today = 7;
   repeated EmployeePerformance top_performers_today = 8;
   
-  repeated string low_stock_alerts = 9;
+  repeated LowStockItem low_stock_alerts = 9;
   int32 pending_commissions_count = 10;
+}
+
+message LowStockItem {
+  string product_name = 1;
+  int32 remaining_quantity = 2;
 }
 
 message GetRealTimeMetricsRequest {
@@ -255,13 +274,39 @@ message GetRealTimeMetricsResponse {
   RealTimeMetrics metrics = 3;
 }
 
+message LargeTransaction {
+  string doc = 1;
+  string amount = 2;
+}
+
 message RealTimeMetrics {
   google.protobuf.Timestamp last_updated = 1;
-  int32 active_transactions = 2;
-  string hourly_revenue = 3;
-  int32 hourly_transaction_count = 4;
-  string average_transaction_value = 5;
-  repeated string recent_large_transactions = 6;
+  string hourly_revenue = 2;
+  int32 hourly_transaction_count = 3;
+  string average_transaction_value = 4;
+  repeated LargeTransaction recent_large_transactions = 5;
+}
+
+message GenerateProductSalesSummaryRequest {
+  string date = 1; 
+  optional string product_code = 2; 
+  optional int32 product_group_id = 3; 
+}
+
+message GenerateProductSalesSummaryResponse {
+  bool success = 1;
+  optional string message = 2;
+  repeated ProductSalesSummary generated_summaries = 3; 
+}
+
+message GenerateEmployeePerformanceRequest {
+  int64 calculation_id = 1; 
+}
+
+message GenerateEmployeePerformanceResponse {
+  bool success = 1;
+  optional string message = 2;
+  EmployeePerformance generated_performance = 3;
 }
 
 service AnalyticsService {
@@ -273,14 +318,17 @@ service AnalyticsService {
   // Product Analytics
   rpc GetProductSales(GetProductSalesRequest) returns (GetProductSalesResponse);
   rpc GetTopSellingProducts(GetTopSellingProductsRequest) returns (GetTopSellingProductsResponse);
+  rpc GenerateProductSalesSummary(GenerateProductSalesSummaryRequest) returns (GenerateProductSalesSummaryResponse);
   
   // Employee Performance Analytics
   rpc GetEmployeePerformance(GetEmployeePerformanceRequest) returns (GetEmployeePerformanceResponse);
   rpc GetPerformanceReport(GetPerformanceReportRequest) returns (GetPerformanceReportResponse);
+  rpc GenerateEmployeePerformance(GenerateEmployeePerformanceRequest) returns (GenerateEmployeePerformanceResponse);
   
   // Customer Analytics
   rpc GetCustomerAnalytics(GetCustomerAnalyticsRequest) returns (GetCustomerAnalyticsResponse);
   rpc GetPeakHours(GetPeakHoursRequest) returns (GetPeakHoursResponse);
+  rpc GenerateCustomerAnalytics(GenerateCustomerAnalyticsRequest) returns (GenerateCustomerAnalyticsResponse);
   
   // Dashboard and Real-time
   rpc GetDashboardData(GetDashboardDataRequest) returns (GetDashboardDataResponse);

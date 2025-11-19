@@ -40,7 +40,7 @@ def get_customer_analytics_paginated(
       'total_transactions': row.total_transactions,
       'total_revenue': row.total_revenue,
       'average_transaction_value': row.average_transaction_value,
-      'peak_hour': row.peak_hour,
+      # 'peak_hour': row.peak_hour,
       'created_at': row.created_at,
       'updated_at': row.updated_at
     })
@@ -97,31 +97,16 @@ def count_total_customer_analytics(
 #   result = db.execute(text(query_str), params).all()
 #   return [dict(row._mapping) for row in result]
 
-# def get_weekly_peak_hour_data(db: Session) -> list[dict]:
-#     query_str = """
-#         SELECT
-#             EXTRACT(DOW FROM order_timestamp) + 1 as day_of_week,
-#             EXTRACT(HOUR FROM order_timestamp) as hour_of_day,
-#             COUNT(id) as transaction_count,
-#             SUM(total_amount) as total_revenue
-#         FROM raw_sales_events
-#         -- Anda bisa menambahkan filter WHERE di sini jika Anda hanya ingin menganalisis data 90 hari terakhir
-#         -- WHERE order_timestamp >= (NOW() - INTERVAL '90 days')
-#         GROUP BY day_of_week, hour_of_day
-#         ORDER BY day_of_week, hour_of_day;
-#     """
-
-#     result = db.execute(text(query_str)).all()
-#     return [dict(row._mapping) for row in result]
-
 def get_weekly_peak_hour_data(db: Session) -> list[dict]:
     query_str = """
         SELECT
-            EXTRACT(DOW FROM (order_timestamp AT TIME ZONE 'UTC+7')) + 1 AS day_of_week,
-            EXTRACT(HOUR FROM (order_timestamp AT TIME ZONE 'UTC+7')) AS hour_of_day,
-            COUNT(id) AS transaction_count,
-            SUM(total_amount) AS total_revenue
+            EXTRACT(DOW FROM order_timestamp) + 1 as day_of_week,
+            EXTRACT(HOUR FROM order_timestamp) as hour_of_day,
+            COUNT(id) as transaction_count,
+            SUM(total_amount) as total_revenue
         FROM raw_sales_events
+        -- Anda bisa menambahkan filter WHERE di sini jika Anda hanya ingin menganalisis data 90 hari terakhir
+        -- WHERE order_timestamp >= (NOW() - INTERVAL '90 days')
         GROUP BY day_of_week, hour_of_day
         ORDER BY day_of_week, hour_of_day;
     """

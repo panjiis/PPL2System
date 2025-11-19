@@ -81,7 +81,7 @@ def get_product_breakdown(
     
     query_str = """
         SELECT
-            pss.product_id,
+            pss.product_code,
             pss.product_group_id,
             SUM(pss.quantity_sold) as total_quantity_sold,
             SUM(pss.gross_sales) as total_gross_sales,
@@ -98,7 +98,7 @@ def get_product_breakdown(
         params["product_group_id"] = product_group_id
         
     query_str += """
-        GROUP BY pss.product_id, pss.product_group_id --, p.product_name
+        GROUP BY pss.product_code, pss.product_group_id --, p.product_name
         ORDER BY total_net_sales DESC
         LIMIT :limit
     """

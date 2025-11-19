@@ -36,11 +36,12 @@ class SalesSummaryDaily(Base):
 
 class ProductSalesSummary(Base):
     __tablename__ = 'product_sales_summary'
-    
+
     id = Column(BigInteger, Identity(always=False), primary_key=True)
     date = Column(Date, nullable=False)
-    product_id = Column(Integer, nullable=False)
+    product_code = Column(String(255), nullable=False) 
     product_group_id = Column(Integer, nullable=True)
+    product_name = Column(String(255), nullable=False)
     quantity_sold = Column(Integer, server_default='0')
     gross_sales = Column(Numeric(15, 2), server_default='0.00')
     total_discounts = Column(Numeric(15, 2), server_default='0.00')
@@ -51,25 +52,28 @@ class ProductSalesSummary(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     __table_args__ = (
-        Index('product_sales_summary_date_product_id_idx', 'date', 'product_id', unique=True),
+        # --- UBAH KUNCI UNIK ---
+        Index('product_sales_summary_date_product_code_idx', 'date', 'product_code', unique=True),
     )
 
 class EmployeePerformance(Base):
     __tablename__ = 'employee_performance'
     
     id = Column(BigInteger, Identity(always=False), primary_key=True)
-    date = Column(Date, nullable=False)
+    # date = Column(Date, nullable=False)
+    period_start = Column(Date, nullable=False)
+    period_end = Column(Date, nullable=False)
     employee_id = Column(BigInteger, nullable=False)
     total_sales = Column(Numeric(15, 2), server_default='0.00')
     total_transactions = Column(Integer, server_default='0')
     total_items_sold = Column(Integer, server_default='0')
     commission_earned = Column(Numeric(15, 2), server_default='0.00')
-    performance_score = Column(Numeric(5, 2), server_default='0.00')
+    # performance_score = Column(Numeric(5, 2), server_default='0.00')
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     __table_args__ = (
-        Index('employee_performance_date_employee_id_idx', 'date', 'employee_id', unique=True),
+        Index('employee_performance_date_employee_id_idx', 'period_start', 'period_end', 'employee_id', unique=True),
     )
 
 class CustomerAnalytics(Base):
@@ -81,7 +85,7 @@ class CustomerAnalytics(Base):
     total_transactions = Column(Integer, server_default='0')
     total_revenue = Column(Numeric(15, 2), server_default='0.00')
     average_transaction_value = Column(Numeric(15, 2), server_default='0.00')
-    peak_hour = Column(String, nullable=True)
+    # peak_hour = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
@@ -122,9 +126,32 @@ class RawOrderItem(Base):
     id = Column(BigInteger, Identity(always=False), primary_key=True)
     document_number = Column(String(255), nullable=False, index=True)
     product_code = Column(String(255), nullable=False)
+    serving_employee_id = Column(BigInteger, index=True, nullable=True)
     quantity = Column(Integer, nullable=False)
     price_before_discount = Column(Numeric(18, 2), nullable=False)
     discount_amount = Column(Numeric(18, 2), nullable=False)
     line_total = Column(Numeric(18, 2), nullable=False)
     cost_price = Column(Numeric(18, 2), nullable=False) # KOLOM KUNCI!
     # Tambahkan field lain dari 'order_items' jika perlu
+
+class RawProduct(Base):
+    __tablename__ = 'raw_products'
+    
+    product_code = Column(String(255), primary_key=True, autoincrement=False) # <-- PK BARU
+    product_group_id = Column(Integer, index=True, nullable=True)
+    product_name = Column(String(255))
+    cost_price = Column(Numeric(18, 2), nullable=False, server_default='0.00')
+    processed_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class RawFinalizedCommission(Base):
+    __tablename__ = 'raw_finalized_commissions'
+    
+    id = Column(BigInteger, Identity(always=False), primary_key=True)
+    # ID dari tabel CommissionCalculation
+    calculation_id = Column(BigInteger, unique=True, nullable=False) 
+    employee_id = Column(BigInteger, index=True, nullable=False)
+    period_start = Column(Date, nullable=False)
+    period_end = Column(Date, nullable=False)
+    commission_earned = Column(Numeric(18, 2), nullable=False, server_default='0.00')
+    total_sales = Column(Numeric(18, 2), nullable=False, server_default='0.00') 
+    processed_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

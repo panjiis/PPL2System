@@ -24,6 +24,30 @@ func NewCommissionsHTTPHandler(commissionClient proto.CommissionServiceClient) *
 	}
 }
 
+func handleGRPCError(c *gin.Context, err error) {
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.InvalidArgument:
+				c.JSON(http.StatusBadRequest, errorResponse(s.Message()))
+			case codes.NotFound:
+				c.JSON(http.StatusNotFound, errorResponse(s.Message()))
+			case codes.FailedPrecondition:
+				c.JSON(http.StatusBadRequest, errorResponse(s.Message()))
+			case codes.AlreadyExists:
+				c.JSON(http.StatusConflict, errorResponse(s.Message()))
+			case codes.DeadlineExceeded:
+				c.JSON(http.StatusGatewayTimeout, errorResponse("Request Timeout: "+s.Message()))
+			default:
+				c.JSON(http.StatusInternalServerError, errorResponse("Internal Service Error: "+s.Message()))
+			}
+		} else {
+			c.JSON(http.StatusInternalServerError, errorResponse("Unknown Service Error"))
+		}
+		c.Abort() 
+	}
+}
+
 // --- Request & Query Structs for Binding ---
 
 type CalculateCommissionRequest struct {
@@ -88,29 +112,6 @@ type ReportQuery struct {
 	EndDate    string `form:"end_date" binding:"required"`
 }
 
-// --- Helper for handling gRPC errors ---
-func handleGRPCError(c *gin.Context, err error) {
-	if err != nil {
-		if s, ok := status.FromError(err); ok {
-			switch s.Code() {
-			case codes.InvalidArgument:
-				c.JSON(http.StatusBadRequest, errorResponse(s.Message()))
-			case codes.NotFound:
-				c.JSON(http.StatusNotFound, errorResponse(s.Message()))
-			case codes.FailedPrecondition:
-				c.JSON(http.StatusBadRequest, errorResponse(s.Message()))
-			case codes.AlreadyExists:
-				c.JSON(http.StatusConflict, errorResponse(s.Message()))
-			default:
-				c.JSON(http.StatusInternalServerError, errorResponse("Service error: "+s.Message()))
-			}
-		} else {
-			c.JSON(http.StatusInternalServerError, errorResponse("Unknown service error"))
-		}
-		c.Abort()
-	}
-}
-
 // --- Commission Calculation Handlers ---
 
 func (h *CommissionsHTTPHandler) CalculateCommission(c *gin.Context) {
@@ -131,7 +132,10 @@ func (h *CommissionsHTTPHandler) CalculateCommission(c *gin.Context) {
 		SaveCalculation: req.SaveCalculation,
 	})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Commission calculated successfully", resp))
 }
@@ -158,7 +162,10 @@ func (h *CommissionsHTTPHandler) RecalculateCommission(c *gin.Context) {
 		Notes:                   req.Notes,
 	})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Commission recalculated successfully", resp))
 }
@@ -180,7 +187,10 @@ func (h *CommissionsHTTPHandler) BulkCalculateCommissions(c *gin.Context) {
 		CalculatedBy: req.CalculatedBy,
 	})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Bulk calculation processed", resp))
 }
@@ -199,7 +209,10 @@ func (h *CommissionsHTTPHandler) GetCommissionCalculation(c *gin.Context) {
 
 	resp, err := h.commissionClient.GetCommissionCalculation(ctx, &proto.GetCommissionCalculationRequest{Id: calcID})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Calculation retrieved successfully", resp.CommissionCalculation))
 }
@@ -236,7 +249,10 @@ func (h *CommissionsHTTPHandler) ListCommissionCalculations(c *gin.Context) {
 
 	resp, err := h.commissionClient.ListCommissionCalculations(ctx, grpcReq)
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successWithMetaResponse("Calculations retrieved successfully", resp.CommissionCalculations, resp.Pagination))
 }
@@ -263,7 +279,10 @@ func (h *CommissionsHTTPHandler) ApproveCommission(c *gin.Context) {
 		ApprovalNotes:           req.ApprovalNotes,
 	})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Commission approved successfully", resp.CommissionCalculation))
 }
@@ -290,7 +309,10 @@ func (h *CommissionsHTTPHandler) RejectCommission(c *gin.Context) {
 		RejectionReason:         req.RejectionReason,
 	})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Commission rejected successfully", resp.CommissionCalculation))
 }
@@ -311,7 +333,10 @@ func (h *CommissionsHTTPHandler) BulkApproveCommissions(c *gin.Context) {
 		ApprovalNotes:            req.ApprovalNotes,
 	})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Bulk approval processed", resp))
 }
@@ -343,7 +368,10 @@ func (h *CommissionsHTTPHandler) PayCommission(c *gin.Context) {
 		PaymentDate:             req.PaymentDate,
 	})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Commission paid successfully", resp))
 }
@@ -362,7 +390,10 @@ func (h *CommissionsHTTPHandler) GetCommissionPayment(c *gin.Context) {
 		CommissionCalculationId: calcID,
 	})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Payment retrieved successfully", resp.CommissionPayment))
 }
@@ -399,7 +430,10 @@ func (h *CommissionsHTTPHandler) GetCommissionSummary(c *gin.Context) {
 		log.Printf("Commission service error: %v", err)
 	}
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Summary retrieved successfully", resp.Summary))
 }
@@ -434,7 +468,10 @@ func (h *CommissionsHTTPHandler) GetCommissionReport(c *gin.Context) {
 
 	resp, err := h.commissionClient.GetCommissionReport(ctx, grpcReq)
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Report retrieved successfully", resp))
 }
@@ -455,7 +492,10 @@ func (h *CommissionsHTTPHandler) GetCommissionSettings(c *gin.Context) {
 		EmployeeId: empID,
 	})
 
-	handleGRPCError(c, err)
+	if err != nil {
+		handleGRPCError(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, successResponse("Settings retrieved successfully", resp))
 }

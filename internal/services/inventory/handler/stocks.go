@@ -457,6 +457,24 @@ func (s *InventoryHandler) UpdateStock(ctx context.Context, req *proto.UpdateSto
 
 	tx.Commit()
 
+	var product InventoryProduct
+	if err := s.db.Where("product_code = ?", stock.ProductCode).First(&product).Error; err != nil {
+		// Jika produk tidak ditemukan, kita tetap kirim event-nya
+		// tapi ReorderLevel akan 0
+		log.Printf("WARNING: Tidak dapat menemukan produk %s untuk event stok: %v", stock.ProductCode, err)
+	}
+
+	event := StockLevelUpdatedEvent{
+		EventType:   "inventory.stock.updated",
+		Timestamp:   time.Now(),
+		ProductCode: stock.ProductCode,
+		ProductName: product.ProductName, // Dari produk yang di-load
+		WarehouseID: stock.WarehouseID,
+		NewQuantity: stock.AvailableQuantity,
+		ReorderLevel: product.ReorderLevel, // <-- Diperlukan untuk Opsi B
+	}
+	s.publishStockEvent(event)
+
 	protoStock := s.stockToProto(stock)
 	protoMovement := s.movementToProto(movement)
 

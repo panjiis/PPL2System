@@ -57,89 +57,89 @@ def get_analytics_db():
 def get_analytics_db_session() -> Session:
     return AnalyticsSessionLocal()
 
-# --- Connection To POS Microservice ---
-POS_DSN = os.getenv("POS_DSN")
-POS_DB_URL, pos_params = convert_dsn_to_url(POS_DSN)
+# # --- Connection To POS Microservice ---
+# POS_DSN = os.getenv("POS_DSN")
+# POS_DB_URL, pos_params = convert_dsn_to_url(POS_DSN)
 
-if not POS_DB_URL:
-    print("Error: POS_DSN is not valid or not found in .env")
-    exit(1)
+# if not POS_DB_URL:
+#     print("Error: POS_DSN is not valid or not found in .env")
+#     exit(1)
 
-try:
-    pos_engine = create_engine(POS_DB_URL, pool_pre_ping=True)
-    POSSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=pos_engine)
+# try:
+#     pos_engine = create_engine(POS_DB_URL, pool_pre_ping=True)
+#     POSSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=pos_engine)
     
-    with pos_engine.connect() as conn:
-        print(f"Database connection (POS) successful to {pos_params.get('host', 'unknown')}.")
+#     with pos_engine.connect() as conn:
+#         print(f"Database connection (POS) successful to {pos_params.get('host', 'unknown')}.")
         
-except OperationalError as e:
-    print(f"Error connecting to POS database: {e}")
-    exit(1)
+# except OperationalError as e:
+#     print(f"Error connecting to POS database: {e}")
+#     exit(1)
 
-def get_pos_db():
-    db = POSSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# def get_pos_db():
+#     db = POSSessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
-def get_pos_db_session() -> Session:
-    return POSSessionLocal()
+# def get_pos_db_session() -> Session:
+#     return POSSessionLocal()
 
-# --- Connection To Inventory Microservice ---
-INVENTORY_DSN = os.getenv("INVENTORY_DSN")
-INVENTORY_DB_URL, inventory_params = convert_dsn_to_url(INVENTORY_DSN)
+# # --- Connection To Inventory Microservice ---
+# INVENTORY_DSN = os.getenv("INVENTORY_DSN")
+# INVENTORY_DB_URL, inventory_params = convert_dsn_to_url(INVENTORY_DSN)
 
-if not INVENTORY_DB_URL:
-    print("Error: INVENTORY_DSN is not valid or not found in .env")
-    exit(1)
+# if not INVENTORY_DB_URL:
+#     print("Error: INVENTORY_DSN is not valid or not found in .env")
+#     exit(1)
 
-try:
-    inventory_engine = create_engine(INVENTORY_DB_URL, pool_pre_ping=True)
-    InventorySessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=inventory_engine)
+# try:
+#     inventory_engine = create_engine(INVENTORY_DB_URL, pool_pre_ping=True)
+#     InventorySessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=inventory_engine)
     
-    with inventory_engine.connect() as conn:
-        print(f"Database connection (Inventory) successful to {inventory_params.get('host', 'unknown')}.")
+#     with inventory_engine.connect() as conn:
+#         print(f"Database connection (Inventory) successful to {inventory_params.get('host', 'unknown')}.")
 
-except OperationalError as e:
-    print(f"Error connecting to Inventory database: {e}")
-    exit(1)
+# except OperationalError as e:
+#     print(f"Error connecting to Inventory database: {e}")
+#     exit(1)
 
-def get_inventory_db():
-    db = InventorySessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# def get_inventory_db():
+#     db = InventorySessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
-def get_inventory_db_session() -> Session:
-    return InventorySessionLocal()
+# def get_inventory_db_session() -> Session:
+#     return InventorySessionLocal()
 
-# --- Connection To Commissions Microservice ---
-COMMISSIONS_DSN = os.getenv("COMMISSIONS_DSN")
-COMMISSIONS_DB_URL, commissions_params = convert_dsn_to_url(COMMISSIONS_DSN)
+# # --- Connection To Commissions Microservice ---
+# COMMISSIONS_DSN = os.getenv("COMMISSIONS_DSN")
+# COMMISSIONS_DB_URL, commissions_params = convert_dsn_to_url(COMMISSIONS_DSN)
 
-if not COMMISSIONS_DB_URL:
-    print("Error: COMMISSIONS_DSN is not valid or not found in .env")
-    exit(1)
+# if not COMMISSIONS_DB_URL:
+#     print("Error: COMMISSIONS_DSN is not valid or not found in .env")
+#     exit(1)
 
-try:
-    commissions_engine = create_engine(COMMISSIONS_DB_URL, pool_pre_ping=True)
-    CommissionsSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=commissions_engine)
+# try:
+#     commissions_engine = create_engine(COMMISSIONS_DB_URL, pool_pre_ping=True)
+#     CommissionsSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=commissions_engine)
     
-    with commissions_engine.connect() as conn:
-        print(f"Database connection (Commissions) successful to {commissions_params.get('host', 'unknown')}.")
+#     with commissions_engine.connect() as conn:
+#         print(f"Database connection (Commissions) successful to {commissions_params.get('host', 'unknown')}.")
 
-except OperationalError as e:
-    print(f"Error connecting to Commissions database: {e}")
-    exit(1)
+# except OperationalError as e:
+#     print(f"Error connecting to Commissions database: {e}")
+#     exit(1)
 
-def get_commissions_db():
-    db = CommissionsSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# def get_commissions_db():
+#     db = CommissionsSessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
-def get_commissions_db_session() -> Session:
-    return CommissionsSessionLocal()
+# def get_commissions_db_session() -> Session:
+#     return CommissionsSessionLocal()

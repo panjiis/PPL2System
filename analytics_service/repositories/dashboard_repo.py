@@ -37,11 +37,11 @@ def get_top_products_for_date(
 
   query_str = """
     SELECT 
-      product_id, 
+      product_code, 
       SUM(net_sales) as total_net_sales
     FROM product_sales_summary
     WHERE date = :date
-    GROUP BY product_id
+    GROUP BY product_code
     ORDER BY total_net_sales DESC
     LIMIT :limit
   """
@@ -55,73 +55,26 @@ def get_top_performers_for_date(
   limit: int = 5
 ) -> list[dict]:
   params = {
-    "date": date,
+    # Kita menggunakan 'date' untuk kedua parameter
+    "date_today": date, 
     "limit": limit
   }
 
   query_str = """
     SELECT 
       employee_id, 
-      SUM(total_sales) as total_sales,
-      SUM(commission_earned) as total_commission
+      total_sales,
+      commission_earned
     FROM employee_performance
-    WHERE date = :date
-    GROUP BY employee_id
+    WHERE 
+      period_start <= :date_today 
+      AND period_end >= :date_today
     ORDER BY total_sales DESC
     LIMIT :limit
   """
 
   result = db.execute(text(query_str), params).all()
   return [dict(row._mapping) for row in result]
-
-# Top Products (Monthly)
-def get_top_products_for_month(
-  db: Session,
-  year: int,
-  month: int,
-  limit: int = 5
-) -> list[dict]:
-  query = text("""
-    SELECT 
-      product_id,
-      SUM(net_sales) AS total_net_sales,
-      SUM(gross_profit) AS total_gross_profit
-    FROM product_sales_summary
-    WHERE EXTRACT(YEAR FROM date) = :year
-      AND EXTRACT(MONTH FROM date) = :month
-    GROUP BY product_id
-    ORDER BY total_net_sales DESC
-    LIMIT :limit
-  """)
-
-  result = db.execute(query, {"year": year, "month": month, "limit": limit}).all()
-  return [dict(row._mapping) for row in result]
-
-
-# Top Performers (Monthly)
-def get_top_performers_for_month(
-  db: Session,
-  year: int,
-  month: int,
-  limit: int = 5
-) -> list[dict]:
-  query = text("""
-    SELECT 
-      employee_id,
-      SUM(total_sales) AS total_sales,
-      SUM(commission_earned) AS total_commission,
-      AVG(performance_score) AS avg_performance_score
-    FROM employee_performance
-    WHERE EXTRACT(YEAR FROM date) = :year
-      AND EXTRACT(MONTH FROM date) = :month
-    GROUP BY employee_id
-    ORDER BY total_sales DESC
-    LIMIT :limit
-  """)
-
-  result = db.execute(query, {"year": year, "month": month, "limit": limit}).all()
-  return [dict(row._mapping) for row in result]
-
 
 # --- Inventory DB ---
 def get_low_stock_alerts(db: Session) -> list[str]:

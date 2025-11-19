@@ -59,6 +59,11 @@ class AnalyticsServiceStub(object):
                 request_serializer=analytics_dot_analytics__service__pb2.GetTopSellingProductsRequest.SerializeToString,
                 response_deserializer=analytics_dot_analytics__service__pb2.GetTopSellingProductsResponse.FromString,
                 _registered_method=True)
+        self.GenerateProductSalesSummary = channel.unary_unary(
+                '/analytics.AnalyticsService/GenerateProductSalesSummary',
+                request_serializer=analytics_dot_analytics__service__pb2.GenerateProductSalesSummaryRequest.SerializeToString,
+                response_deserializer=analytics_dot_analytics__service__pb2.GenerateProductSalesSummaryResponse.FromString,
+                _registered_method=True)
         self.GetEmployeePerformance = channel.unary_unary(
                 '/analytics.AnalyticsService/GetEmployeePerformance',
                 request_serializer=analytics_dot_analytics__service__pb2.GetEmployeePerformanceRequest.SerializeToString,
@@ -69,6 +74,11 @@ class AnalyticsServiceStub(object):
                 request_serializer=analytics_dot_analytics__service__pb2.GetPerformanceReportRequest.SerializeToString,
                 response_deserializer=analytics_dot_analytics__service__pb2.GetPerformanceReportResponse.FromString,
                 _registered_method=True)
+        self.GenerateEmployeePerformance = channel.unary_unary(
+                '/analytics.AnalyticsService/GenerateEmployeePerformance',
+                request_serializer=analytics_dot_analytics__service__pb2.GenerateEmployeePerformanceRequest.SerializeToString,
+                response_deserializer=analytics_dot_analytics__service__pb2.GenerateEmployeePerformanceResponse.FromString,
+                _registered_method=True)
         self.GetCustomerAnalytics = channel.unary_unary(
                 '/analytics.AnalyticsService/GetCustomerAnalytics',
                 request_serializer=analytics_dot_analytics__service__pb2.GetCustomerAnalyticsRequest.SerializeToString,
@@ -78,6 +88,11 @@ class AnalyticsServiceStub(object):
                 '/analytics.AnalyticsService/GetPeakHours',
                 request_serializer=analytics_dot_analytics__service__pb2.GetPeakHoursRequest.SerializeToString,
                 response_deserializer=analytics_dot_analytics__service__pb2.GetPeakHoursResponse.FromString,
+                _registered_method=True)
+        self.GenerateCustomerAnalytics = channel.unary_unary(
+                '/analytics.AnalyticsService/GenerateCustomerAnalytics',
+                request_serializer=analytics_dot_analytics__service__pb2.GenerateCustomerAnalyticsRequest.SerializeToString,
+                response_deserializer=analytics_dot_analytics__service__pb2.GenerateCustomerAnalyticsResponse.FromString,
                 _registered_method=True)
         self.GetDashboardData = channel.unary_unary(
                 '/analytics.AnalyticsService/GetDashboardData',
@@ -126,6 +141,12 @@ class AnalyticsServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GenerateProductSalesSummary(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetEmployeePerformance(self, request, context):
         """Employee Performance Analytics
         """
@@ -139,6 +160,12 @@ class AnalyticsServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GenerateEmployeePerformance(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetCustomerAnalytics(self, request, context):
         """Customer Analytics
         """
@@ -147,6 +174,12 @@ class AnalyticsServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def GetPeakHours(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GenerateCustomerAnalytics(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -193,6 +226,11 @@ def add_AnalyticsServiceServicer_to_server(servicer, server):
                     request_deserializer=analytics_dot_analytics__service__pb2.GetTopSellingProductsRequest.FromString,
                     response_serializer=analytics_dot_analytics__service__pb2.GetTopSellingProductsResponse.SerializeToString,
             ),
+            'GenerateProductSalesSummary': grpc.unary_unary_rpc_method_handler(
+                    servicer.GenerateProductSalesSummary,
+                    request_deserializer=analytics_dot_analytics__service__pb2.GenerateProductSalesSummaryRequest.FromString,
+                    response_serializer=analytics_dot_analytics__service__pb2.GenerateProductSalesSummaryResponse.SerializeToString,
+            ),
             'GetEmployeePerformance': grpc.unary_unary_rpc_method_handler(
                     servicer.GetEmployeePerformance,
                     request_deserializer=analytics_dot_analytics__service__pb2.GetEmployeePerformanceRequest.FromString,
@@ -203,6 +241,11 @@ def add_AnalyticsServiceServicer_to_server(servicer, server):
                     request_deserializer=analytics_dot_analytics__service__pb2.GetPerformanceReportRequest.FromString,
                     response_serializer=analytics_dot_analytics__service__pb2.GetPerformanceReportResponse.SerializeToString,
             ),
+            'GenerateEmployeePerformance': grpc.unary_unary_rpc_method_handler(
+                    servicer.GenerateEmployeePerformance,
+                    request_deserializer=analytics_dot_analytics__service__pb2.GenerateEmployeePerformanceRequest.FromString,
+                    response_serializer=analytics_dot_analytics__service__pb2.GenerateEmployeePerformanceResponse.SerializeToString,
+            ),
             'GetCustomerAnalytics': grpc.unary_unary_rpc_method_handler(
                     servicer.GetCustomerAnalytics,
                     request_deserializer=analytics_dot_analytics__service__pb2.GetCustomerAnalyticsRequest.FromString,
@@ -212,6 +255,11 @@ def add_AnalyticsServiceServicer_to_server(servicer, server):
                     servicer.GetPeakHours,
                     request_deserializer=analytics_dot_analytics__service__pb2.GetPeakHoursRequest.FromString,
                     response_serializer=analytics_dot_analytics__service__pb2.GetPeakHoursResponse.SerializeToString,
+            ),
+            'GenerateCustomerAnalytics': grpc.unary_unary_rpc_method_handler(
+                    servicer.GenerateCustomerAnalytics,
+                    request_deserializer=analytics_dot_analytics__service__pb2.GenerateCustomerAnalyticsRequest.FromString,
+                    response_serializer=analytics_dot_analytics__service__pb2.GenerateCustomerAnalyticsResponse.SerializeToString,
             ),
             'GetDashboardData': grpc.unary_unary_rpc_method_handler(
                     servicer.GetDashboardData,
@@ -370,6 +418,33 @@ class AnalyticsService(object):
             _registered_method=True)
 
     @staticmethod
+    def GenerateProductSalesSummary(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/analytics.AnalyticsService/GenerateProductSalesSummary',
+            analytics_dot_analytics__service__pb2.GenerateProductSalesSummaryRequest.SerializeToString,
+            analytics_dot_analytics__service__pb2.GenerateProductSalesSummaryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
     def GetEmployeePerformance(request,
             target,
             options=(),
@@ -424,6 +499,33 @@ class AnalyticsService(object):
             _registered_method=True)
 
     @staticmethod
+    def GenerateEmployeePerformance(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/analytics.AnalyticsService/GenerateEmployeePerformance',
+            analytics_dot_analytics__service__pb2.GenerateEmployeePerformanceRequest.SerializeToString,
+            analytics_dot_analytics__service__pb2.GenerateEmployeePerformanceResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
     def GetCustomerAnalytics(request,
             target,
             options=(),
@@ -467,6 +569,33 @@ class AnalyticsService(object):
             '/analytics.AnalyticsService/GetPeakHours',
             analytics_dot_analytics__service__pb2.GetPeakHoursRequest.SerializeToString,
             analytics_dot_analytics__service__pb2.GetPeakHoursResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GenerateCustomerAnalytics(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/analytics.AnalyticsService/GenerateCustomerAnalytics',
+            analytics_dot_analytics__service__pb2.GenerateCustomerAnalyticsRequest.SerializeToString,
+            analytics_dot_analytics__service__pb2.GenerateCustomerAnalyticsResponse.FromString,
             options,
             channel_credentials,
             insecure,

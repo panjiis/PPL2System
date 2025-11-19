@@ -228,6 +228,19 @@ type SaleRefundedEvent struct {
 	Items         []SaleItem `json:"items"`
 }
 
+type ProductEventPayload struct {
+    ProductCode    string `json:"product_code"`
+    ProductGroupID *int32 `json:"product_group_id,omitempty"` // Ambil dari model product
+    ProductName    string `json:"product_name"`
+    CostPrice      string `json:"cost_price"`     // Ambil dari model product
+}
+
+type ProductEvent struct {
+    EventType   string              `json:"event_type"` // "pos.product.updated"
+    Timestamp   time.Time           `json:"timestamp"`
+    ProductData ProductEventPayload `json:"product_data"`
+}
+
 // func (s *POSHandler) publishOrderEvent(ctx context.Context, event OrderEvent) error {
 // 	eventJSON, err := json.Marshal(event)
 // 	if err != nil {
@@ -260,9 +273,9 @@ func (s *POSHandler) publishOrderEvent(ctx context.Context, event OrderEvent) er
 		return fmt.Errorf("failed to publish event to NATS: %w", err)
 	}
 
-	if err := s.nats.Publish("pos.order.events.all", eventJSON); err != nil { // <-- UBAH KE NATS
-		return fmt.Errorf("failed to publish to NATS 'all' channel: %w", err)
-	}
+	// if err := s.nats.Publish("pos.order.events.all", eventJSON); err != nil { // <-- UBAH KE NATS
+	// 	return fmt.Errorf("failed to publish to NATS 'all' channel: %w", err)
+	// }
 
 	// Tambahkan log ini untuk konfirmasi
 	log.Printf("DEBUG POS: Berhasil publish ke NATS, channel=%s", channel)
@@ -355,4 +368,23 @@ func (s *POSHandler) orderItemsToSaleItems(orderItems []OrderItem) []SaleItem {
 		}
 	}
 	return saleItems
+}
+
+func (s *POSHandler) publishProductEvent(event ProductEvent) {
+	// Tentukan topik NATS
+	subject := "pos.product.events"
+
+	// Marshal event ke JSON
+	payload, err := json.Marshal(event)
+	if err != nil {
+		log.Printf("ERROR: Gagal marshal event pos.product: %v", err)
+		return
+	}
+
+	// Publish ke NATS
+	if err := s.nats.Publish(subject, payload); err != nil {
+		log.Printf("ERROR: Gagal publish event ke NATS (subjek: %s): %v", subject, err)
+	} else {
+		log.Printf("SUCCESS: Berhasil publish event NATS: %s", event.EventType)
+	}
 }

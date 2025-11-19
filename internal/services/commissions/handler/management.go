@@ -223,6 +223,26 @@ func (c *CommissionHandler) ApproveCommission(ctx context.Context, req *proto.Ap
 		return nil, status.Errorf(codes.Internal, "Failed to retrieve updated data for response: %v", err)
 	}
 
+	event := CommissionFinalizedEvent{
+		EventType:      "commission.finalized",
+		Timestamp:      time.Now(),
+		CalculationID:  calculation.ID, // Asumsi 'calculation' adalah model GORM Anda
+		EmployeeID:     calculation.EmployeeID,
+		PeriodStart:    calculation.CalculationPeriodStart,
+		PeriodEnd:      calculation.CalculationPeriodEnd,
+		TotalSales:     calculation.TotalSales,
+		TotalCommission: calculation.TotalCommission,
+	}
+
+	// 2. Publish
+	c.publishCommissionFinalizedEvent(event)
+
+	c.publishCommissionStatusEvent(
+			"commission.status.updated",
+			calculation.ID,
+			calculation.Status, // Kirim status baru (APPROVED)
+	)
+
 	return &proto.ApproveCommissionResponse{
 		Success:               true,
 		Message:               lib.StrPtr("Commission approved successfully"),
@@ -360,6 +380,24 @@ func (c *CommissionHandler) BulkApproveCommissions(ctx context.Context, req *pro
 				mu.Unlock()
 				return
 			}
+
+			event := CommissionFinalizedEvent{
+        EventType:      "commission.finalized",
+        Timestamp:      time.Now(),
+        CalculationID:  calculation.ID,
+        EmployeeID:     calculation.EmployeeID,
+        PeriodStart:    calculation.CalculationPeriodStart,
+        PeriodEnd:      calculation.CalculationPeriodEnd,
+        TotalSales:     calculation.TotalSales,
+        TotalCommission: calculation.TotalCommission,
+      }
+      c.publishCommissionFinalizedEvent(event)
+
+			c.publishCommissionStatusEvent(
+          "commission.status.updated",
+          calculation.ID,
+          calculation.Status, // Kirim status baru (APPROVED)
+      )
 
 			c.InvalidateCommissionCaches(ctx, id)
 

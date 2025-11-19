@@ -253,6 +253,24 @@ type OrderDataEvent struct {
 	OrderItems     []OrderItemEvent `json:"OrderItems"`  // Menggunakan slice event
 }
 
+type CommissionFinalizedEvent struct {
+	EventType      string    `json:"event_type"` 
+	Timestamp      time.Time `json:"timestamp"`
+	CalculationID  int64     `json:"calculation_id"`
+	EmployeeID     int64     `json:"employee_id"`
+	PeriodStart    string    `json:"period_start"`
+	PeriodEnd      string    `json:"period_end"`
+	TotalSales     string    `json:"total_sales"`
+	TotalCommission string    `json:"total_commission"`
+}
+
+type CommissionStatusEvent struct {
+	EventType      string    `json:"event_type"` // "commission.calculated" atau "commission.status.updated"
+	Timestamp      time.Time `json:"timestamp"`
+	CalculationID  int64     `json:"calculation_id"`
+	NewStatus      int32     `json:"new_status"` // (proto.CommissionStatus_COMMISSION_STATUS_CALCULATED, dll)
+}
+
 type Manager struct {
 	Found       bool   `json:"found"`
 	Error       string `json:"error,omitempty"`
@@ -624,6 +642,50 @@ func (c *CommissionHandler) handleOrderPaidEvent(msg *nats.Msg) {
 		log.Printf("SUCCESS: Saved %d sales data items for Doc: %s", len(itemsToSave), event.DocumentNumber)
 	}
 }
+
+func (c *CommissionHandler) publishCommissionFinalizedEvent(event CommissionFinalizedEvent) {
+	subject := "commission.finalized" // Analytics akan mendengarkan ini
+	payload, err := json.Marshal(event)
+	if err != nil {
+		log.Printf("ERROR: Gagal marshal event commission.finalized: %v", err)
+		return
+	}
+
+	if err := c.nats.Publish(subject, payload); err != nil {
+		log.Printf("ERROR: Gagal publish event ke NATS (subjek: %s): %v", subject, err)
+	} else {
+		log.Printf("SUCCESS: Berhasil publish event NATS: %s (CalcID: %d)", event.EventType, event.CalculationID)
+	}
+}
+
+func (c *CommissionHandler) publishCommissionStatusEvent(eventType string, calculationID int64, newStatus int32) {
+	subject := ""
+	if eventType == "commission.calculated" {
+		subject = "commission.calculated" // Didengarkan oleh Python untuk INCR
+	} else {
+		subject = "commission.status.updated" // Didengarkan oleh Python untuk DECR
+	}
+	
+	event := CommissionStatusEvent{
+		EventType:     eventType,
+		Timestamp:     time.Now(),
+		CalculationID: calculationID,
+		NewStatus:     newStatus,
+	}
+
+	payload, err := json.Marshal(event)
+	if err != nil {
+		log.Printf("ERROR: Gagal marshal event status komisi: %v", err)
+		return
+	}
+
+	if err := c.nats.Publish(subject, payload); err != nil {
+		log.Printf("ERROR: Gagal publish event ke NATS (subjek: %s): %v", subject, err)
+	} else {
+		log.Printf("SUCCESS: Berhasil publish event NATS: %s (CalcID: %d)", subject, calculationID)
+	}
+}
+
 
 // -- Manager Events Handler --
 func (c *CommissionHandler) GetManagerDetails(ctx context.Context, managerID int64) (*Manager, error) {

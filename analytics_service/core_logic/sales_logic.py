@@ -200,8 +200,6 @@ def generate_daily_summary_logic(
     raw_sales_data = etl_repo.get_raw_sales_data(
         db, date, cashier_id # Panggil fungsi baru
     )
-
-    print(f"raw sales data : \n{raw_sales_data}")
     
     if not raw_sales_data:
         print("[Logic] No sales data found for the given date and cashier.")
@@ -226,48 +224,10 @@ def generate_daily_summary_logic(
     
     return final_summaries
 
-# def generate_daily_summary_logic(
-#     analytics_db: Session,
-#     pos_db: Session,
-#     date_str: str,
-#     cashier_id: int | None
-# ) -> list[dict]:
-#     try:
-#         date = datetime.date.fromisoformat(date_str)
-#     except ValueError:
-#         raise ValueError("Incorrect date format. Use YYYY-MM-DD.")
-        
-#     raw_sales_data = etl_repo.get_raw_sales_data_from_pos(
-#         pos_db, date, cashier_id
-#     )
-    
-#     if not raw_sales_data:
-#         print("[Logic] No sales data found for the given date and cashier.")
-#         return []
-        
-#     generated_ids = []
-#     for summary_row in raw_sales_data:
-#         new_id = etl_repo.upsert_sales_summary_daily(analytics_db, summary_row)
-#         generated_ids.append(new_id)
-    
-#     cache_pattern_to_delete = ""
-#     if cashier_id:
-#         cache_pattern_to_delete = f"reports:daily-summary:date={date_str}:cashier={cashier_id}"
-#     else:
-#         cache_pattern_to_delete = f"reports:daily-summary:date={date_str}:cashier=*"
-    
-#     delete_cache(cache_pattern_to_delete)
-        
-#     final_summaries = get_daily_summary_logic(
-#         analytics_db, date_str, cashier_id
-#     )
-    
-#     return final_summaries
-
 def get_product_sales_logic(
     db: Session,
     date_range: object,
-    product_id: int | None,
+    product_code: str | None,
     product_group_id: int | None,
     pagination: object
 ) -> dict:
@@ -286,20 +246,20 @@ def get_product_sales_logic(
         except ValueError:
             raise ValueError(f"Invalid page_token: {pagination.page_token}")
     
-    p_product_id = product_id if product_id is not None else "all"
+    p_product_code = product_code if product_code is not None else "all"
     p_group_id = product_group_id if product_group_id is not None else "all"
 
     count_cache_key = (
         f"reports:product-sales:count:"
         f"start={date_range.start_date}:end={date_range.end_date}:"
-        f"prod={p_product_id}:group={p_group_id}"
+        f"prod={p_product_code}:group={p_group_id}"
     )
 
     total_count = get_cache(count_cache_key)
 
     if total_count is None:
         total_count = sales_repo.count_total_product_sales(
-            db, start_date, end_date, product_id, product_group_id
+            db, start_date, end_date, product_code, product_group_id
         )
         set_cache(
             count_cache_key,
@@ -311,7 +271,7 @@ def get_product_sales_logic(
         total_count = int(total_count)
 
     raw_sales = sales_repo.get_product_sales_paginated(
-        db, start_date, end_date, product_id, product_group_id, page_size, last_id
+        db, start_date, end_date, product_code, product_group_id, page_size, last_id
     )
 
     formatted_sales = []
@@ -319,7 +279,7 @@ def get_product_sales_logic(
         formatted_sales.append({
             "id": item['id'],
             "date": item['date'].isoformat(),
-            "product_id": item['product_id'],
+            "product_code": item['product_code'],
             "product_group_id": item['product_group_id'],
             "quantity_sold": item['quantity_sold'],
             "gross_sales": to_string(item['gross_sales']),
@@ -363,7 +323,7 @@ def _get_top_selling_products_from_db(
     formatted_products = []
     for item in aggregated_products:
         formatted_products.append({
-            "product_id": item['product_id'],
+            "product_code": item['product_code'],
             "product_group_id": item['product_group_id'],
             "quantity_sold": int(item['total_quantity_sold']), 
             "gross_sales": to_string(item['total_gross_sales']),
@@ -401,7 +361,7 @@ def get_top_selling_products_logic(
             limit=limit,
             product_group_id=product_group_id
         )
-    
+
     except Exception as e:
         print(f"Error querying database: {e}")
         raise e
@@ -415,3 +375,53 @@ def get_top_selling_products_logic(
     
     return db_data
     
+def generate_product_sales_summary_logic(
+    analytics_db: Session,
+    date_str: str,
+    product_code: str | None,
+    product_group_id: int | None
+) -> list[dict]:
+    try:
+        date = datetime.date.fromisoformat(date_str)
+        print(f"date : {date}")
+    except ValueError:
+        raise ValueError("Format tanggal salah. Gunakan YYYY-MM-DD.")
+        
+    # 1. EXTRACT & TRANSFORM
+    raw_product_data = etl_repo.get_raw_product_sales_data(
+        analytics_db, date, product_code, product_group_id
+    )
+    
+    if not raw_product_data:
+        print(f"[Logic] Tidak ada data penjualan produk untuk tanggal {date_str}.")
+        return []
+        
+    generated_ids = []
+    try:
+        # 2. LOAD (dalam satu transaksi)
+        for summary_row in raw_product_data:
+            new_id = etl_repo.upsert_product_sales_summary(analytics_db, summary_row)
+            generated_ids.append(new_id)
+        
+        analytics_db.commit() # Commit transaksi
+        
+    except Exception as e:
+        analytics_db.rollback()
+        print(f"Error saat upsert data produk: {e}")
+        raise e
+
+    # 3. HAPUS CACHE (PENTING)
+    # Hapus cache yang relevan dari API GetProductSales
+    cache_pattern = f"reports:product-sales:count:start={date_str}*"
+    delete_cache(cache_pattern)
+    cache_pattern_top = f"reports:top-selling:start={date_str}*"
+    delete_cache(cache_pattern_top)
+    
+    # 4. Ambil data yang baru dibuat untuk dikembalikan
+    # (Ini opsional, tapi API GenerateDailySummary Anda melakukannya)
+    
+    # Untuk kesederhanaan, kita bisa kembalikan data yang baru saja kita proses
+    # (Atau kita bisa memanggil sales_repo.get_product_sales_paginated)
+    
+    # Mari kita kembalikan data yang sudah diproses untuk saat ini
+    return raw_product_data

@@ -20,8 +20,10 @@ def get_employee_performance_paginated(
   }
 
   query_str = """
-    SELECT * FROM employee_performance
-    WHERE date BETWEEN :start_date AND :end_date AND id > :last_id
+      SELECT * FROM employee_performance
+      WHERE 
+          period_start <= :end_date AND period_end >= :start_date
+          AND id > :last_id
   """
 
   if employee_id:
@@ -45,9 +47,10 @@ def count_total_employee_performance(
   }
 
   query_str = """
-    SELECT COUNT(*) FROM employee_performance
-    WHERE date BETWEEN :start_date AND :end_date
-  """
+        SELECT COUNT(*) FROM employee_performance
+        WHERE 
+            period_start <= :end_date AND period_end >= :start_date
+    """
 
   if employee_id:
     query_str += " AND employee_id = :employee_id"
@@ -119,3 +122,29 @@ def get_company_top_performer(
 
   result = db.execute(text(query_str), params).first()
   return dict(result._mapping) if result else {}
+
+def get_performance_report_data(
+    db: Session,
+    start_date: datetime.date,
+    end_date: datetime.date,
+    employee_id: int | None
+) -> list[dict]:
+    params = {
+        "start_date": start_date,
+        "end_date": end_date
+    }
+    
+    query_str = """
+        SELECT * FROM employee_performance
+        WHERE 
+            period_start <= :end_date AND period_end >= :start_date
+    """
+
+    if employee_id:
+        query_str += " AND employee_id = :employee_id"
+        params["employee_id"] = employee_id
+
+    query_str += " ORDER BY total_sales DESC" 
+    
+    result = db.execute(text(query_str), params).all()
+    return [dict(row._mapping) for row in result]

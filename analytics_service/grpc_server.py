@@ -81,7 +81,7 @@ class AnalyticsService(rpc.AnalyticsService):
                     pb.ProductSalesSummary(
                         id=0, 
                         date="", 
-                        product_id=item['product_id'],
+                        product_code=item['product_code'],
                         product_group_id=item['product_group_id'],
                         quantity_sold=int(item['total_quantity_sold']), 
                         gross_sales=item['total_gross_sales'],
@@ -222,7 +222,7 @@ class AnalyticsService(rpc.AnalyticsService):
             result_dict = get_product_sales_logic(  
                 db=db,
                 date_range=request.date_range,
-                product_id=request.product_id if request.HasField('product_id') else None,
+                product_code=request.product_code if request.HasField('product_code') else None,
                 product_group_id=request.product_group_id if request.HasField('product_group_id') else None,
                 pagination=request.pagination  
             )
@@ -237,7 +237,7 @@ class AnalyticsService(rpc.AnalyticsService):
                     pb.ProductSalesSummary(
                         id=item['id'],
                         date=item['date'], 
-                        product_id=item['product_id'],
+                        product_code=item['product_code'],
                         product_group_id=item['product_group_id'],
                         quantity_sold=item['quantity_sold'],
                         gross_sales=item['gross_sales'],      
@@ -249,6 +249,7 @@ class AnalyticsService(rpc.AnalyticsService):
                         updated_at=to_proto_timestamp(item['updated_at'])
                     )
                 )
+            # print(f"response : \n{response}")
             return response
 
         except ValueError as ve:
@@ -272,7 +273,7 @@ class AnalyticsService(rpc.AnalyticsService):
                 date_range=request.date_range,
                 limit=request.limit,
                 product_group_id=request.product_group_id if request.HasField('product_group_id') else None,
-                # product_id=request.product_id if request.HasField('product_id') else None,
+                # product_code=request.product_code if request.HasField('product_code') else None,
             )
 
             response = pb.GetTopSellingProductsResponse()
@@ -283,7 +284,7 @@ class AnalyticsService(rpc.AnalyticsService):
                         id=0, 
                         date="", 
                         
-                        product_id=item['product_id'],
+                        product_code=item['product_code'],
                         product_group_id=item['product_group_id'],
                         quantity_sold=item['quantity_sold'],
                         gross_sales=item['gross_sales'],
@@ -329,18 +330,26 @@ class AnalyticsService(rpc.AnalyticsService):
             response.pagination.next_page_token = result_dict['next_page_token']
 
             for item in result_dict['data']:
+                created_at_dt = parser.isoparse(item['created_at']) if isinstance(item['created_at'], str) else item['created_at']
+                updated_at_dt = parser.isoparse(item['updated_at']) if isinstance(item['updated_at'], str) else item['updated_at']
+                
+                period_start_str = item['period_start'].isoformat() if isinstance(item['period_start'], datetime.date) else item['period_start']
+                period_end_str = item['period_end'].isoformat() if isinstance(item['period_end'], datetime.date) else item['period_end']
+
                 response.performances.append(
                     pb.EmployeePerformance(
                         id=item['id'],
-                        date=item['date'], 
+                        calculation_id=item['calculation_id'],  
                         employee_id=item['employee_id'],
+                        period_start=period_start_str,
+                        period_end=period_end_str,
                         total_sales=item['total_sales'],           
                         total_transactions=item['total_transactions'],
                         total_items_sold=item['total_items_sold'],
                         commission_earned=item['commission_earned'], 
-                        performance_score=item['performance_score'], 
-                        created_at=to_proto_timestamp(item['created_at']),
-                        updated_at=to_proto_timestamp(item['updated_at'])
+                        # performance_score=item['performance_score'], 
+                        created_at=to_proto_timestamp(created_at_dt),
+                        updated_at=to_proto_timestamp(updated_at_dt)
                     )
                 )
         
@@ -383,18 +392,27 @@ class AnalyticsService(rpc.AnalyticsService):
             )
 
             for item in report_dict["employee_performances"]:
+                created_at_dt = parser.isoparse(item['created_at']) if isinstance(item['created_at'], str) else item['created_at']
+                updated_at_dt = parser.isoparse(item['updated_at']) if isinstance(item['updated_at'], str) else item['updated_at']
+                
+                period_start_str = item['period_start'].isoformat() if isinstance(item['period_start'], datetime.date) else item['period_start']
+                period_end_str = item['period_end'].isoformat() if isinstance(item['period_end'], datetime.date) else item['period_end']
+
                 report_pb.employee_performances.append(
                     pb.EmployeePerformance(
                         id=item['id'],
-                        date=item['date'],
+                        # date=item['date'],
+                        calculation_id=item['calculation_id'],
                         employee_id=item['employee_id'],
+                        period_start=period_start_str,
+                        period_end=period_end_str,
                         total_sales=item['total_sales'],
                         total_transactions=item['total_transactions'],
                         total_items_sold=item['total_items_sold'],
                         commission_earned=item['commission_earned'],
-                        performance_score=item['performance_score'],
-                        created_at=to_proto_timestamp(item['created_at']),
-                        updated_at=to_proto_timestamp(item['updated_at'])
+                        # performance_score=item['performance_score'],
+                        created_at=to_proto_timestamp(created_at_dt),
+                        updated_at=to_proto_timestamp(updated_at_dt)
                     )
                 )
             
@@ -440,7 +458,7 @@ class AnalyticsService(rpc.AnalyticsService):
                         total_transactions=item['total_transactions'],
                         total_revenue=item['total_revenue'],                 
                         average_transaction_value=item['average_transaction_value'], 
-                        peak_hour=item['peak_hour'],
+                        # peak_hour=item['peak_hour'],
                         created_at=to_proto_timestamp(item['created_at']),
                         updated_at=to_proto_timestamp(item['updated_at'])
                     )
@@ -508,14 +526,14 @@ class AnalyticsService(rpc.AnalyticsService):
     
     def GetDashboardData(self, request, context):
         analytics_db = get_analytics_db_session()
-        inventory_db = get_inventory_db_session()
-        commissions_db = get_commissions_db_session()
+        # inventory_db = get_inventory_db_session()
+        # commissions_db = get_commissions_db_session()
 
         try:
             result_dict = get_dashboard_data_logic(
                 analytics_db=analytics_db,
-                inventory_db=inventory_db,
-                commissions_db=commissions_db,
+                # inventory_db=inventory_db,
+                # commissions_db=commissions_db,
                 date_str=request.date
             )
 
@@ -529,7 +547,15 @@ class AnalyticsService(rpc.AnalyticsService):
                 pending_commissions_count=result_dict['pending_commissions_count']
             )
 
-            dashboard_pb.low_stock_alerts.extend(result_dict['low_stock_alerts'])
+            # dashboard_pb.low_stock_alerts.extend(result_dict['low_stock_alerts'])
+
+            for item in result_dict['low_stock_alerts']:
+                dashboard_pb.low_stock_alerts.append(
+                    pb.LowStockItem(
+                        product_name=item['product_name'],
+                        remaining_quantity=item['remaining_quantity']
+                    )
+                )
 
             # for item in result_dict['top_products_today']:
             #     dashboard_pb.top_products_today.append(
@@ -544,7 +570,7 @@ class AnalyticsService(rpc.AnalyticsService):
                 dashboard_pb.top_products_today.append(
                     pb.ProductSalesSummary(
                         # Asumsi 'item' memiliki kunci ini, sesuaikan jika perlu
-                        product_id=item.get('product_id', 0),
+                        product_code=item.get('product_code', 0),
                         net_sales=str(item.get('net_sales', 0)),
                         quantity_sold=int(item.get('quantity_sold', 0))
                     )
@@ -557,7 +583,7 @@ class AnalyticsService(rpc.AnalyticsService):
                         total_sales=str(item.get('total_sales', 0))
                     )
                 )
-
+            
             return pb.GetDashboardDataResponse(dashboard=dashboard_pb)
         
         except ValueError as ve:
@@ -573,27 +599,41 @@ class AnalyticsService(rpc.AnalyticsService):
         finally:
             if analytics_db:
                 analytics_db.close()
-            if inventory_db:
-                inventory_db.close()
-            if commissions_db:
-                commissions_db.close()
+            # if inventory_db:
+            #     inventory_db.close()
+            # if commissions_db:
+            #     commissions_db.close()
     
     def GetRealTimeMetrics(self, request, context):
-        db = get_pos_db_session()
+        # db = get_pos_db_session()
     
         try:
-            metrics_dict = get_real_time_metrics_logic(db)
+            # metrics_dict = get_real_time_metrics_logic(db)
+
+            metrics_dict = get_realtime_metrics_from_cache()
 
             response = pb.GetRealTimeMetricsResponse()
 
+            last_updated_dt = parser.isoparse(metrics_dict['last_updated']) if isinstance(metrics_dict['last_updated'], str) else metrics_dict['last_updated']
+
+            last_updated_ts = to_proto_timestamp(last_updated_dt)
+
             metrics_pb = pb.RealTimeMetrics(
-                last_updated=to_proto_timestamp(metrics_dict['last_updated']),
-                active_transactions=metrics_dict['active_transactions'],
+                last_updated=last_updated_ts,
+                # active_transactions=metrics_dict['active_transactions'],
                 hourly_revenue=metrics_dict['hourly_revenue'],
                 hourly_transaction_count=metrics_dict['hourly_transaction_count'],
                 average_transaction_value=metrics_dict['average_transaction_value'],
-                recent_large_transactions=metrics_dict['recent_large_transactions']
+                # recent_large_transactions=metrics_dict['recent_large_transactions']
             )
+
+            for tx_dict in metrics_dict['recent_large_transactions']:
+                metrics_pb.recent_large_transactions.append(
+                    pb.LargeTransaction(
+                        doc=tx_dict.get("doc"),
+                        amount=tx_dict.get("amount")
+                    )
+                )
 
             response.metrics.CopyFrom(metrics_pb)
 
@@ -603,9 +643,155 @@ class AnalyticsService(rpc.AnalyticsService):
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(f"Internal error: {e}")
             return pb.GetRealTimeMetricsResponse()
+        # finally:
+        #     if db:
+        #         db.close()
+    
+    def GenerateProductSalesSummary(self, request, context):
+        analytics_db = None
+        try:
+            analytics_db = get_analytics_db_session()
+
+            formatted_summaries = generate_product_sales_summary_logic(
+                analytics_db=analytics_db,
+                date_str=request.date,
+                product_code=request.product_code if request.HasField('product_code') else None,
+                product_group_id=request.product_group_id if request.HasField('product_group_id') else None
+            )
+            
+            response = pb.GenerateProductSalesSummaryResponse(
+                success=True,
+                message=f"Product sales summary for {request.date} generated successfully."
+            )
+
+            print(formatted_summaries)
+            
+            # Ubah format ke Protobuf
+            for item in formatted_summaries:
+                # Perlu konversi datetime/decimal
+                response.generated_summaries.append(
+                    pb.ProductSalesSummary(
+                        id=0, # ID dari upsert mungkin tidak relevan di sini
+                        product_code=item['product_code'],
+                        date=item['date'].isoformat(),
+                        product_group_id=item['product_group_id'],
+                        quantity_sold=int(item['quantity_sold']),
+                        gross_sales=to_string(item['gross_sales']),
+                        total_discounts=to_string(item['total_discounts']),
+                        net_sales=to_string(item['net_sales']),
+                        total_cost=to_string(item['total_cost']),
+                        gross_profit=to_string(item['gross_profit']),
+                        created_at=None, # Kita tidak mengambil ini dari kueri
+                        updated_at=None
+                    )
+                )
+            
+            return response
+
+        except ValueError as ve:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details(str(ve))
+            return pb.GenerateProductSalesSummaryResponse(success=False, message=f"Error input: {ve}")
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(f'Internal error: {e}')
+            return pb.GenerateProductSalesSummaryResponse(success=False, message=f"Internal error: {e}")
         finally:
-            if db:
-                db.close()
+            if analytics_db:
+                analytics_db.close()
+    
+    def GenerateCustomerAnalytics(self, request, context):
+        analytics_db = None
+        try:
+            analytics_db = get_analytics_db_session()
+
+            formatted_analytics = generate_customer_analytics_logic(
+                analytics_db=analytics_db,
+                date_str=request.date,
+                product_group_id=request.product_group_id if request.HasField('product_group_id') else None
+            )
+            
+            response = pb.GenerateCustomerAnalyticsResponse(
+                success=True,
+                message=f"Customer analytics for {request.date} generated successfully."
+            )
+            
+            # Ubah format ke Protobuf
+            for item in formatted_analytics:
+                response.generated_analytics.append(
+                    pb.CustomerAnalytics(
+                        date=item['date'].isoformat(),
+                        product_group_id=item['product_group_id'],
+                        total_transactions=item['total_transactions'],
+                        total_revenue=to_string(item['total_revenue']),
+                        average_transaction_value=to_string(item['average_transaction_value']),
+                        created_at=None,
+                        updated_at=None
+                    )
+                )
+            
+            return response
+
+        except ValueError as ve:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details(str(ve))
+            return pb.GenerateCustomerAnalyticsResponse(success=False, message=f"Error input: {ve}")
+        except Exception as e:
+            print(f"Error in GenerateCustomerAnalytics gRPC: {e}")
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(f'Internal error: {e}')
+            return pb.GenerateCustomerAnalyticsResponse(success=False, message=f"Internal error: {e}")
+        finally:
+            if analytics_db:
+                analytics_db.close()
+    
+    def GenerateEmployeePerformance(self, request, context):
+        analytics_db = None
+        try:
+            analytics_db = get_analytics_db_session()
+
+            # Panggil logika baru dengan calculation_id
+            performance_data = generate_employee_performance_logic(
+                analytics_db=analytics_db,
+                calculation_id=request.calculation_id
+            )
+            
+            response = pb.GenerateEmployeePerformanceResponse(
+                success=True,
+                message=f"Employee performance for CalculationID {request.calculation_id} generated successfully."
+            )
+            
+            # Ubah format ke Protobuf
+            response.generated_performance.CopyFrom(
+                pb.EmployeePerformance(
+                    # id=0, # ID tidak perlu dikembalikan
+                    calculation_id=performance_data['calculation_id'],
+                    employee_id=performance_data['employee_id'],
+                    period_start=performance_data['period_start'].isoformat(),
+                    period_end=performance_data['period_end'].isoformat(),
+                    total_sales=to_string(performance_data['total_sales']),
+                    total_transactions=int(performance_data['total_transactions']),
+                    total_items_sold=int(performance_data['total_items_sold']),
+                    commission_earned=to_string(performance_data['commission_earned']),
+                    created_at=None,
+                    updated_at=None
+                )
+            )
+            
+            return response
+
+        except ValueError as ve:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details(str(ve))
+            return pb.GenerateEmployeePerformanceResponse(success=False, message=str(ve))
+        except Exception as e:
+            print(f"Error in GenerateEmployeePerformance gRPC: {e}")
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(f'Internal error: {e}')
+            return pb.GenerateEmployeePerformanceResponse(success=False, message=f"Internal error: {e}")
+        finally:
+            if analytics_db:
+                analytics_db.close()
 
 def start_grpc_server():
     global server_instance

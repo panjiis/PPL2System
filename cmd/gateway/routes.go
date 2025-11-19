@@ -314,17 +314,22 @@ func main() {
 				analyticsGroup.GET("/reports/sales", analyticsHandler.GetSalesReport)
 				analyticsGroup.GET("/reports/daily-summary", analyticsHandler.GetDailySummary)
 				analyticsGroup.POST("/reports/daily-summary/generate", analyticsHandler.GenerateDailySummary)
+
+				// products
 				analyticsGroup.GET("/products/sales", analyticsHandler.GetProductSales)
 				analyticsGroup.GET("/products/top-selling", analyticsHandler.GetTopSellingProducts)
+				analyticsGroup.POST("/products/sales/generate", analyticsHandler.GenerateProductSalesSummary)
 
 				// employees
 				analyticsGroup.GET("/employees/performance", analyticsHandler.GetEmployeePerformance)
 				analyticsGroup.GET("/performance/report", analyticsHandler.GetPerformanceReport)
-
+				analyticsGroup.POST("/employees/performance/generate", analyticsHandler.GenerateEmployeePerformance)
+				
 				// customers
 				analyticsGroup.GET("/customers/analytics", analyticsHandler.GetCustomerAnalytics)
 				analyticsGroup.GET("/customers/peak-hours", analyticsHandler.GetPeakHours)
-
+				analyticsGroup.POST("/customers/analytics/generate", analyticsHandler.GenerateCustomerAnalytics)
+				
 				// dashboard
 				analyticsGroup.GET("/dashboard", analyticsHandler.GetDashboardData)
 				analyticsGroup.GET("/real-time-metrics", analyticsHandler.GetRealTimeMetrics)
