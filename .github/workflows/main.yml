@@ -40,9 +40,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pylint
+          # PENTING: Install dependency proyek agar Pylint tidak error 'Unable to import'
+          if [ -f analytics_service/requirements.txt ]; then pip install -r analytics_service/requirements.txt; fi
 
       - name: Run Pylint (Report Only)
-        run: pylint --exit-zero analytics_service/
+        run: |
+          pylint --exit-zero \
+          --ignore-patterns=.*_pb2.py,.*_pb2_grpc.py \
+          --disable=C0114,C0115,C0116,C0301 \
+          analytics_service/
 
 
       - name: 2. Set up Docker Buildx
