@@ -9,10 +9,87 @@ import (
 	"syntra-system/internal/gateway/clients"
 	"syntra-system/internal/gateway/handlers"
 	"syntra-system/internal/gateway/middleware"
+	proto "syntra-system/proto/protogen/analytics"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
+
+func startScheduler(analyticsClient proto.AnalyticsServiceClient) {
+	go func() {
+		loc, err := time.LoadLocation("Asia/Jakarta")
+		if err != nil {
+			log.Printf("⚠️ Gagal load lokasi Asia/Jakarta, fallback ke Local: %v", err)
+			loc = time.Local
+		}
+
+		for {
+			// nextRun := time.Now().In(loc).Add(10 * time.Second) // Mode Test
+			
+			now := time.Now().In(loc)
+			nextRun := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 1, 0, 0, loc) // Mode Production
+			// ---------------------------------------------------------
+
+			duration := nextRun.Sub(now)
+			log.Printf("⏳ Scheduler sleeping for %v until next run at %v...", duration, nextRun)
+
+			time.Sleep(duration)
+
+			// --- STARTING BATCH PROCESS ---
+			log.Println("🚀 Starting Nightly Batch Jobs...")
+
+			waktuBangun := time.Now().In(loc)
+			targetDate := waktuBangun.AddDate(0, 0, -1).Format("2006-01-02")
+			
+			log.Printf("📅 Processing data for date: %s", targetDate)
+
+			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+			
+			// ==========================================
+			// JOB 1: Generate Daily Summary 
+			// ==========================================
+			log.Println("▶️ [1/3] Running GenerateDailySummary...")
+			resp1, err := analyticsClient.GenerateDailySummary(ctx, &proto.GenerateDailySummaryRequest{
+					Date: targetDate,
+			})
+			if err != nil {
+					log.Printf("❌ [1/3] Failed: %v", err)
+			} else {
+					log.Printf("✅ [1/3] Success: %s", resp1.GetMessage())
+			}
+
+			// ==========================================
+			// JOB 2: Generate Product Sales Summary 
+			// ==========================================
+			log.Println("▶️ [2/3] Running GenerateProductSalesSummary...")
+			// Kita kosongkan ProductCode & GroupId agar Python memproses SEMUA produk
+			resp2, err := analyticsClient.GenerateProductSalesSummary(ctx, &proto.GenerateProductSalesSummaryRequest{
+					Date: targetDate, 
+			})
+			if err != nil {
+					log.Printf("❌ [2/3] Failed: %v", err)
+			} else {
+					log.Printf("✅ [2/3] Success: %s", resp2.GetMessage())
+			}
+
+			// ==========================================
+			// JOB 3: Generate Customer Analytics 
+			// ==========================================
+			log.Println("▶️ [3/3] Running GenerateCustomerAnalytics...")
+			resp3, err := analyticsClient.GenerateCustomerAnalytics(ctx, &proto.GenerateCustomerAnalyticsRequest{
+					Date: targetDate,
+			})
+			if err != nil {
+					log.Printf("❌ [3/3] Failed: %v", err)
+			} else {
+					log.Printf("✅ [3/3] Success: %s", resp3.GetMessage())
+			}
+
+			log.Println("🏁 Nightly Batch Jobs Finished.")
+			cancel()
+		}
+	}()
+}
 
 func main() {
 	err := godotenv.Load()
@@ -343,6 +420,13 @@ func main() {
 
 	r.GET("/health", healthCheckHandler(grpcClients))
 	r.GET("/health/detailed", detailedHealthCheckHandler(grpcClients))
+
+	if grpcClients.Analytics != nil {
+		log.Println("🕒 Starting Daily Summary Scheduler...")
+		startScheduler(grpcClients.Analytics)
+	} else {
+		log.Println("⚠️ Analytics Service unavailable. Scheduler will not start.")
+	}
 
 	port := ":8080"
 	log.Printf("Starting server on port %s", port)

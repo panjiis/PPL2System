@@ -1,6 +1,7 @@
 import time
 import sys
 import signal
+from core_logic.cache_manager import clear_dashboard_caches
 
 # Impor server gRPC Anda
 import grpc_server 
@@ -31,6 +32,10 @@ def handle_shutdown(sig, frame):
     """Menangani sinyal shutdown (seperti Ctrl+C) dengan bersih."""
     print("\nStop command received. Stopping service...")
     grpc_server.stop_grpc_server()
+    try:
+        clear_dashboard_caches()
+    except Exception as e:
+        print(f"Error clearing cache: {e}")
     print("Analytics gRPC service stopped.")
     sys.exit(0)
 

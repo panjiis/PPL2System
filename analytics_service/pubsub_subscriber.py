@@ -15,6 +15,7 @@ from repositories.db_connection import get_analytics_db_session
 from repositories.models import RawSalesEvent, RawOrderDocument, RawOrderItem, RawProduct, RawFinalizedCommission
 
 from core_logic.cache_manager import redis_client
+from core_logic.employee_logic import generate_employee_performance_logic
 
 # Anda bilang akan mengisinya sendiri
 NATS_URL = "nats://10.147.17.76:4222" 
@@ -87,7 +88,17 @@ async def commission_event_handler(msg):
                 db = get_analytics_db_session()
                 db.execute(stmt)
                 db.commit()
-                print(f"Berhasil memproses event komisi final (CalcID: {calc_id})")
+                print(f"✅ [1/2] Raw Commission Data saved (CalcID: {calc_id})")
+
+                print(f"▶️ [2/2] Generating Employee Performance for CalcID: {calc_id}...")
+                
+                # Panggil logika bisnis langsung (tanpa lewat gRPC network)
+                result = generate_employee_performance_logic(
+                    analytics_db=db, # Pass session database
+                    calculation_id=calc_id
+                )
+                
+                print(f"✅ [2/2] Performance Generated Successfully. Employee ID: {result.get('employee_id')}")
             except Exception as e:
                 if db: db.rollback()
                 print(f"DB Error saat memproses event komisi: {e}")

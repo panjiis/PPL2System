@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -67,6 +68,18 @@ func (s *POSHandler) CreateProduct(ctx context.Context, req *proto.Product) (*pr
 
 	log.Printf("Successfully created product with code: %s", newProduct.ProductCode)
 
+	event := ProductEvent{
+		EventType: "pos.product.created",
+		Timestamp: time.Now(),
+		ProductData: ProductEventPayload{
+			ProductCode:    newProduct.ProductCode,
+			ProductGroupID: newProduct.ProductGroupId,
+			ProductName:    newProduct.ProductName,
+			CostPrice:      newProduct.CostPrice,
+		},
+	}
+	s.publishProductEvent(event)
+
 	return &proto.GetProductResponse{
 		Success: true,
 		Product: s.productToProto(*newProduct),
@@ -116,6 +129,18 @@ func (s *POSHandler) UpdateProduct(ctx context.Context, req *proto.UpdateProduct
 	}
 
 	log.Printf("Successfully updated product with ID: %s", existingProduct.ProductCode)
+
+	event := ProductEvent{
+		EventType: "pos.product.updated",
+		Timestamp: time.Now(),
+		ProductData: ProductEventPayload{
+			ProductCode:    existingProduct.ProductCode,
+			ProductGroupID: existingProduct.ProductGroupId,
+			ProductName:    existingProduct.ProductName,
+			CostPrice:      existingProduct.CostPrice,
+		},
+	}
+	s.publishProductEvent(event)
 
 	return &proto.GetProductResponse{
 		Success: true,

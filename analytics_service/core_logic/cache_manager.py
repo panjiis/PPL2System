@@ -78,3 +78,20 @@ def delete_cache(key_pattern: str):
   except Exception as e:
     print(f"Error deleting cache with pattern '{key_pattern}: {e}")
     return False
+  
+def clear_dashboard_caches():
+    if not redis_client:
+        print("Redis client not connected.")
+        return
+
+    print("🧹 Cleaning up dashboard caches...")
+    
+    patterns = ["dashboard:*", "metrics:*"]
+    
+    count = 0
+    for pattern in patterns:
+        for key in redis_client.scan_iter(match=pattern):
+            redis_client.delete(key)
+            count += 1
+            
+    print(f"✅ Cache cleanup complete. Removed {count} keys.")

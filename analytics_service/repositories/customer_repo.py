@@ -105,8 +105,6 @@ def get_weekly_peak_hour_data(db: Session) -> list[dict]:
             COUNT(id) as transaction_count,
             SUM(total_amount) as total_revenue
         FROM raw_sales_events
-        -- Anda bisa menambahkan filter WHERE di sini jika Anda hanya ingin menganalisis data 90 hari terakhir
-        -- WHERE order_timestamp >= (NOW() - INTERVAL '90 days')
         GROUP BY day_of_week, hour_of_day
         ORDER BY day_of_week, hour_of_day;
     """

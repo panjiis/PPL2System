@@ -29,7 +29,7 @@ type CommissionDetail struct {
 	OrderItemID             int64      `gorm:"not null"`
 	ProductCode             string     `gorm:"size:100;not null;index"`
 	SalesAmount             string     `gorm:"type:decimal(18,2);not null"`
-	CommissionRate          string     `gorm:"type:decimal(5,4);not null"`
+	CommissionRate          string     `gorm:"type:decimal(18,2);not null"`
 	CommissionAmount        string     `gorm:"type:decimal(18,2);not null"`
 	CreatedAt               *time.Time `gorm:"autoCreateTime"`
 }
@@ -57,5 +57,5 @@ type SalesDataItem struct {
 	ProductName         *string    `gorm:"size:255"`
 	SalesAmount         string     `gorm:"type:decimal(18,2);not null"`
 	IsReturned          bool       `gorm:"default:false"`
-	CreatedAt           *time.Time `gorm:"autoCreateTime"` // Menggunakan autoCreateTime
+	CreatedAt           *time.Time `gorm:"autoCreateTime"` 
 }
