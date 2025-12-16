@@ -97,11 +97,15 @@ def count_total_customer_analytics(
 #   result = db.execute(text(query_str), params).all()
 #   return [dict(row._mapping) for row in result]
 
+# repositories/customer_repo.py
+
 def get_weekly_peak_hour_data(db: Session) -> list[dict]:
     query_str = """
         SELECT
-            EXTRACT(DOW FROM order_timestamp) + 1 as day_of_week,
-            EXTRACT(HOUR FROM order_timestamp) as hour_of_day,
+            EXTRACT(ISODOW FROM (order_timestamp AT TIME ZONE 'Asia/Jakarta')) as day_of_week,
+            
+            EXTRACT(HOUR FROM (order_timestamp AT TIME ZONE 'Asia/Jakarta')) as hour_of_day,
+            
             COUNT(id) as transaction_count,
             SUM(total_amount) as total_revenue
         FROM raw_sales_events

@@ -304,6 +304,10 @@ async def message_handler(msg):
                     pipe.expire(today_key, 86400 * 3)
 
                     pipe.delete(dashboard_main_key)
+
+                    peak_hours_pattern = "reports:weekly-peak-hours:*"
+                    for key in redis_client.scan_iter(match=peak_hours_pattern):
+                        pipe.delete(key)
                     
                     pipe.execute()
                     print(f"Update Metrics & Delete Cache Dashboard: {doc_number}")

@@ -79,19 +79,41 @@ def delete_cache(key_pattern: str):
     print(f"Error deleting cache with pattern '{key_pattern}: {e}")
     return False
   
-def clear_dashboard_caches():
-    if not redis_client:
-        print("Redis client not connected.")
-        return
+def clear_all_analytics_caches():
+  if not redis_client:
+    print("Redis client not connected.")
+    return
 
-    print("🧹 Cleaning up dashboard caches...")
-    
-    patterns = ["dashboard:*", "metrics:*"]
-    
-    count = 0
+  print("🧹 Cleaning up ALL analytics caches...")
+  
+  # Daftar pattern key yang mencakup seluruh sistem analytics
+  patterns = [
+    "dashboard:*",  # Main Dashboard, Low Stock, Pending Comm
+    "metrics:*",    # Realtime Charts
+    "reports:*"     # Sales Report, Product Summary, Peak Hours, dll
+  ]
+  
+  count = 0
+  try:
+    # Menggunakan pipeline untuk menghapus banyak key sekaligus (lebih cepat)
+    pipe = redis_client.pipeline()
+    found_keys = False
+
     for pattern in patterns:
-        for key in redis_client.scan_iter(match=pattern):
-            redis_client.delete(key)
-            count += 1
-            
+      # scan_iter aman untuk production (tidak memblokir Redis)
+      for key in redis_client.scan_iter(match=pattern):
+        pipe.delete(key)
+        count += 1
+        found_keys = True
+        
+        # Eksekusi batch setiap 100 key agar memori python aman
+        if count % 100 == 0:
+          pipe.execute()
+          pipe = redis_client.pipeline()
+
+    if found_keys:
+      pipe.execute() # Hapus sisa key
+        
     print(f"✅ Cache cleanup complete. Removed {count} keys.")
+  except Exception as e:
+    print(f"❌ Error during cache cleanup: {e}")
