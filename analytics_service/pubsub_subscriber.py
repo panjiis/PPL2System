@@ -1,6 +1,7 @@
 # pubsub_subscriber.py
 import asyncio
 import json
+import logging
 import string
 import nats
 from nats.errors import NoServersError
@@ -385,6 +386,8 @@ async def message_handler(msg):
                         "cost_price": Decimal(cost_price_str)
                     })
 
+                logging.info(f"new item : \n {new_items}")
+                
                 if new_items:
                     db.execute(text("DELETE FROM raw_order_items WHERE document_number = :doc_num"), {"doc_num": doc_number})
                     db.bulk_insert_mappings(RawOrderItem, new_items)
