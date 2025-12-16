@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 from sqlalchemy.orm import Session
 from decimal import Decimal
 
@@ -12,21 +13,7 @@ CACHE_TTL = 900
 LOW_STOCK_HASH_KEY = "dashboard:low_stock_hash"
 PENDING_COMMISSIONS_KEY = "dashboard:pending_commissions"
 
-# core_logic/dashboard_logic.py
-
-import datetime
-import json
-from sqlalchemy.orm import Session
-from decimal import Decimal
-
-from repositories import dashboard_repo
-from core_logic.utils import to_string, to_percent_string
-from core_logic.cache_manager import get_cache, set_cache, redis_client
-
-CACHE_TTL = 900
-
-LOW_STOCK_HASH_KEY = "dashboard:low_stock_hash"
-PENDING_COMMISSIONS_KEY = "dashboard:pending_commissions"
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def _get_realtime_operational_data() -> dict:
     """
@@ -83,6 +70,8 @@ def _get_dashboard_data_from_db(
         'items_sold': kpi_today_raw.get('total_items_sold', 0),
         'profit': kpi_today_raw.get('total_gross_profit', Decimal(0))
     }
+
+    logging
 
     # --- KPI KEMARIN (Untuk Persentase) ---
     kpi_yesterday_raw = dashboard_repo.get_kpi_for_date(analytics_db, date_yesterday)
