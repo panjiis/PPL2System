@@ -385,6 +385,8 @@ async def message_handler(msg):
                         "cost_price": Decimal(cost_price_str)
                     })
 
+                print(f"new item : \n {new_items}")
+                
                 if new_items:
                     db.execute(text("DELETE FROM raw_order_items WHERE document_number = :doc_num"), {"doc_num": doc_number})
                     db.bulk_insert_mappings(RawOrderItem, new_items)
