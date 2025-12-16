@@ -310,6 +310,8 @@ func (s *POSHandler) createOrderEvent(order *OrderDocument, eventType EventType)
 		}
 	}
 
+	log.Println(order.OrderItems)
+	
 	orderDataPayload := &OrderDataEvent{
 		ID:             order.ID,
 		DocumentNumber: order.DocumentNumber,
