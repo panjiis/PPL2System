@@ -4,27 +4,81 @@ from sqlalchemy import text
 from decimal import Decimal
 
 # --- Analytics DB ---
-def get_kpi_for_date(
-  db: Session,
-  date: datetime.date
-) -> dict:
-  params = {
-    "date": date
-  }
+# def get_kpi_for_date(
+#   db: Session,
+#   date: datetime.date
+# ) -> dict:
+#   params = {
+#     "date": date
+#   }
 
-  query_str = """
-    SELECT
-      SUM(net_sales) as total_revenue,
-      SUM(gross_profit) as total_gross_profit,
-      SUM(total_transactions) as total_transactions,
-      SUM(total_items_sold) as total_items_sold
-    FROM sales_summary_daily
-    WHERE date = :date 
-  """
+#   query_str = """
+#     SELECT
+#       SUM(net_sales) as total_revenue,
+#       SUM(gross_profit) as total_gross_profit,
+#       SUM(total_transactions) as total_transactions,
+#       SUM(total_items_sold) as total_items_sold
+#     FROM sales_summary_daily
+#     WHERE date = :date 
+#   """
   
-  result = db.execute(text(query_str), params).first()
-  return dict(result._mapping) if result and result.total_revenue is not None else {}
+#   result = db.execute(text(query_str), params).first()
+#   return dict(result._mapping) if result and result.total_revenue is not None else {}
 
+def get_kpi_for_date(db: Session, date_obj: datetime.date) -> dict:
+    today = datetime.date.today()
+    
+    # === STRATEGI 1: REAL-TIME (Untuk Hari Ini) ===
+    if date_obj == today:
+        # QUERY 1: Ambil Revenue & Transaksi dari tabel 'raw_sales_events'
+        # Sesuai models.py: RawSalesEvent punya kolom 'total_amount' dan 'order_timestamp'
+        query_header = text("""
+            SELECT 
+                COALESCE(SUM(total_amount), 0) as total_revenue,
+                COUNT(id) as total_transactions
+            FROM raw_sales_events
+            -- Menggunakan Timezone Asia/Jakarta agar akurat dengan jam lokal
+            WHERE DATE(order_timestamp AT TIME ZONE 'Asia/Jakarta') = :date
+        """)
+        header_result = db.execute(query_header, {"date": date_obj}).first()
+        
+        # QUERY 2: Ambil Items Sold & Profit dari tabel 'raw_order_items'
+        # Kita perlu JOIN ke 'raw_sales_events' hanya untuk memfilter berdasarkan tanggal transaksi
+        # Sesuai models.py: RawOrderItem punya 'quantity', 'line_total', 'cost_price'
+        query_items = text("""
+            SELECT 
+                COALESCE(SUM(i.quantity), 0) as total_items_sold,
+                -- Profit = Total Jual - (Qty * Harga Modal)
+                COALESCE(SUM(i.line_total - (i.quantity * i.cost_price)), 0) as total_gross_profit
+            FROM raw_order_items i
+            JOIN raw_sales_events se ON i.document_number = se.order_document_number
+            WHERE DATE(se.order_timestamp AT TIME ZONE 'Asia/Jakarta') = :date
+        """)
+        items_result = db.execute(query_items, {"date": date_obj}).first()
+
+        # GABUNGKAN HASILNYA
+        return {
+            "total_revenue": header_result.total_revenue if header_result else 0,
+            "total_transactions": header_result.total_transactions if header_result else 0,
+            "total_items_sold": items_result.total_items_sold if items_result else 0,
+            "total_gross_profit": items_result.total_gross_profit if items_result else 0
+        }
+
+    # === STRATEGI 2: HISTORICAL (Untuk Kemarin/Lampau) ===
+    else:
+        # Menggunakan SalesSummaryDaily sesuai models.py
+        query = text("""
+            SELECT 
+                gross_sales as total_revenue, -- atau net_sales tergantung definisi bisnis Anda
+                total_transactions, 
+                total_items_sold, 
+                gross_profit as total_gross_profit
+            FROM sales_summary_daily 
+            WHERE date = :date
+        """)
+        result = db.execute(query, {"date": date_obj}).first()
+        return dict(result._mapping) if result else {}
+    
 # def get_top_products_for_date(
 #   db: Session,
 #   date: datetime.date,
