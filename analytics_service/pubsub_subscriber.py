@@ -401,6 +401,57 @@ async def message_handler(msg):
     except Exception as e:
         print(f"Error di message_handler: {e}")
 
+async def user_event_handler(msg):
+    """
+    Callback untuk menangani event employee dari User Service.
+    Topic: employee.created, employee.updated
+    """
+    if not redis_client: 
+        return
+
+    try:
+        # 1. Parsing Data
+        data = json.loads(msg.data.decode())
+        subject = msg.subject # Contoh: "employee.created"
+
+        # Cek apakah ini event yang kita butuhkan
+        if subject in ["employee.created", "employee.updated"]:
+            
+            # Mapping Field dari Go (employee.go) -> ke DB Analytics (raw_employees)
+            emp_id = data.get("id")
+            name = data.get("employee_name") # Di Go namanya 'employee_name'
+            role = data.get("position")      # Di Go namanya 'position', di Analytics 'role'
+            
+            if not emp_id or not name:
+                print(f"⚠️ Event {subject} incomplete data: {data}")
+                return
+
+            # 2. UPSERT ke tabel raw_employees
+            # Logika: Jika ID sudah ada, update Nama & Role. Jika belum, Insert.
+            stmt = text("""
+                INSERT INTO raw_employees (employee_id, name, role, updated_at)
+                VALUES (:id, :name, :role, NOW())
+                ON CONFLICT (employee_id) 
+                DO UPDATE SET 
+                    name = EXCLUDED.name, 
+                    role = EXCLUDED.role, 
+                    updated_at = NOW()
+            """)
+            
+            db = None
+            try:
+                db = get_analytics_db_session()
+                db.execute(stmt, {"id": emp_id, "name": name, "role": role})
+                db.commit()
+                print(f"✅ Employee synced via NATS: {name} (ID: {emp_id})")
+            except Exception as e:
+                print(f"❌ DB Error syncing employee: {e}")
+            finally:
+                if db: db.close()
+
+    except Exception as e:
+        print(f"❌ Error user_event_handler: {e}")
+
 async def run_subscriber():
     """Menghubungkan ke NATS dan memulai subscriber."""
     print(f"Connecting ke NATS in {NATS_URL}...")
@@ -409,6 +460,7 @@ async def run_subscriber():
     pos_topic = "pos.>"
     commission_topic = "commission.>"  
     inventory_topic = "inventory.stock.updated" 
+    employee_topic = "employee.>"
     
     try:
         nc = await nats.connect(NATS_URL)
@@ -426,6 +478,10 @@ async def run_subscriber():
         await nc.subscribe(inventory_topic, cb=inventory_event_handler)
         print(f"Subscribed to topic: '{inventory_topic}'")
         
+        # --- SUBSCRIBE KE TOPIK 4 ---
+        await nc.subscribe(employee_topic, cb=user_event_handler)
+        print(f"Subscribed to topic: '{employee_topic}'")
+
         # Biarkan subscriber berjalan selamanya
         await asyncio.Event().wait()
     except NoServersError:

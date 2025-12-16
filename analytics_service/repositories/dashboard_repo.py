@@ -49,32 +49,84 @@ def get_top_products_for_date(
   result = db.execute(text(query_str), params).all()
   return [dict(row._mapping) for row in result]
 
-def get_top_performers_for_date(
-  db: Session,
-  date: datetime.date,
-  limit: int = 5
-) -> list[dict]:
-  params = {
-    # Kita menggunakan 'date' untuk kedua parameter
-    "date_today": date, 
-    "limit": limit
-  }
+# def get_top_performers_for_date(
+#   db: Session,
+#   date: datetime.date,
+#   limit: int = 5
+# ) -> list[dict]:
+#   params = {
+#     # Kita menggunakan 'date' untuk kedua parameter
+#     "date_today": date, 
+#     "limit": limit
+#   }
 
-  query_str = """
-    SELECT 
-      employee_id, 
-      total_sales,
-      commission_earned
-    FROM employee_performance
-    WHERE 
-      period_start <= :date_today 
-      AND period_end >= :date_today
-    ORDER BY total_sales DESC
-    LIMIT :limit
-  """
+#   query_str = """
+#     SELECT 
+#       employee_id, 
+#       total_sales,
+#       commission_earned
+#     FROM employee_performance
+#     WHERE 
+#       period_start <= :date_today 
+#       AND period_end >= :date_today
+#     ORDER BY total_sales DESC
+#     LIMIT :limit
+#   """
 
-  result = db.execute(text(query_str), params).all()
-  return [dict(row._mapping) for row in result]
+#   result = db.execute(text(query_str), params).all()
+#   return [dict(row._mapping) for row in result]
+
+# def get_top_performers_for_date(
+#     db: Session, 
+#     date: datetime.date, 
+#     limit: int = 5
+# ) -> list[dict]:
+#     # Kita harus join antara order items (untuk ambil sales) 
+#     # dan documents (untuk ambil tanggal)
+#     # Lalu GROUP BY employee_id saja.
+    
+#     query_str = """
+#         SELECT 
+#             oi.serving_employee_id as employee_id,
+#             SUM(oi.line_total) as total_sales
+#         FROM raw_order_items oi
+#         JOIN raw_order_documents od ON oi.document_number = od.document_number
+#         WHERE CAST(od.order_timestamp AS DATE) = :date
+#           AND oi.serving_employee_id IS NOT NULL
+#         GROUP BY oi.serving_employee_id -- <--- PENTING: Grouping hanya berdasarkan ID Karyawan
+#         ORDER BY total_sales DESC
+#         LIMIT :limit
+#     """
+    
+#     params = {
+#         "date": date,
+#         "limit": limit
+#     }
+    
+#     result = db.execute(text(query_str), params).all()
+#     return [dict(row._mapping) for row in result]
+
+def get_top_performers_for_date(db: Session, date: datetime.date, limit: int = 5) -> list[dict]:
+    query_str = """
+        SELECT 
+            oi.serving_employee_id as employee_id,
+            -- Ambil nama dari tabel lokal
+            COALESCE(e.name, 'Unknown') as employee_name, 
+            SUM(oi.line_total) as total_sales
+        FROM raw_order_items oi
+        JOIN raw_order_documents od ON oi.document_number = od.document_number
+        -- JOIN ke tabel raw_employees lokal
+        LEFT JOIN raw_employees e ON oi.serving_employee_id = e.employee_id
+        WHERE CAST(od.order_timestamp AS DATE) = :date
+          AND oi.serving_employee_id IS NOT NULL
+        GROUP BY oi.serving_employee_id, e.name
+        ORDER BY total_sales DESC
+        LIMIT :limit
+    """
+    
+    params = {"date": date, "limit": limit}
+    result = db.execute(text(query_str), params).all()
+    return [dict(row._mapping) for row in result]
 
 # --- Inventory DB ---
 def get_low_stock_alerts(db: Session) -> list[str]:

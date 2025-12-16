@@ -580,6 +580,7 @@ class AnalyticsService(rpc.AnalyticsService):
                 dashboard_pb.top_performers_today.append(
                     pb.EmployeePerformance(
                         employee_id=item.get('employee_id', 0),
+                        employee_name=item.get('employee_name', "Unknown"),
                         total_sales=str(item.get('total_sales', 0))
                     )
                 )
@@ -599,10 +600,6 @@ class AnalyticsService(rpc.AnalyticsService):
         finally:
             if analytics_db:
                 analytics_db.close()
-            # if inventory_db:
-            #     inventory_db.close()
-            # if commissions_db:
-            #     commissions_db.close()
     
     def GetRealTimeMetrics(self, request, context):
         # db = get_pos_db_session()

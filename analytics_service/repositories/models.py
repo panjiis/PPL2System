@@ -155,3 +155,12 @@ class RawFinalizedCommission(Base):
     commission_earned = Column(Numeric(18, 2), nullable=False, server_default='0.00')
     total_sales = Column(Numeric(18, 2), nullable=False, server_default='0.00') 
     processed_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class RawEmployee(Base):
+    __tablename__ = "raw_employees"
+
+    employee_id = Column(BigInteger, primary_key=True, autoincrement=False)
+    name = Column(String(255), nullable=False)
+    role = Column(String(50), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
