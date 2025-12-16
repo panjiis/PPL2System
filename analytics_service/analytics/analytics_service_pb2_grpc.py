@@ -104,6 +104,11 @@ class AnalyticsServiceStub(object):
                 request_serializer=analytics_dot_analytics__service__pb2.GetRealTimeMetricsRequest.SerializeToString,
                 response_deserializer=analytics_dot_analytics__service__pb2.GetRealTimeMetricsResponse.FromString,
                 _registered_method=True)
+        self.ClearLowStockCache = channel.unary_unary(
+                '/analytics.AnalyticsService/ClearLowStockCache',
+                request_serializer=analytics_dot_analytics__service__pb2.ClearLowStockCacheRequest.SerializeToString,
+                response_deserializer=analytics_dot_analytics__service__pb2.ClearLowStockCacheResponse.FromString,
+                _registered_method=True)
 
 
 class AnalyticsServiceServicer(object):
@@ -198,6 +203,12 @@ class AnalyticsServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ClearLowStockCache(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AnalyticsServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -270,6 +281,11 @@ def add_AnalyticsServiceServicer_to_server(servicer, server):
                     servicer.GetRealTimeMetrics,
                     request_deserializer=analytics_dot_analytics__service__pb2.GetRealTimeMetricsRequest.FromString,
                     response_serializer=analytics_dot_analytics__service__pb2.GetRealTimeMetricsResponse.SerializeToString,
+            ),
+            'ClearLowStockCache': grpc.unary_unary_rpc_method_handler(
+                    servicer.ClearLowStockCache,
+                    request_deserializer=analytics_dot_analytics__service__pb2.ClearLowStockCacheRequest.FromString,
+                    response_serializer=analytics_dot_analytics__service__pb2.ClearLowStockCacheResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -650,6 +666,33 @@ class AnalyticsService(object):
             '/analytics.AnalyticsService/GetRealTimeMetrics',
             analytics_dot_analytics__service__pb2.GetRealTimeMetricsRequest.SerializeToString,
             analytics_dot_analytics__service__pb2.GetRealTimeMetricsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ClearLowStockCache(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/analytics.AnalyticsService/ClearLowStockCache',
+            analytics_dot_analytics__service__pb2.ClearLowStockCacheRequest.SerializeToString,
+            analytics_dot_analytics__service__pb2.ClearLowStockCacheResponse.FromString,
             options,
             channel_credentials,
             insecure,

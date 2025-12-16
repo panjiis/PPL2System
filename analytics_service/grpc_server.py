@@ -792,6 +792,27 @@ class AnalyticsService(rpc.AnalyticsService):
         finally:
             if analytics_db:
                 analytics_db.close()
+    
+    def ClearLowStockCache(self, request, context):
+        print("testpy")
+        try:
+            success = clear_low_stock_cache_logic()
+            
+            if success:
+                return pb.ClearLowStockCacheResponse(
+                    success=True, 
+                    message="Low stock cache cleared successfully"
+                )
+            else:
+                return pb.ClearLowStockCacheResponse(
+                    success=False, 
+                    message="Failed to connect to Redis"
+                )
+        except Exception as e:
+            print(f"Error in ClearLowStockCache: {e}")
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return pb.ClearLowStockCacheResponse(success=False, message=str(e))
 
 def start_grpc_server():
     global server_instance

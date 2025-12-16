@@ -289,6 +289,28 @@ async def message_handler(msg):
             total_amount_float = float(total_amount) # <-- Definisikan di sini
             tax_amount = Decimal(tax_amount_str)
 
+            if redis_client:
+                try:
+                    dashboard_main_key = order_timestamp.strftime("dashboard:main:%Y-%m-%d")
+                    today_key = order_timestamp.strftime("metrics:%Y-%m-%d") # Key untuk grafik
+                    current_hour = str(order_timestamp.hour)
+                    
+                    pipe = redis_client.pipeline()
+                    
+                    pipe.hincrbyfloat(today_key, f"hour_revenue:{current_hour}", total_amount_float)
+                    pipe.hincrby(today_key, f"hour_count:{current_hour}", 1)
+                    
+                    pipe.hincrbyfloat(today_key, "total_revenue", total_amount_float) 
+                    pipe.expire(today_key, 86400 * 3)
+
+                    pipe.delete(dashboard_main_key)
+                    
+                    pipe.execute()
+                    print(f"Update Metrics & Delete Cache Dashboard: {doc_number}")
+
+                except Exception as e:
+                    print(f"Redis Error: {e}")
+
             # --- LOGIKA REDIS (SEKARANG DI TEMPAT YANG BENAR) ---
             if not redis_client:
                 print("Koneksi Redis tidak tersedia, melewati pembaruan metrik real-time.")
