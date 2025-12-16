@@ -104,7 +104,7 @@ def _get_dashboard_data_from_db(
         tx_change = Decimal(100) if kpi_today['transactions'] > 0 else Decimal(0)
     
     # --- TOP CHARTS ---
-    top_products = dashboard_repo.get_top_products_for_date(analytics_db, date_today, limit=5)
+    top_products = dashboard_repo.get_top_products_for_date(analytics_db, date_today, limit=1)
     top_performers = dashboard_repo.get_top_performers_for_date(analytics_db, date_today, limit=5)
 
     # Catatan: Kita HAPUS pengambilan Redis dari sini agar tidak ikut ter-cache statis.

@@ -25,29 +25,62 @@ def get_kpi_for_date(
   result = db.execute(text(query_str), params).first()
   return dict(result._mapping) if result and result.total_revenue is not None else {}
 
+# def get_top_products_for_date(
+#   db: Session,
+#   date: datetime.date,
+#   limit: int = 5
+# ) -> list[dict]:
+#   params = {
+#     "date": date,
+#     "limit": limit
+#   }
+
+#   query_str = """
+#     SELECT 
+#       product_code, 
+#       SUM(net_sales) as total_net_sales
+#     FROM product_sales_summary
+#     WHERE date = :date
+#     GROUP BY product_code
+#     ORDER BY total_net_sales DESC
+#     LIMIT :limit
+#   """
+
+#   result = db.execute(text(query_str), params).all()
+#   return [dict(row._mapping) for row in result]
+
 def get_top_products_for_date(
-  db: Session,
-  date: datetime.date,
-  limit: int = 5
+    db: Session, 
+    date: datetime.date, 
+    limit: int = 1
 ) -> list[dict]:
-  params = {
-    "date": date,
-    "limit": limit
-  }
+    
+    query_str = """
+      SELECT 
+        oi.product_code,
+        COALESCE(MAX(p.product_name), 'Unknown Product') as product_name,
+        SUM(oi.quantity) as quantity_sold,
+        SUM(oi.line_total) as net_sales,
+        SUM(oi.line_total - (oi.quantity * oi.cost_price)) as gross_profit
 
-  query_str = """
-    SELECT 
-      product_code, 
-      SUM(net_sales) as total_net_sales
-    FROM product_sales_summary
-    WHERE date = :date
-    GROUP BY product_code
-    ORDER BY total_net_sales DESC
-    LIMIT :limit
-  """
-
-  result = db.execute(text(query_str), params).all()
-  return [dict(row._mapping) for row in result]
+      FROM raw_order_items oi
+      JOIN raw_order_documents od ON oi.document_number = od.document_number
+      LEFT JOIN raw_products p ON oi.product_code = p.product_code
+      
+      WHERE CAST(od.order_timestamp AS DATE) = :date
+      
+      GROUP BY oi.product_code
+      ORDER BY net_sales DESC
+      LIMIT :limit
+    """
+    
+    params = {
+      "date": date,
+      "limit": limit
+    }
+    
+    result = db.execute(text(query_str), params).all()
+    return [dict(row._mapping) for row in result]
 
 # def get_top_performers_for_date(
 #   db: Session,
@@ -76,35 +109,35 @@ def get_top_products_for_date(
 #   result = db.execute(text(query_str), params).all()
 #   return [dict(row._mapping) for row in result]
 
-# def get_top_performers_for_date(
-#     db: Session, 
-#     date: datetime.date, 
-#     limit: int = 5
-# ) -> list[dict]:
-#     # Kita harus join antara order items (untuk ambil sales) 
-#     # dan documents (untuk ambil tanggal)
-#     # Lalu GROUP BY employee_id saja.
+def get_top_performers_for_date(
+    db: Session, 
+    date: datetime.date, 
+    limit: int = 5
+) -> list[dict]:
+    # Kita harus join antara order items (untuk ambil sales) 
+    # dan documents (untuk ambil tanggal)
+    # Lalu GROUP BY employee_id saja.
     
-#     query_str = """
-#         SELECT 
-#             oi.serving_employee_id as employee_id,
-#             SUM(oi.line_total) as total_sales
-#         FROM raw_order_items oi
-#         JOIN raw_order_documents od ON oi.document_number = od.document_number
-#         WHERE CAST(od.order_timestamp AS DATE) = :date
-#           AND oi.serving_employee_id IS NOT NULL
-#         GROUP BY oi.serving_employee_id -- <--- PENTING: Grouping hanya berdasarkan ID Karyawan
-#         ORDER BY total_sales DESC
-#         LIMIT :limit
-#     """
+    query_str = """
+        SELECT 
+            oi.serving_employee_id as employee_id,
+            SUM(oi.line_total) as total_sales
+        FROM raw_order_items oi
+        JOIN raw_order_documents od ON oi.document_number = od.document_number
+        WHERE CAST(od.order_timestamp AS DATE) = :date
+          AND oi.serving_employee_id IS NOT NULL
+        GROUP BY oi.serving_employee_id -- <--- PENTING: Grouping hanya berdasarkan ID Karyawan
+        ORDER BY total_sales DESC
+        LIMIT :limit
+    """
     
-#     params = {
-#         "date": date,
-#         "limit": limit
-#     }
+    params = {
+        "date": date,
+        "limit": limit
+    }
     
-#     result = db.execute(text(query_str), params).all()
-#     return [dict(row._mapping) for row in result]
+    result = db.execute(text(query_str), params).all()
+    return [dict(row._mapping) for row in result]
 
 def get_top_performers_for_date(db: Session, date: datetime.date, limit: int = 5) -> list[dict]:
     query_str = """

@@ -571,6 +571,7 @@ class AnalyticsService(rpc.AnalyticsService):
                     pb.ProductSalesSummary(
                         # Asumsi 'item' memiliki kunci ini, sesuaikan jika perlu
                         product_code=item.get('product_code', 0),
+                        product_name=item.get('product_name', "Unknown"),
                         net_sales=str(item.get('net_sales', 0)),
                         quantity_sold=int(item.get('quantity_sold', 0))
                     )

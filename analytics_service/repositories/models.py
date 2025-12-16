@@ -126,6 +126,7 @@ class RawOrderItem(Base):
     id = Column(BigInteger, Identity(always=False), primary_key=True)
     document_number = Column(String(255), nullable=False, index=True)
     product_code = Column(String(255), nullable=False)
+    product_name = Column(String(255), nullable=True)
     serving_employee_id = Column(BigInteger, index=True, nullable=True)
     quantity = Column(Integer, nullable=False)
     price_before_discount = Column(Numeric(18, 2), nullable=False)

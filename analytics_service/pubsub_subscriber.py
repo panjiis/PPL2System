@@ -376,6 +376,7 @@ async def message_handler(msg):
                     new_items.append({
                         "document_number": doc_number,
                         "product_code": item.get("product_code"),
+                        "product_name": item.get("product_name"),
                         "serving_employee_id": serving_emp_id,
                         "quantity": item.get("quantity"),
                         "price_before_discount": Decimal(item.get("price_before_discount")),
@@ -383,7 +384,7 @@ async def message_handler(msg):
                         "line_total": Decimal(item.get("line_total")),
                         "cost_price": Decimal(cost_price_str)
                     })
-                
+
                 if new_items:
                     db.execute(text("DELETE FROM raw_order_items WHERE document_number = :doc_num"), {"doc_num": doc_number})
                     db.bulk_insert_mappings(RawOrderItem, new_items)
