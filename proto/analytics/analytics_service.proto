@@ -309,6 +309,13 @@ message GenerateEmployeePerformanceResponse {
   EmployeePerformance generated_performance = 3;
 }
 
+message ClearLowStockCacheRequest {}
+
+message ClearLowStockCacheResponse {
+    bool success = 1;
+    string message = 2;
+}
+
 service AnalyticsService {
   // Sales Analytics
   rpc GetSalesReport(GetSalesReportRequest) returns (GetSalesReportResponse);
@@ -333,4 +340,6 @@ service AnalyticsService {
   // Dashboard and Real-time
   rpc GetDashboardData(GetDashboardDataRequest) returns (GetDashboardDataResponse);
   rpc GetRealTimeMetrics(GetRealTimeMetricsRequest) returns (GetRealTimeMetricsResponse);
+
+  rpc ClearLowStockCache(ClearLowStockCacheRequest) returns (ClearLowStockCacheResponse);
 }

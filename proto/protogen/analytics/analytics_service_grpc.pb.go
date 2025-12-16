@@ -41,6 +41,7 @@ type AnalyticsServiceClient interface {
 	// Dashboard and Real-time
 	GetDashboardData(ctx context.Context, in *GetDashboardDataRequest, opts ...grpc.CallOption) (*GetDashboardDataResponse, error)
 	GetRealTimeMetrics(ctx context.Context, in *GetRealTimeMetricsRequest, opts ...grpc.CallOption) (*GetRealTimeMetricsResponse, error)
+	ClearLowStockCache(ctx context.Context, in *ClearLowStockCacheRequest, opts ...grpc.CallOption) (*ClearLowStockCacheResponse, error)
 }
 
 type analyticsServiceClient struct {
@@ -177,6 +178,15 @@ func (c *analyticsServiceClient) GetRealTimeMetrics(ctx context.Context, in *Get
 	return out, nil
 }
 
+func (c *analyticsServiceClient) ClearLowStockCache(ctx context.Context, in *ClearLowStockCacheRequest, opts ...grpc.CallOption) (*ClearLowStockCacheResponse, error) {
+	out := new(ClearLowStockCacheResponse)
+	err := c.cc.Invoke(ctx, "/analytics.AnalyticsService/ClearLowStockCache", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AnalyticsServiceServer is the server API for AnalyticsService service.
 // All implementations must embed UnimplementedAnalyticsServiceServer
 // for forward compatibility
@@ -200,6 +210,7 @@ type AnalyticsServiceServer interface {
 	// Dashboard and Real-time
 	GetDashboardData(context.Context, *GetDashboardDataRequest) (*GetDashboardDataResponse, error)
 	GetRealTimeMetrics(context.Context, *GetRealTimeMetricsRequest) (*GetRealTimeMetricsResponse, error)
+	ClearLowStockCache(context.Context, *ClearLowStockCacheRequest) (*ClearLowStockCacheResponse, error)
 	mustEmbedUnimplementedAnalyticsServiceServer()
 }
 
@@ -248,6 +259,9 @@ func (UnimplementedAnalyticsServiceServer) GetDashboardData(context.Context, *Ge
 }
 func (UnimplementedAnalyticsServiceServer) GetRealTimeMetrics(context.Context, *GetRealTimeMetricsRequest) (*GetRealTimeMetricsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRealTimeMetrics not implemented")
+}
+func (UnimplementedAnalyticsServiceServer) ClearLowStockCache(context.Context, *ClearLowStockCacheRequest) (*ClearLowStockCacheResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClearLowStockCache not implemented")
 }
 func (UnimplementedAnalyticsServiceServer) mustEmbedUnimplementedAnalyticsServiceServer() {}
 
@@ -514,6 +528,24 @@ func _AnalyticsService_GetRealTimeMetrics_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AnalyticsService_ClearLowStockCache_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearLowStockCacheRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AnalyticsServiceServer).ClearLowStockCache(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/analytics.AnalyticsService/ClearLowStockCache",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AnalyticsServiceServer).ClearLowStockCache(ctx, req.(*ClearLowStockCacheRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AnalyticsService_ServiceDesc is the grpc.ServiceDesc for AnalyticsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -576,6 +608,10 @@ var AnalyticsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRealTimeMetrics",
 			Handler:    _AnalyticsService_GetRealTimeMetrics_Handler,
+		},
+		{
+			MethodName: "ClearLowStockCache",
+			Handler:    _AnalyticsService_ClearLowStockCache_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -410,6 +410,8 @@ func main() {
 				// dashboard
 				analyticsGroup.GET("/dashboard", analyticsHandler.GetDashboardData)
 				analyticsGroup.GET("/real-time-metrics", analyticsHandler.GetRealTimeMetrics)
+
+				analyticsGroup.DELETE("/cache/low-stock", analyticsHandler.ClearLowStockCache)
 			} else {
 				// Fallback jika service analytics tidak tersedia
 				analyticsGroup.GET("/*any", serviceUnavailableHandler("Analytics service"))

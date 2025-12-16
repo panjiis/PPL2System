@@ -533,3 +533,35 @@ func (h *AnalyticsHTTPHandler) GenerateEmployeePerformance(c *gin.Context) {
 
 	c.JSON(http.StatusOK, successResponse(*resp.Message, resp.GeneratedPerformance))
 }
+
+func (h *AnalyticsHTTPHandler) ClearLowStockCache(c *gin.Context) {
+    // Gunakan timeout pendek karena ini operasi Redis yang cepat
+		log.Println("test1")
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+		
+    // Panggil gRPC
+    req := &proto.ClearLowStockCacheRequest{}
+    resp, err := h.analyticsClient.ClearLowStockCache(ctx, req)
+		
+    if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
+			return
+    }
+		log.Println("test1")
+
+    if resp.Success {
+        c.JSON(http.StatusOK, gin.H{
+            "success": true,
+            "message": resp.Message,
+        })
+    } else {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "success": false,
+            "message": resp.Message,
+        })
+    }
+}
