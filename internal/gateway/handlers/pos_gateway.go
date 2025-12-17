@@ -768,8 +768,14 @@ func (h *POSHTTPHandler) GetDiscount(c *gin.Context) {
 		return
 	}
 
-	resp.Discount.ValidFrom = resp.Discount.ValidFrom.AsTime().In(wibLoc)
-	resp.Discount.ValidUntil = resp.Discount.ValidUntil.AsTime().In(wibLoc)
+	if resp.Discount.GetValidFrom() != nil {
+        validFromTime := resp.Discount.GetValidFrom().AsTime().In(wibLoc)
+        resp.Discount.ValidFrom = timestamppb.New(validFromTime)
+    }
+    if resp.Discount.GetValidUntil() != nil {
+        validUntilTime := resp.Discount.GetValidUntil().AsTime().In(wibLoc)
+        resp.Discount.ValidUntil = timestamppb.New(validUntilTime)
+    }
 
 	c.JSON(http.StatusOK, successResponse("Discount retrieved successfully", resp.Discount))
 }
