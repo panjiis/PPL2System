@@ -155,6 +155,9 @@ func (s *POSHandler) GetDiscount(ctx context.Context, req *proto.GetDiscountRequ
 		}, err
 	}
 
+	&discount.ValidFrom = discount.ValidFrom.In(wibLoc)
+	&discount.ValidUntil = discount.ValidUntil.In(wibLoc)
+
 	return &proto.GetDiscountResponse{
 		Success:  true,
 		Discount: s.discountToProto(&discount),
@@ -214,6 +217,8 @@ func (s *POSHandler) ListDiscounts(ctx context.Context, req *proto.ListDiscounts
 
 	pbDiscounts := make([]*proto.Discount, len(discounts))
 	for i, discount := range discounts {
+		pbDiscount[i].ValidFrom = pbDiscounts[i].ValidFrom.AsTime().In(wibLoc)
+		pbDiscounts[i].ValidUntil = pbDiscounts[i].ValidUntil.AsTime().In(wibLoc) 
 		pbDiscounts[i] = s.discountToProto(&discount)
 	}
 
