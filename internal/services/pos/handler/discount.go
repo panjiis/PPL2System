@@ -747,11 +747,13 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 			return
 		}
 
-		log.Printf("Next discount status change scheduled for %s",
+		log.Printf(
+			"Next discount status change scheduled for %s",
 			nextUpdateTime.In(wib).Format("2006-01-02 15:04:05 MST"),
 		)
 
-		durationUntilNext := time.Until(nextUpdateTime)
+		now := time.Now().In(wib)
+		durationUntilNext := nextUpdateTime.Sub(now)
 
 		if durationUntilNext <= 0 {
 			continue
@@ -760,7 +762,6 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 		timer := time.NewTimer(durationUntilNext)
 		select {
 		case <-timer.C:
-			timer.Stop()
 		case <-ctx.Done():
 			timer.Stop()
 			log.Println("Stopping discount scheduler due to context cancellation")
@@ -769,12 +770,9 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 	}
 }
 
+
 func (s *POSHandler) TriggerSchedulerRecalculation() {
 	log.Println("🔄 Requested discount scheduler recalculation")
-	if s.cancelFunc != nil {
-		s.cancelFunc()
-	}
-
 	s.StartDiscountScheduler(s.parentCtx)
 }
 
