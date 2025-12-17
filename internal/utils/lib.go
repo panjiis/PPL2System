@@ -64,3 +64,14 @@ func IntToInt32Ptr(i *int) *int32 {
 	v := int32(*i)
 	return &v
 }
+
+func LocalToWIBTimestamp(in *timestamppb.Timestamp) *timestamppb.Timestamp {
+    if in == nil {
+        return nil
+    }
+
+    t := in.AsTime().In(wibLoc)
+
+    wallClockUTC := time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
+    return timestamppb.New(wallClockUTC)
+}

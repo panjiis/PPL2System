@@ -590,14 +590,8 @@ func (h *POSHTTPHandler) ListDiscounts(c *gin.Context) {
 	}
 
     for _, discount := range resp.Discounts {
-        if discount.GetValidFrom() != nil {
-            validFromTime := discount.GetValidFrom().AsTime().In(wibLoc)
-            discount.ValidFrom = timestamppb.New(validFromTime)
-        }
-        if discount.GetValidUntil() != nil {
-            validUntilTime := discount.GetValidUntil().AsTime().In(wibLoc)
-            discount.ValidUntil = timestamppb.New(validUntilTime)
-        }
+		discount.ValidFrom = lib.LocalToWIBTimestamp(discount.GetValidFrom())
+        discount.ValidUntil = lib.LocalToWIBTimestamp(discount.GetValidUntil())
     }
 
 	c.JSON(http.StatusOK, successWithMetaResponse("Discounts retrieved successfully", resp.Discounts, gin.H{
@@ -769,12 +763,10 @@ func (h *POSHTTPHandler) GetDiscount(c *gin.Context) {
 	}
 
 	if resp.Discount.GetValidFrom() != nil {
-        validFromTime := resp.Discount.GetValidFrom().AsTime().In(wibLoc)
-        resp.Discount.ValidFrom = timestamppb.New(validFromTime)
+        resp.Discount.ValidFrom = lib.LocalToWIBTimestamp(resp.Discount.GetValidFrom())
     }
     if resp.Discount.GetValidUntil() != nil {
-        validUntilTime := resp.Discount.GetValidUntil().AsTime().In(wibLoc)
-        resp.Discount.ValidUntil = timestamppb.New(validUntilTime)
+        resp.Discount.ValidUntil = lib.LocalToWIBTimestamp(resp.Discount.GetValidUntil())
     }
 
 	c.JSON(http.StatusOK, successResponse("Discount retrieved successfully", resp.Discount))
