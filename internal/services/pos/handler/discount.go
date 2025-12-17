@@ -711,6 +711,8 @@ func (s *POSHandler) StartDiscountScheduler(parentCtx context.Context) {
 		wibLoc = time.UTC
 	}
 
+	log.Println("🔁 Starting or restarting discount scheduler")
+
 	s.schedulerMu.Lock()
 	defer s.schedulerMu.Unlock()
 
@@ -726,6 +728,11 @@ func (s *POSHandler) StartDiscountScheduler(parentCtx context.Context) {
 
 	go func() {
 		defer s.schedulerWg.Done()
+		defer func() { 
+			if r := recover(); r != nil {
+				log.Printf("Panic recovered in discount scheduler goroutine: %v", r)
+			}
+		}()
 		s.updateDiscountsAndScheduleNext(ctx, wibLoc)
 	}()
 }
@@ -763,6 +770,11 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 }
 
 func (s *POSHandler) TriggerSchedulerRecalculation() {
+	log.Println("🔄 Requested discount scheduler recalculation")
+	if s.cancelFunc != nil {
+		s.cancelFunc()
+	}
+
 	s.StartDiscountScheduler(s.parentCtx)
 }
 
