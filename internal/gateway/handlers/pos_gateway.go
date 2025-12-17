@@ -589,11 +589,6 @@ func (h *POSHTTPHandler) ListDiscounts(c *gin.Context) {
 		return
 	}
 
-    for _, discount := range resp.Discounts {
-		discount.ValidFrom = lib.LocalToWIBTimestamp(discount.GetValidFrom())
-        discount.ValidUntil = lib.LocalToWIBTimestamp(discount.GetValidUntil())
-    }
-
 	c.JSON(http.StatusOK, successWithMetaResponse("Discounts retrieved successfully", resp.Discounts, gin.H{
 		"total":     resp.Total,
 		"page":      resp.Page,
@@ -761,13 +756,6 @@ func (h *POSHTTPHandler) GetDiscount(c *gin.Context) {
 		c.JSON(http.StatusNotFound, errorResponse(*resp.Message))
 		return
 	}
-
-	if resp.Discount.GetValidFrom() != nil {
-        resp.Discount.ValidFrom = lib.LocalToWIBTimestamp(resp.Discount.GetValidFrom())
-    }
-    if resp.Discount.GetValidUntil() != nil {
-        resp.Discount.ValidUntil = lib.LocalToWIBTimestamp(resp.Discount.GetValidUntil())
-    }
 
 	c.JSON(http.StatusOK, successResponse("Discount retrieved successfully", resp.Discount))
 }

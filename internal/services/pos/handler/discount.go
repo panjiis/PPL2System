@@ -693,13 +693,13 @@ func (s *POSHandler) StartDiscountScheduler() {
 	}
 
 	schedulerID := time.Now().UnixNano()
-	log.Printf("🟢 Scheduler %d starting", schedulerID)
+	log.Printf("Scheduler %d starting", schedulerID)
 
 	s.schedulerMu.Lock()
 	defer s.schedulerMu.Unlock()
 
 	if s.cancelFunc != nil {
-		log.Printf("🔁 Restarting scheduler (stopping previous one)")
+		log.Printf("Restarting scheduler (stopping previous one)")
 		s.cancelFunc()
 		s.schedulerWg.Wait()
 	}
@@ -720,12 +720,12 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 
 		nextUpdateTime, ok := s.calculateNextUpdateTime(ctx, wib)
 		if !ok {
-			log.Printf("🟡 Scheduler %d: no future discounts, stopping", id)
+			log.Printf("Scheduler %d: no future discounts, stopping", id)
 			return
 		}
 
 		log.Printf(
-			"⏭️ Scheduler %d: next change at %s",
+			"Scheduler %d: next change at %s",
 			id,
 			nextUpdateTime.In(wib).Format("2006-01-02 15:04:05 MST"),
 		)
@@ -746,9 +746,9 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 			}
 
 			if s.shuttingDown.Load() {
-				log.Printf("🛑 Scheduler %d stopped (application shutdown)", id)
+				log.Printf("Scheduler %d stopped (application shutdown)", id)
 			} else {
-				log.Printf("🔄 Scheduler %d stopped (restart)", id)
+				log.Printf("Scheduler %d stopped (restart)", id)
 			}
 			return
 		}
@@ -761,7 +761,7 @@ func (s *POSHandler) TriggerSchedulerRecalculation() {
 }
 
 func (s *POSHandler) Shutdown() {
-	log.Println("🛑 Shutting down discount scheduler")
+	log.Println("Shutting down discount scheduler")
 
 	s.shuttingDown.Store(true)
 
