@@ -25,6 +25,7 @@ type POSHandler struct {
 	schedulerWg sync.WaitGroup
 	schedulerMu sync.Mutex
 	parentCtx   context.Context
+	shuttingDown atomic.Bool
 }
 
 func NewPOSHandler(db *gorm.DB, redisClient *redis.Client, parentCtx context.Context) *POSHandler {
