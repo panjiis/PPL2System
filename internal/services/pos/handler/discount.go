@@ -756,9 +756,6 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 			timer.Stop()
 		case <-ctx.Done():
 			timer.Stop()
-			if errors.Is(ctx.Err(), context.Canceled) {
-				log.Println("Discount scheduler stopped (restart or shutdown)")
-			}
 			log.Println("Stopping discount scheduler due to context cancellation")
 			return
 		}
@@ -766,11 +763,27 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 }
 
 func (s *POSHandler) TriggerSchedulerRecalculation() {
-	if s.cancelFunc != nil {
-		s.cancelFunc()
-	}
+    s.schedulerMu.Lock()
+    defer s.schedulerMu.Unlock()
 
-	s.StartDiscountScheduler(s.parentCtx)
+    if s.cancelFunc != nil {
+        s.cancelFunc()
+        s.schedulerWg.Wait()
+    }
+
+    if s.parentCtx != nil {
+        ctx, cancel := context.WithCancel(s.parentCtx)
+        s.cancelFunc = cancel
+        s.schedulerWg.Add(1)
+        go func() {
+            defer s.schedulerWg.Done()
+            wibLoc, _ := time.LoadLocation("Asia/Jakarta")
+            if wibLoc == nil {
+                wibLoc = time.UTC
+            }
+            s.updateDiscountsAndScheduleNext(ctx, wibLoc)
+        }()
+    }
 }
 
 func (s *POSHandler) updateDiscountActiveStatus(ctx context.Context, wib *time.Location) {
