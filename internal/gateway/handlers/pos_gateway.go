@@ -22,6 +22,8 @@ func strPtr(s string) *string {
 	return &s
 }
 
+var wibLoc, _ = time.LoadLocation("Asia/Jakarta")
+
 type POSHTTPHandler struct {
 	posClient proto.POSServiceClient
 }
@@ -587,6 +589,17 @@ func (h *POSHTTPHandler) ListDiscounts(c *gin.Context) {
 		return
 	}
 
+    for _, discount := range resp.Discounts {
+        if discount.GetValidFrom() != nil {
+            validFromTime := discount.GetValidFrom().AsTime().In(wibLoc)
+            discount.ValidFrom = timestamppb.New(validFromTime)
+        }
+        if discount.GetValidUntil() != nil {
+            validUntilTime := discount.GetValidUntil().AsTime().In(wibLoc)
+            discount.ValidUntil = timestamppb.New(validUntilTime)
+        }
+    }
+
 	c.JSON(http.StatusOK, successWithMetaResponse("Discounts retrieved successfully", resp.Discounts, gin.H{
 		"total":     resp.Total,
 		"page":      resp.Page,
@@ -754,6 +767,9 @@ func (h *POSHTTPHandler) GetDiscount(c *gin.Context) {
 		c.JSON(http.StatusNotFound, errorResponse(*resp.Message))
 		return
 	}
+
+	resp.Discount.ValidFrom = resp.Discount.ValidFrom.AsTime().In(wibLoc)
+	resp.Discount.ValidUntil = resp.Discount.ValidUntil.AsTime().In(wibLoc)
 
 	c.JSON(http.StatusOK, successResponse("Discount retrieved successfully", resp.Discount))
 }
