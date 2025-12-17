@@ -777,6 +777,21 @@ func (s *POSHandler) TriggerSchedulerRecalculation() {
 	s.StartDiscountScheduler()
 }
 
+func (s *POSHandler) Shutdown() {
+	log.Println("🛑 Shutting down discount scheduler")
+
+	s.shuttingDown.Store(true)
+
+	s.schedulerMu.Lock()
+	if s.cancelFunc != nil {
+		s.cancelFunc()
+	}
+	s.schedulerMu.Unlock()
+
+	s.schedulerWg.Wait()
+}
+
+
 func (s *POSHandler) updateDiscountActiveStatus(ctx context.Context, wib *time.Location) {
 	nowWib := time.Now().In(wib)
 	nowStr := nowWib.Format("2006-01-02 15:04:05")
