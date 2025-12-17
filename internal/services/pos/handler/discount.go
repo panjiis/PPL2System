@@ -763,27 +763,7 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 }
 
 func (s *POSHandler) TriggerSchedulerRecalculation() {
-    s.schedulerMu.Lock()
-    defer s.schedulerMu.Unlock()
-
-    if s.cancelFunc != nil {
-        s.cancelFunc()
-        s.schedulerWg.Wait()
-    }
-
-    if s.parentCtx != nil {
-        ctx, cancel := context.WithCancel(s.parentCtx)
-        s.cancelFunc = cancel
-        s.schedulerWg.Add(1)
-        go func() {
-            defer s.schedulerWg.Done()
-            wibLoc, _ := time.LoadLocation("Asia/Jakarta")
-            if wibLoc == nil {
-                wibLoc = time.UTC
-            }
-            s.updateDiscountsAndScheduleNext(ctx, wibLoc)
-        }()
-    }
+	s.StartDiscountScheduler(s.parentCtx)
 }
 
 func (s *POSHandler) updateDiscountActiveStatus(ctx context.Context, wib *time.Location) {
