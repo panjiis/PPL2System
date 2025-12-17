@@ -295,3 +295,67 @@ def get_recent_large_transactions(
 
   result = db.execute(text(query_str), params).all()
   return [dict(row._mapping) for row in result]
+
+def get_top_products_by_range(
+    db: Session, 
+    start_date: datetime.date, 
+    end_date: datetime.date, 
+    limit: int = 5
+) -> list[dict]:
+    
+    query_str = """
+        SELECT 
+            oi.product_code,
+            COALESCE(MAX(oi.product_name), MAX(p.product_name), 'Unknown Product') as product_name,
+            SUM(oi.quantity) as quantity_sold,
+            SUM(oi.line_total) as net_sales
+        FROM raw_order_items oi
+        JOIN raw_order_documents od ON oi.document_number = od.document_number
+        LEFT JOIN raw_products p ON oi.product_code = p.product_code
+        
+        -- UBAH DI SINI: Filter berdasarkan Range Tanggal (Bulanan)
+        WHERE CAST(od.order_timestamp AS DATE) BETWEEN :start_date AND :end_date
+        
+        GROUP BY oi.product_code
+        ORDER BY net_sales DESC
+        LIMIT :limit
+    """
+    
+    params = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "limit": limit
+    }
+    
+    result = db.execute(text(query_str), params).all()
+    return [dict(row._mapping) for row in result]
+
+# Lakukan hal yang sama untuk get_top_performers_by_range
+def get_top_performers_by_range(
+    db: Session, 
+    start_date: datetime.date, 
+    end_date: datetime.date, 
+    limit: int = 5
+) -> list[dict]:
+    
+    query_str = """
+        SELECT 
+            oi.serving_employee_id as employee_id,
+            COALESCE(e.name, 'Unknown') as employee_name, 
+            SUM(oi.line_total) as total_sales
+        FROM raw_order_items oi
+        JOIN raw_order_documents od ON oi.document_number = od.document_number
+        LEFT JOIN raw_employees e ON oi.serving_employee_id = e.employee_id
+        
+        -- UBAH DI SINI: Filter Range
+        WHERE CAST(od.order_timestamp AS DATE) BETWEEN :start_date AND :end_date
+          AND oi.serving_employee_id IS NOT NULL
+          
+        GROUP BY oi.serving_employee_id, e.name
+        ORDER BY total_sales DESC
+        LIMIT :limit
+    """
+    
+    params = {"start_date": start_date, "end_date": end_date, "limit": limit}
+    result = db.execute(text(query_str), params).all()
+    return [dict(row._mapping) for row in result]

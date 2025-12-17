@@ -8,6 +8,8 @@ from repositories import dashboard_repo
 from core_logic.utils import to_string, to_percent_string
 from core_logic.cache_manager import get_cache, set_cache, redis_client
 
+import calendar
+
 CACHE_TTL = 900
 
 LOW_STOCK_HASH_KEY = "dashboard:low_stock_hash"
@@ -93,11 +95,16 @@ def _get_dashboard_data_from_db(
         tx_change = Decimal(100) if kpi_today['transactions'] > 0 else Decimal(0)
     
     # --- TOP CHARTS ---
-    top_products = dashboard_repo.get_top_products_for_date(analytics_db, date_today, limit=1)
-    top_performers = dashboard_repo.get_top_performers_for_date(analytics_db, date_today, limit=5)
+    # top_products = dashboard_repo.get_top_products_for_date(analytics_db, date_today, limit=1)
+    # top_performers = dashboard_repo.get_top_performers_for_date(analytics_db, date_today, limit=5)
 
-    # Catatan: Kita HAPUS pengambilan Redis dari sini agar tidak ikut ter-cache statis.
-    # Kita berikan nilai kosong dulu, nanti diisi di fungsi utama.
+    target_date = datetime.date.fromisoformat(date_str)
+    start_of_month = target_date.replace(day=1)
+    _, last_day = calendar.monthrange(target_date.year, target_date.month)
+    end_of_month = target_date.replace(day=last_day)
+
+    top_products = dashboard_repo.get_top_products_by_range(analytics_db, start_of_month, end_of_month, limit=1)
+    top_performers = dashboard_repo.get_top_performers_by_range(analytics_db, start_of_month, end_of_month, limit=5)
 
     dashboard_data = {
         "today_revenue": to_string(kpi_today['revenue']),
@@ -122,9 +129,6 @@ def get_dashboard_data_logic(
     analytics_db: Session,
     date_str: str
 ) -> dict:
-    """
-    Logika Utama: Menggabungkan Data Cached (DB) + Data Realtime (Redis).
-    """
     cache_key = f"dashboard:main:{date_str}"
 
     # 1. AMBIL DATA STATIS (KPI, Charts) - Coba dari Cache dulu
