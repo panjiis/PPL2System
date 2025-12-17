@@ -18,7 +18,6 @@ import (
 var wibLoc, _ = time.LoadLocation("Asia/Jakarta")
 
 func (s *POSHandler) CreateDiscount(ctx context.Context, req *proto.CreateDiscountRequest) (*proto.CreateDiscountResponse, error) {
-	loc, _ := time.LoadLocation("Asia/Jakarta")
 
 	if err := s.validateDiscountValue(req.GetDiscountType(), req.GetDiscountValue()); err != nil {
 		return &proto.CreateDiscountResponse{
@@ -28,7 +27,7 @@ func (s *POSHandler) CreateDiscount(ctx context.Context, req *proto.CreateDiscou
 	}
 
 	if req.ValidFrom != nil && req.ValidUntil != nil {
-		if req.GetValidFrom().AsTime().In(loc).After(req.GetValidUntil().AsTime().In(loc)) {
+		if req.GetValidFrom().AsTime().In(wibLoc).After(req.GetValidUntil().AsTime().In(wibLoc)) {
 			return &proto.CreateDiscountResponse{
 				Success: false,
 				Message: lib.StrPtr("Valid from date cannot be after valid until date"),
@@ -109,11 +108,11 @@ func (s *POSHandler) CreateDiscount(ctx context.Context, req *proto.CreateDiscou
 		discount.MaxUsagePerTransaction = req.MaxUsagePerTransaction
 	}
 	if req.ValidFrom != nil {
-		validFrom := req.GetValidFrom().AsTime().In(loc)
+		validFrom := req.GetValidFrom().AsTime().In(wibLoc)
 		discount.ValidFrom = &validFrom
 	}
 	if req.ValidUntil != nil {
-		validUntil := req.GetValidUntil().AsTime().In(loc)
+		validUntil := req.GetValidUntil().AsTime().In(wibLoc)
 		discount.ValidUntil = &validUntil
 	}
 	if buyQuantity != nil {
@@ -245,7 +244,6 @@ func (s *POSHandler) ListDiscounts(ctx context.Context, req *proto.ListDiscounts
 
 func (s *POSHandler) UpdateDiscount(ctx context.Context, req *proto.UpdateDiscountRequest) (*proto.UpdateDiscountResponse, error) {
 	var discount Discount
-	loc, _ := time.LoadLocation("Asia/Jakarta")
 
 	if err := s.db.Preload("Product").Preload("ProductGroup").First(&discount, req.GetId()).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -313,11 +311,11 @@ func (s *POSHandler) UpdateDiscount(ctx context.Context, req *proto.UpdateDiscou
 		updates["max_usage_per_transaction"] = req.GetMaxUsagePerTransaction()
 	}
 	if req.ValidFrom != nil {
-		validFrom := req.GetValidFrom().AsTime().In(loc)
+		validFrom := req.GetValidFrom().AsTime().In(wibLoc)
 		updates["valid_from"] = &validFrom
 	}
 	if req.ValidUntil != nil {
-		validUntil := req.GetValidUntil().AsTime().In(loc)
+		validUntil := req.GetValidUntil().AsTime().In(wibLoc)
 		updates["valid_until"] = &validUntil
 	}
 	if req.IsActive != nil {
