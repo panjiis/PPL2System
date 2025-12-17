@@ -14,6 +14,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
+	"sync/atomic"
 )
 
 type POSHandler struct {
