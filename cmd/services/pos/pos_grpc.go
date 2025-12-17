@@ -55,11 +55,11 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	posHandler := handler.NewPOSHandler(db, redisClient)
-
 	ctx, cancel := context.WithCancel(context.Background())
+	
+	posHandler := handler.NewPOSHandler(db, redisClient, ctx)
 
-	go posHandler.StartDiscountScheduler(ctx)
+	go posHandler.StartDiscountScheduler()
 
 	proto.RegisterPOSServiceServer(s, posHandler)
 	reflection.Register(s)

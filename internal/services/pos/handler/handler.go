@@ -27,7 +27,7 @@ type POSHandler struct {
 	parentCtx   context.Context
 }
 
-func NewPOSHandler(db *gorm.DB, redisClient *redis.Client) *POSHandler {
+func NewPOSHandler(db *gorm.DB, redisClient *redis.Client, parentCtx context.Context) *POSHandler {
 	nc, err := nats.Connect("nats://10.147.17.76:4222",
 		nats.ConnectHandler(func(nc *nats.Conn) {
 			log.Printf("POS service connected to NATS at %v", nc.ConnectedUrl())
@@ -47,6 +47,7 @@ func NewPOSHandler(db *gorm.DB, redisClient *redis.Client) *POSHandler {
 		db:    db,
 		redis: redisClient,
 		nats:  nc,
+		parentCtx: parentCtx,
 	}
 }
 

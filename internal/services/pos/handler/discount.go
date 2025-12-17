@@ -702,7 +702,7 @@ func (s *POSHandler) stringToDiscountType(sType int32) proto.DiscountType {
 	}
 }
 
-func (s *POSHandler) StartDiscountScheduler(parentCtx context.Context) {
+func (s *POSHandler) StartDiscountScheduler() {
 	var wibLoc *time.Location
 	var err error
 	wibLoc, err = time.LoadLocation("Asia/Jakarta")
@@ -721,18 +721,12 @@ func (s *POSHandler) StartDiscountScheduler(parentCtx context.Context) {
 		s.schedulerWg.Wait()
 	}
 
-	ctx, cancel := context.WithCancel(parentCtx)
-	s.parentCtx = parentCtx
+	ctx, cancel := context.WithCancel(s.parentCtx)
 	s.cancelFunc = cancel
 	s.schedulerWg.Add(1)
 
 	go func() {
 		defer s.schedulerWg.Done()
-		defer func() { 
-			if r := recover(); r != nil {
-				log.Printf("Panic recovered in discount scheduler goroutine: %v", r)
-			}
-		}()
 		s.updateDiscountsAndScheduleNext(ctx, wibLoc)
 	}()
 }
@@ -763,6 +757,9 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 		select {
 		case <-timer.C:
 		case <-ctx.Done():
+			if !timer.Stop() {
+				<-timer.C
+			}
 			timer.Stop()
 			log.Println("Stopping discount scheduler due to context cancellation")
 			return
@@ -773,7 +770,7 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 
 func (s *POSHandler) TriggerSchedulerRecalculation() {
 	log.Println("🔄 Requested discount scheduler recalculation")
-	s.StartDiscountScheduler(s.parentCtx)
+	s.StartDiscountScheduler()
 }
 
 func (s *POSHandler) updateDiscountActiveStatus(ctx context.Context, wib *time.Location) {
