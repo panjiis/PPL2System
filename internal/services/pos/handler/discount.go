@@ -756,6 +756,9 @@ func (s *POSHandler) updateDiscountsAndScheduleNext(ctx context.Context, wib *ti
 			timer.Stop()
 		case <-ctx.Done():
 			timer.Stop()
+			if errors.Is(ctx.Err(), context.Canceled) {
+				log.Println("Discount scheduler stopped (restart or shutdown)")
+			}
 			log.Println("Stopping discount scheduler due to context cancellation")
 			return
 		}
