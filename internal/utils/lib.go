@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var wibLoc, _ = time.LoadLocation("Asia/Jakarta")
