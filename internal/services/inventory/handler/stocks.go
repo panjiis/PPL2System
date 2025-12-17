@@ -660,7 +660,7 @@ func (s *InventoryHandler) TransferStock(ctx context.Context, req *proto.Transfe
 		}, err
 	}
 
-	transferRefId := fmt.Sprintf("TRANSFER_%d_%d_%d", req.GetProductCode(), req.GetFromWarehouseId(), time.Now().Unix())
+	transferRefId := fmt.Sprintf("TRANSFER_%s_%d_%d", req.GetProductCode(), req.GetFromWarehouseId(), time.Now().Unix())
 
 	employee, err := s.GetManagerDetails(ctx, req.GetTransferredBy())
 	if err != nil {
